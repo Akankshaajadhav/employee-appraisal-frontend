@@ -1,10 +1,13 @@
 import React from "react";
+import './App.css';
 import DataGridDemo from "./table_grid";
+import AddAppraisalCycle from './components/AddAppraisalCycle'; 
 
 function App() {
   return (
-    <div style={{ padding: 20 }}>
+    <div>
       <DataGridDemo />  
+      <AddAppraisalCycle />
     </div>
   );
 }
