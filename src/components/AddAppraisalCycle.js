@@ -11,7 +11,7 @@ import {
   Snackbar,
   Alert,
 } from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import AddIcon from "@mui/icons-material/Add";
 import TextField from '@mui/material/TextField';
 import {

@@ -1,6 +1,6 @@
 import React from "react";
 import './App.css';
-import DataGridDemo from "./table_grid";
+import DataGridDemo from "./components/employee";
 import AddAppraisalCycle from './components/AddAppraisalCycle'; 
 
 function App() {
