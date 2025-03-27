@@ -1,13 +1,15 @@
+import React from "react";
 import './App.css';
+import DataGridDemo from "./table_grid";
 import AddAppraisalCycle from './components/AddAppraisalCycle'; 
 
 function App() {
   return (
     <div>
-    <AddAppraisalCycle />
+      <DataGridDemo />  
+      <AddAppraisalCycle />
     </div>
   );
 }
 
 export default App;
-
