@@ -1,4 +1,6 @@
 
+
+
 import React, { useState, useEffect } from "react";
 import {
   Button,
@@ -10,8 +12,12 @@ import {
   IconButton,
   Snackbar,
   Alert,
+  FormControl, 
+  Radio,
+  RadioGroup
+
 } from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import AddIcon from "@mui/icons-material/Add";
 import TextField from '@mui/material/TextField';
 import {
@@ -27,7 +33,7 @@ const AddAppraisalCycle = () => {
   const [description, setDescription] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [status, setStatus] = useState("active");
+  const [status, setStatus] = useState("");
 
   // Validation Errors
   const [startDateError, setStartDateError] = useState("");
@@ -50,6 +56,8 @@ const AddAppraisalCycle = () => {
     { name: "Closure", startDate: "", endDate: "" },
   ]);
 
+  
+
   // Parameters State
   const [parameters, setParameters] = useState([
     {
@@ -61,6 +69,46 @@ const AddAppraisalCycle = () => {
     },
   ]);
 
+    const handleCancel = () => {
+    setCycleName("");
+    setDescription("");
+    setStartDate("");
+    setEndDate("");
+    setStatus("");
+  
+    // Reset stages to the initial state
+    setStages([
+      { name: "Setup", startDate: "", endDate: "" },
+      { name: "Self Assessment", startDate: "", endDate: "" },
+      { name: "Lead Assessment", startDate: "", endDate: "" },
+      { name: "HR/VL Validation", startDate: "", endDate: "" },
+      { name: "Closure", startDate: "", endDate: "" },
+    ]);
+  
+    // Reset parameters to the initial state
+    setParameters([
+      {
+        name: "Overall Performance Rating",
+        helptext: "",
+        employee: true,
+        teamLead: true,
+        fixed: true,
+      },
+    ]);
+  
+    // Reset validation errors
+    setStartDateError("");
+    setEndDateError("");
+    setStageErrors({});
+  
+    // Close the snackbar
+    setSnackbar({
+      open: false,
+      message: "",
+      severity: "success",
+    });
+  };
+  
   const [formValid, setFormValid] = useState(false);
 
   useEffect(() => {
@@ -206,7 +254,8 @@ const AddAppraisalCycle = () => {
   };
 
   return (
-    <Card sx={{ p: 3, width: "80%", margin: "auto", mt: 5, mb:3 }}>
+   
+    <Card sx={{ p: 3, width: "90%", margin: "auto", mt: 5, mb:3 }}>
         <Typography variant="h6" color="primary">
             Add Appraisal Cycle
           </Typography>
@@ -259,6 +308,19 @@ const AddAppraisalCycle = () => {
                   error={!!endDateError}
                   helperText={endDateError}
                 />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControl component="fieldset">
+                  <Typography>Status</Typography>
+                  <RadioGroup
+                    row
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value)}
+                  >
+                    <FormControlLabel value="active" control={<Radio />} label="Active" />
+                    <FormControlLabel value="inactive" control={<Radio />} label="Inactive" />
+                  </RadioGroup>
+                </FormControl>
               </Grid>
             </Grid>
           </CardContent>
@@ -455,7 +517,7 @@ const AddAppraisalCycle = () => {
             sx={{ mt: 3 }}
           >Save
           </Button>
-          <Button variant="contained" color="error" sx={{ mt: 3, ml:3 }}>
+          <Button variant="contained" onClick={handleCancel} color="error" sx={{ mt: 3, ml:3 }}>
             Cancel
           </Button>
         </Grid>
@@ -473,3 +535,4 @@ const AddAppraisalCycle = () => {
 };
 
 export default AddAppraisalCycle;
+
