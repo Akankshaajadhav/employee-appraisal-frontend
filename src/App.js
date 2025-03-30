@@ -25,7 +25,7 @@ const ParentComponent = ({ onNext }) => {
             color="primary"
             onClick={() => setShowPage(true)}
           >
-            Add Appraisal Cycle
+            Add 
           </Button>
         </Box>
       )}

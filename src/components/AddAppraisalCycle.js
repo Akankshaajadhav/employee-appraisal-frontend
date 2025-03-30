@@ -14,7 +14,8 @@ import {
   Alert,
   FormControl, 
   Radio,
-  RadioGroup
+  RadioGroup,
+  Box
 
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
@@ -440,119 +441,99 @@ const [parameterErrors, setParameterErrors] = useState({});
           </CardContent>
         </Card>
         {/* Parameters Section */}
-        <Card sx={{ p: 1, width: "100%", mt: 1 }}>
-          <CardContent>
-          <Grid item></Grid>
-            {/* <Typography variant="h6" sx={{ mt: 3, color: "primary.main" }}>Parameters</Typography> */}
-            <Grid container spacing={2} sx={{ mt: 1, ml:5 }}>
-              <Grid size={4}>
-                <Typography
-                  fontWeight="bold"
-                  sx={{ ml: 2, color: "primary.main" }}
-                >
-                  Parameters For Lead Assessment
-                </Typography>
-              </Grid>
-              <Grid size={4}>
-                <Typography
-                  fontWeight="bold"
-                  sx={{ ml: 2, color: "primary.main", ml:5 }}
-                >
-                  Help Text
-                </Typography>
-              </Grid>
-              <Grid size={2}>
-                <Typography
-                  fontWeight="bold"
-                  sx={{color: "primary.main" }}
-                >
-                  Employee
-                </Typography>
-              </Grid>
-              <Grid size={2}>
-                <Typography
-                  fontWeight="bold"
-                  sx={{ color: "primary.main" }}
-                >
-                  Team Lead
-                </Typography>
-              </Grid>
-            </Grid>
+  
+        <Card sx={{ p: 2, width: "100%", mt: 1 }}>
+  <CardContent>
+    {/* Header Row */}
+    <Box sx={{ display: "flex", alignItems: "center", gap: 2, flexWrap: "wrap" }}>
+      <Typography fontWeight="bold" sx={{ flex: 2, color: "primary.main" }}>
+        Parameters For Lead Assessment
+      </Typography>
+      <Typography fontWeight="bold" sx={{ flex: 2, color: "primary.main" }}>
+        Help Text
+      </Typography>
+      <Typography fontWeight="bold" sx={{ flex: 1,  color: "primary.main" }}>
+        Employee
+      </Typography>
+      <Typography fontWeight="bold" sx={{ flex: 1, color: "primary.main" }}>
+        Team Lead
+      </Typography>
+     
+    </Box>
 
-            {parameters.map((param, index) => (
-              <Grid container spacing={2} key={index} sx={{ mt: 1 }}>
-                <Grid size={4}>
-                  <TextField
-                    fullWidth
-                    // label="Parameter"
-                    disabled={param.fixed}
-                    value={param.name}
-                    onChange={(e) => {
-                      const newParams = [...parameters];
-                      newParams[index].name = e.target.value;
-                      setParameters(newParams);
-                    }}
-                  />
-                </Grid>
-                <Grid size={4}>
-                  <TextField
-                    fullWidth
-                    // label="Helptext"
-                    value={param.helptext}
-                    onChange={(e) => {
-                      const newParams = [...parameters];
-                      newParams[index].helptext = e.target.value;
-                      setParameters(newParams);
-                    }}
-                  />
-                </Grid>
-                <Grid size={1}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        sx={{ ml: 5 }}
-                        checked={param.employee}
-                        disabled={param.fixed}
-                        onChange={(e) => {
-                          const newParams = [...parameters];
-                          newParams[index].employee = e.target.checked;
-                          setParameters(newParams);
-                        }}
-                      />
-                    }
-                  />
-                </Grid>
-                <Grid size={2}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        sx={{ ml: 18 }}
-                        checked={param.teamLead}
-                        disabled={param.fixed}
-                        onChange={(e) => {
-                          const newParams = [...parameters];
-                          newParams[index].teamLead = e.target.checked;
-                          setParameters(newParams);
-                        }}
-                      />
-                    }
-                  />
-                </Grid>
-                {/* new line added to add remove button */}
-                <Grid item>
-            <IconButton onClick={() => removeParameter(index)} color="error" sx={{ml:5}}>
-              {/* <RemoveCircleOutlineIcon /> */}
-              <DeleteIcon size="small" color="error"/>
-            </IconButton>
-          </Grid>
-              </Grid>
-            ))}
+    {/* Parameters List */}
+    {parameters.map((param, index) => (
+      <Box
+        key={index}
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 2,
+          flexWrap: "wrap",
+          mt: 1,
+        }}
+      >
+        <TextField
+          fullWidth
+          sx={{ flex: 2 }}
+          disabled={param.fixed}
+          value={param.name}
+          onChange={(e) => {
+            const newParams = [...parameters];
+            newParams[index].name = e.target.value;
+            setParameters(newParams);
+          }}
+        />
+        <TextField
+          fullWidth
+          sx={{ flex: 2 }}
+          value={param.helptext}
+          onChange={(e) => {
+            const newParams = [...parameters];
+            newParams[index].helptext = e.target.value;
+            setParameters(newParams);
+          }}
+        />
+        <Box sx={{ flex: 1, display: "flex", justifyContent: "center" }}>
+          <Checkbox
+            checked={param.employee}
+            disabled={param.fixed}
+            onChange={(e) => {
+              const newParams = [...parameters];
+              newParams[index].employee = e.target.checked;
+              setParameters(newParams);
+            }}
+          />
+        </Box>
+        <Box sx={{ flex: 1, display: "flex", justifyContent: "center" }}>
+          <Checkbox
+            checked={param.teamLead}
+            disabled={param.fixed}
+            onChange={(e) => {
+              const newParams = [...parameters];
+              newParams[index].teamLead = e.target.checked;
+              setParameters(newParams);
+            }}
+          />
+        </Box>
+        <Box sx={{ flex: "none", display: "flex", justifyContent: "center" }}>
+          <IconButton onClick={() => removeParameter(index)} color="error">
+            <DeleteIcon />
+          </IconButton>
+        </Box>
+      </Box>
+    ))}
 
-            <IconButton color="primary" onClick={addParameter} sx={{ mt: 2 }}>
-              <AddIcon />
-            </IconButton>
-          </CardContent>
-        </Card>
+    {/* Add Button */}
+    <Box sx={{ display: "flex", justifyContent: "flex-start", mt: 2 }}>
+      <IconButton color="primary" onClick={addParameter}>
+        <AddIcon />
+      </IconButton>
+    </Box>
+  </CardContent>
+</Card>
+
+
         <Grid container justifyContent="flex-end" sx={{ mt: 3 }}>
           <Button
             variant="contained"
