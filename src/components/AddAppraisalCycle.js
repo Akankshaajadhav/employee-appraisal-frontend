@@ -20,6 +20,8 @@ import {
 import Grid from "@mui/material/Grid";
 import AddIcon from "@mui/icons-material/Add";
 import TextField from '@mui/material/TextField';
+import DeleteIcon from '@mui/icons-material/Delete';
+import CloseIcon from "@mui/icons-material/Close";
 import {
   createAppraisalCycle,
   createStage,
@@ -27,7 +29,7 @@ import {
 } from "../services/AddAppraisalCycle";
 
 
-const AddAppraisalCycle = () => {
+const AddAppraisalCycle = ({ onClose }) => {
   // Appraisal Cycle State
   const [cycleName, setCycleName] = useState("");
   const [description, setDescription] = useState("");
@@ -57,6 +59,8 @@ const AddAppraisalCycle = () => {
   ]);
 
   
+//new
+const [parameterErrors, setParameterErrors] = useState({});
 
   // Parameters State
   const [parameters, setParameters] = useState([
@@ -113,11 +117,14 @@ const AddAppraisalCycle = () => {
 
   useEffect(() => {
     validateForm();
-  }, [cycleName, description, startDate, endDate, stages, parameters]);
+  }, [cycleName, description, status, startDate, endDate, stages, parameters]);
 
   const validateForm = () => {
     
     let valid = true;
+    if(!status){
+      valid=false;
+    }
     if (!startDate) {
         setStartDateError("Start date is required");
         valid = false;
@@ -184,6 +191,22 @@ const AddAppraisalCycle = () => {
       newStageErrors[index] = error;
     });
 
+    let newParameterErrors = {};
+
+    parameters.forEach((param, index) => {
+      let error = {};
+      if (!param.name.trim()) {
+        error.name = "Parameter name is required";
+        valid = false;
+      }
+      if (!param.employee && !param.teamLead) {
+        error.selection = "At least one selection (Employee or Team Lead) is required";
+        valid = false;
+      }
+      newParameterErrors[index] = error;
+    });
+
+    setParameterErrors(newParameterErrors);
     setStageErrors(newStageErrors);
     setFormValid(valid);
   };
@@ -253,12 +276,26 @@ const AddAppraisalCycle = () => {
     ]);
   };
 
+  const removeParameter = (index) => {
+    const updatedParameters = parameters.filter((_, i) => i !== index);
+    setParameters(updatedParameters);
+  };
+  
   return (
    
     <Card sx={{ p: 3, width: "90%", margin: "auto", mt: 5, mb:3 }}>
-        <Typography variant="h6" color="primary">
-            Add Appraisal Cycle
-          </Typography>
+         <Grid container alignItems="center">
+    <Grid size={11}>
+      <Typography variant="h6" color="primary">
+        Add Appraisal Cycle
+      </Typography>
+    </Grid>
+    <Grid size={1} sx={{ textAlign: "right" }}> 
+      <IconButton onClick={onClose} color="error">
+        <CloseIcon />
+      </IconButton>
+    </Grid>
+  </Grid>
       <CardContent>
         <Card sx={{ p: 1, width: "100%" }}>
           <Typography  color="primary" fontWeight="bold">
@@ -405,8 +442,9 @@ const AddAppraisalCycle = () => {
         {/* Parameters Section */}
         <Card sx={{ p: 1, width: "100%", mt: 1 }}>
           <CardContent>
+          <Grid item></Grid>
             {/* <Typography variant="h6" sx={{ mt: 3, color: "primary.main" }}>Parameters</Typography> */}
-            <Grid container spacing={2} sx={{ mt: 1 }}>
+            <Grid container spacing={2} sx={{ mt: 1, ml:5 }}>
               <Grid size={4}>
                 <Typography
                   fontWeight="bold"
@@ -418,7 +456,7 @@ const AddAppraisalCycle = () => {
               <Grid size={4}>
                 <Typography
                   fontWeight="bold"
-                  sx={{ ml: 2, color: "primary.main" }}
+                  sx={{ ml: 2, color: "primary.main", ml:5 }}
                 >
                   Help Text
                 </Typography>
@@ -426,7 +464,7 @@ const AddAppraisalCycle = () => {
               <Grid size={2}>
                 <Typography
                   fontWeight="bold"
-                  sx={{ ml: 2, color: "primary.main" }}
+                  sx={{color: "primary.main" }}
                 >
                   Employee
                 </Typography>
@@ -434,7 +472,7 @@ const AddAppraisalCycle = () => {
               <Grid size={2}>
                 <Typography
                   fontWeight="bold"
-                  sx={{ ml: 2, color: "primary.main" }}
+                  sx={{ color: "primary.main" }}
                 >
                   Team Lead
                 </Typography>
@@ -446,7 +484,7 @@ const AddAppraisalCycle = () => {
                 <Grid size={4}>
                   <TextField
                     fullWidth
-                    label="Parameter"
+                    // label="Parameter"
                     disabled={param.fixed}
                     value={param.name}
                     onChange={(e) => {
@@ -459,7 +497,7 @@ const AddAppraisalCycle = () => {
                 <Grid size={4}>
                   <TextField
                     fullWidth
-                    label="Helptext"
+                    // label="Helptext"
                     value={param.helptext}
                     onChange={(e) => {
                       const newParams = [...parameters];
@@ -468,11 +506,11 @@ const AddAppraisalCycle = () => {
                     }}
                   />
                 </Grid>
-                <Grid size={2}>
+                <Grid size={1}>
                   <FormControlLabel
                     control={
                       <Checkbox
-                        sx={{ ml: 3 }}
+                        sx={{ ml: 5 }}
                         checked={param.employee}
                         disabled={param.fixed}
                         onChange={(e) => {
@@ -488,7 +526,7 @@ const AddAppraisalCycle = () => {
                   <FormControlLabel
                     control={
                       <Checkbox
-                        sx={{ ml: 3 }}
+                        sx={{ ml: 18 }}
                         checked={param.teamLead}
                         disabled={param.fixed}
                         onChange={(e) => {
@@ -500,6 +538,13 @@ const AddAppraisalCycle = () => {
                     }
                   />
                 </Grid>
+                {/* new line added to add remove button */}
+                <Grid item>
+            <IconButton onClick={() => removeParameter(index)} color="error" sx={{ml:5}}>
+              {/* <RemoveCircleOutlineIcon /> */}
+              <DeleteIcon size="small" color="error"/>
+            </IconButton>
+          </Grid>
               </Grid>
             ))}
 
