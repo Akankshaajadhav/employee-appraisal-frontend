@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card, CardContent, TextField, Button, Typography, Modal, Box } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { login_auth } from "../services/login"; // Correct import
+import { login_auth } from "../services/login"; 
 import CardMedia from '@mui/material/CardMedia';
 import logo from "./logo.jpg";
 const Login = () => {
@@ -13,7 +13,7 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await login_auth(parseInt(employeeId), password); // Parse ID to int
+      const response = await login_auth(parseInt(employeeId), password); 
       console.log(response);
       if (response.message === "Login successful") {
         navigate("/home"); // Navigate to home on success
