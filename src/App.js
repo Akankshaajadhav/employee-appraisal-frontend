@@ -1,7 +1,3 @@
-<<<<<<< Updated upstream
-import React,{ useState } from "react";
-import './App.css';
-=======
 
 // import React, { useState } from "react";
 // import "./App.css";
@@ -133,11 +129,11 @@ import './App.css';
 import React, {useState} from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./App.css";
->>>>>>> Stashed changes
+
 import DataGridDemo from "./components/employee";
 import AddAppraisalCycle from './components/AddAppraisalCycle'; 
 import Questionnaire from "./components/Questionnaire";
-<<<<<<< Updated upstream
+
 // function App() {
 //   return (
 //     <div>
@@ -148,30 +144,25 @@ import Questionnaire from "./components/Questionnaire";
 //     </div>
 //   );
 // }
-=======
+
 import Login from "./components/LoginCompo"; // Corrected import
 import Home from "./components/Home"
 
 import { Button } from "@mui/material"; 
 import { Box } from "@mui/system"; 
-const ParentComponent = ({ onNext }) => {
-  const [showPage, setShowPage] = useState(true);
->>>>>>> Stashed changes
 
 // export default App;
 
 
-<<<<<<< Updated upstream
+
 // import React, { useState } from "react";
 // import './App.css';
 // import DataGridDemo from "./components/employee";
 // import AddAppraisalCycle from './components/AddAppraisalCycle';
 
-function App() {
-=======
+
 
 const MainApp = () => {
->>>>>>> Stashed changes
   const [screen, setScreen] = useState(1);
 
   return (
@@ -191,9 +182,7 @@ const MainApp = () => {
   );
 }
 
-<<<<<<< Updated upstream
-export default App;
-=======
+
 // const MainApp = () => {
 //   return (
 //     <div>
@@ -215,4 +204,4 @@ export default function App() {
     </Router>
   );
 }
->>>>>>> Stashed changes
+
