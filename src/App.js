@@ -126,82 +126,73 @@
 // }
 
 
-import React, {useState} from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import "./App.css";
 
-import DataGridDemo from "./components/employee";
-import AddAppraisalCycle from './components/AddAppraisalCycle'; 
-import Questionnaire from "./components/Questionnaire";
+// working for the login branch
+// import React, {useState} from "react";
+// import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+// import "./App.css";
 
-// function App() {
+// import DataGridDemo from "./components/employee";
+// import AddAppraisalCycle from './components/AddAppraisalCycle'; 
+// import Questionnaire from "./components/Questionnaire";
+
+
+// import Login from "./components/LoginCompo"; // Corrected import
+// import Home from "./components/Home"
+
+// import { Button } from "@mui/material"; 
+// import { Box } from "@mui/system"; 
+
+
+
+// const MainApp = () => {
+//   const [screen, setScreen] = useState(1);
+
 //   return (
 //     <div>
-        
-//       <AddAppraisalCycle />
-//       <DataGridDemo />
-//       <Questionnaire />
+//       {/* Conditionally render components based on state */}
+//       {screen === 1 && <AddAppraisalCycle />}
+//       {screen === 2 && <DataGridDemo />}  
+//       {screen === 3 && <Questionnaire />}
+
+
+//       {/* Navigation buttons */}
+//       <div style={{ marginTop: "20px" }}>
+//         {screen > 1 && <button onClick={() => setScreen(screen - 1)}>Previous</button>}
+//         {(screen < 2 ||screen <3) && <button onClick={() => setScreen(screen + 1)}>Next</button>}
+//       </div>
 //     </div>
 //   );
 // }
 
-import Login from "./components/LoginCompo"; // Corrected import
-import Home from "./components/Home"
 
-import { Button } from "@mui/material"; 
-import { Box } from "@mui/system"; 
-
-// export default App;
-
-
-
-// import React, { useState } from "react";
-// import './App.css';
-// import DataGridDemo from "./components/employee";
-// import AddAppraisalCycle from './components/AddAppraisalCycle';
-
-
-
-const MainApp = () => {
-  const [screen, setScreen] = useState(1);
-
-  return (
-    <div>
-      {/* Conditionally render components based on state */}
-      {screen === 1 && <AddAppraisalCycle />}
-      {screen === 2 && <DataGridDemo />}  
-      {screen === 3 && <Questionnaire />}
-
-
-      {/* Navigation buttons */}
-      <div style={{ marginTop: "20px" }}>
-        {screen > 1 && <button onClick={() => setScreen(screen - 1)}>Previous</button>}
-        {(screen < 2 ||screen <3) && <button onClick={() => setScreen(screen + 1)}>Next</button>}
-      </div>
-    </div>
-  );
-}
-
-
-// const MainApp = () => {
+// export default function App() {
 //   return (
-//     <div>
-//       <Home />
-//       <DataGridDemo />
-//       <Questionnaire />
-//     </div>
+//     <Router>
+//       <Routes>
+//         <Route path="/" element={<Login />} />
+//         <Route path="/home" element={<MainApp />} />
+//       </Routes>
+//     </Router>
 //   );
-// };
+// }
 
 
-export default function App() {
+
+
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Login from "./components/LoginCompo";
+import DropdownPage from "./components/DropdownPage";
+
+function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Login />} />
-        <Route path="/home" element={<MainApp />} />
+        <Route path="/home" element={<DropdownPage employeeId={1} />} />
       </Routes>
     </Router>
   );
 }
 
+export default App;

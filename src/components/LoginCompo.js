@@ -16,6 +16,7 @@ const Login = () => {
       const response = await login_auth(parseInt(employeeId), password); // Parse ID to int
       console.log(response);
       if (response.message === "Login successful") {
+        localStorage.setItem("employee_id", response.employee_id);  // Store employee ID
         navigate("/home"); // Navigate to home on success
       } else {
         setError(response.detail || "Invalid credentials");
