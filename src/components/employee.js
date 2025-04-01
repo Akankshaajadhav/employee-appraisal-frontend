@@ -83,7 +83,7 @@ export default function DataGridDemo() {
     { field: "previous_reporting_manager", headerName: "Previous Manager", width: 200 },
   ];
 
-  // Function to define row height
+
   const getRowHeight = () => 35;
 
   return (
