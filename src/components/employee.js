@@ -83,6 +83,9 @@ export default function DataGridDemo() {
     { field: "previous_reporting_manager", headerName: "Previous Manager", width: 200 },
   ];
 
+  //Function to define row height
+  const getRowHeight = () => 35;
+
   return (
     <Box item sx={{ height: 400, width: '50%', overflow: 'auto'}}>
       <DataGrid
@@ -94,6 +97,7 @@ export default function DataGridDemo() {
         slots={{ toolbar: CustomToolbar }} // Toolbar added here
         onRowSelectionModelChange={handleRowSelection} // Handle row selection change
         selectionModel={selectedIds} // Maintain selection state
+        rowHeight={getRowHeight()}
       />
     </Box>
   );
