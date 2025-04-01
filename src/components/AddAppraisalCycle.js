@@ -1,4 +1,6 @@
 
+
+
 import React, { useState, useEffect } from "react";
 import {
   Button,
@@ -10,10 +12,17 @@ import {
   IconButton,
   Snackbar,
   Alert,
+  FormControl, 
+  Radio,
+  RadioGroup,
+  Box
+
 } from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import AddIcon from "@mui/icons-material/Add";
 import TextField from '@mui/material/TextField';
+import DeleteIcon from '@mui/icons-material/Delete';
+import CloseIcon from "@mui/icons-material/Close";
 import {
   createAppraisalCycle,
   createStage,
@@ -21,13 +30,13 @@ import {
 } from "../services/AddAppraisalCycle";
 
 
-const AddAppraisalCycle = () => {
+const AddAppraisalCycle = ({ onClose }) => {
   // Appraisal Cycle State
   const [cycleName, setCycleName] = useState("");
   const [description, setDescription] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [status, setStatus] = useState("active");
+  const [status, setStatus] = useState("");
 
   // Validation Errors
   const [startDateError, setStartDateError] = useState("");
@@ -50,6 +59,10 @@ const AddAppraisalCycle = () => {
     { name: "Closure", startDate: "", endDate: "" },
   ]);
 
+  
+//new
+const [parameterErrors, setParameterErrors] = useState({});
+
   // Parameters State
   const [parameters, setParameters] = useState([
     {
@@ -61,15 +74,58 @@ const AddAppraisalCycle = () => {
     },
   ]);
 
+    const handleCancel = () => {
+    setCycleName("");
+    setDescription("");
+    setStartDate("");
+    setEndDate("");
+    setStatus("");
+  
+    // Reset stages to the initial state
+    setStages([
+      { name: "Setup", startDate: "", endDate: "" },
+      { name: "Self Assessment", startDate: "", endDate: "" },
+      { name: "Lead Assessment", startDate: "", endDate: "" },
+      { name: "HR/VL Validation", startDate: "", endDate: "" },
+      { name: "Closure", startDate: "", endDate: "" },
+    ]);
+  
+    // Reset parameters to the initial state
+    setParameters([
+      {
+        name: "Overall Performance Rating",
+        helptext: "",
+        employee: true,
+        teamLead: true,
+        fixed: true,
+      },
+    ]);
+  
+    // Reset validation errors
+    setStartDateError("");
+    setEndDateError("");
+    setStageErrors({});
+  
+    // Close the snackbar
+    setSnackbar({
+      open: false,
+      message: "",
+      severity: "success",
+    });
+  };
+  
   const [formValid, setFormValid] = useState(false);
 
   useEffect(() => {
     validateForm();
-  }, [cycleName, description, startDate, endDate, stages, parameters]);
+  }, [cycleName, description, status, startDate, endDate, stages, parameters]);
 
   const validateForm = () => {
     
     let valid = true;
+    if(!status){
+      valid=false;
+    }
     if (!startDate) {
         setStartDateError("Start date is required");
         valid = false;
@@ -136,6 +192,22 @@ const AddAppraisalCycle = () => {
       newStageErrors[index] = error;
     });
 
+    let newParameterErrors = {};
+
+    parameters.forEach((param, index) => {
+      let error = {};
+      if (!param.name.trim()) {
+        error.name = "Parameter name is required";
+        valid = false;
+      }
+      if (!param.employee && !param.teamLead) {
+        error.selection = "At least one selection (Employee or Team Lead) is required";
+        valid = false;
+      }
+      newParameterErrors[index] = error;
+    });
+
+    setParameterErrors(newParameterErrors);
     setStageErrors(newStageErrors);
     setFormValid(valid);
   };
@@ -205,11 +277,26 @@ const AddAppraisalCycle = () => {
     ]);
   };
 
+  const removeParameter = (index) => {
+    const updatedParameters = parameters.filter((_, i) => i !== index);
+    setParameters(updatedParameters);
+  };
+  
   return (
-    <Card sx={{ p: 3, width: "80%", margin: "auto", mt: 5, mb:3 }}>
-        <Typography variant="h6" color="primary">
-            Add Appraisal Cycle
-          </Typography>
+   
+    <Card sx={{ p: 3, width: "90%", margin: "auto", mt: 5, mb:3 }}>
+         <Grid container alignItems="center">
+    <Grid size={11}>
+      <Typography variant="h6" color="primary">
+        Add Appraisal Cycle
+      </Typography>
+    </Grid>
+    <Grid size={1} sx={{ textAlign: "right" }}> 
+      <IconButton onClick={onClose} color="error">
+        <CloseIcon />
+      </IconButton>
+    </Grid>
+  </Grid>
       <CardContent>
         <Card sx={{ p: 1, width: "100%" }}>
           <Typography  color="primary" fontWeight="bold">
@@ -259,6 +346,19 @@ const AddAppraisalCycle = () => {
                   error={!!endDateError}
                   helperText={endDateError}
                 />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControl component="fieldset">
+                  <Typography>Status</Typography>
+                  <RadioGroup
+                    row
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value)}
+                  >
+                    <FormControlLabel value="active" control={<Radio />} label="Active" />
+                    <FormControlLabel value="inactive" control={<Radio />} label="Inactive" />
+                  </RadioGroup>
+                </FormControl>
               </Grid>
             </Grid>
           </CardContent>
@@ -341,111 +441,99 @@ const AddAppraisalCycle = () => {
           </CardContent>
         </Card>
         {/* Parameters Section */}
-        <Card sx={{ p: 1, width: "100%", mt: 1 }}>
-          <CardContent>
-            {/* <Typography variant="h6" sx={{ mt: 3, color: "primary.main" }}>Parameters</Typography> */}
-            <Grid container spacing={2} sx={{ mt: 1 }}>
-              <Grid size={4}>
-                <Typography
-                  fontWeight="bold"
-                  sx={{ ml: 2, color: "primary.main" }}
-                >
-                  Parameters For Lead Assessment
-                </Typography>
-              </Grid>
-              <Grid size={4}>
-                <Typography
-                  fontWeight="bold"
-                  sx={{ ml: 2, color: "primary.main" }}
-                >
-                  Help Text
-                </Typography>
-              </Grid>
-              <Grid size={2}>
-                <Typography
-                  fontWeight="bold"
-                  sx={{ ml: 2, color: "primary.main" }}
-                >
-                  Employee
-                </Typography>
-              </Grid>
-              <Grid size={2}>
-                <Typography
-                  fontWeight="bold"
-                  sx={{ ml: 2, color: "primary.main" }}
-                >
-                  Team Lead
-                </Typography>
-              </Grid>
-            </Grid>
+  
+        <Card sx={{ p: 2, width: "100%", mt: 1 }}>
+  <CardContent>
+    {/* Header Row */}
+    <Box sx={{ display: "flex", alignItems: "center", gap: 2, flexWrap: "wrap" }}>
+      <Typography fontWeight="bold" sx={{ flex: 2, color: "primary.main" }}>
+        Parameters For Lead Assessment
+      </Typography>
+      <Typography fontWeight="bold" sx={{ flex: 2, color: "primary.main" }}>
+        Help Text
+      </Typography>
+      <Typography fontWeight="bold" sx={{ flex: 1,  color: "primary.main" }}>
+        Employee
+      </Typography>
+      <Typography fontWeight="bold" sx={{ flex: 1, color: "primary.main" }}>
+        Team Lead
+      </Typography>
+     
+    </Box>
 
-            {parameters.map((param, index) => (
-              <Grid container spacing={2} key={index} sx={{ mt: 1 }}>
-                <Grid size={4}>
-                  <TextField
-                    fullWidth
-                    label="Parameter"
-                    disabled={param.fixed}
-                    value={param.name}
-                    onChange={(e) => {
-                      const newParams = [...parameters];
-                      newParams[index].name = e.target.value;
-                      setParameters(newParams);
-                    }}
-                  />
-                </Grid>
-                <Grid size={4}>
-                  <TextField
-                    fullWidth
-                    label="Helptext"
-                    value={param.helptext}
-                    onChange={(e) => {
-                      const newParams = [...parameters];
-                      newParams[index].helptext = e.target.value;
-                      setParameters(newParams);
-                    }}
-                  />
-                </Grid>
-                <Grid size={2}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        sx={{ ml: 3 }}
-                        checked={param.employee}
-                        disabled={param.fixed}
-                        onChange={(e) => {
-                          const newParams = [...parameters];
-                          newParams[index].employee = e.target.checked;
-                          setParameters(newParams);
-                        }}
-                      />
-                    }
-                  />
-                </Grid>
-                <Grid size={2}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        sx={{ ml: 3 }}
-                        checked={param.teamLead}
-                        disabled={param.fixed}
-                        onChange={(e) => {
-                          const newParams = [...parameters];
-                          newParams[index].teamLead = e.target.checked;
-                          setParameters(newParams);
-                        }}
-                      />
-                    }
-                  />
-                </Grid>
-              </Grid>
-            ))}
+    {/* Parameters List */}
+    {parameters.map((param, index) => (
+      <Box
+        key={index}
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 2,
+          flexWrap: "wrap",
+          mt: 1,
+        }}
+      >
+        <TextField
+          fullWidth
+          sx={{ flex: 2 }}
+          disabled={param.fixed}
+          value={param.name}
+          onChange={(e) => {
+            const newParams = [...parameters];
+            newParams[index].name = e.target.value;
+            setParameters(newParams);
+          }}
+        />
+        <TextField
+          fullWidth
+          sx={{ flex: 2 }}
+          value={param.helptext}
+          onChange={(e) => {
+            const newParams = [...parameters];
+            newParams[index].helptext = e.target.value;
+            setParameters(newParams);
+          }}
+        />
+        <Box sx={{ flex: 1, display: "flex", justifyContent: "center" }}>
+          <Checkbox
+            checked={param.employee}
+            disabled={param.fixed}
+            onChange={(e) => {
+              const newParams = [...parameters];
+              newParams[index].employee = e.target.checked;
+              setParameters(newParams);
+            }}
+          />
+        </Box>
+        <Box sx={{ flex: 1, display: "flex", justifyContent: "center" }}>
+          <Checkbox
+            checked={param.teamLead}
+            disabled={param.fixed}
+            onChange={(e) => {
+              const newParams = [...parameters];
+              newParams[index].teamLead = e.target.checked;
+              setParameters(newParams);
+            }}
+          />
+        </Box>
+        <Box sx={{ flex: "none", display: "flex", justifyContent: "center" }}>
+          <IconButton onClick={() => removeParameter(index)} color="error">
+            <DeleteIcon />
+          </IconButton>
+        </Box>
+      </Box>
+    ))}
 
-            <IconButton color="primary" onClick={addParameter} sx={{ mt: 2 }}>
-              <AddIcon />
-            </IconButton>
-          </CardContent>
-        </Card>
+    {/* Add Button */}
+    <Box sx={{ display: "flex", justifyContent: "flex-start", mt: 2 }}>
+      <IconButton color="primary" onClick={addParameter}>
+        <AddIcon />
+      </IconButton>
+    </Box>
+  </CardContent>
+</Card>
+
+
         <Grid container justifyContent="flex-end" sx={{ mt: 3 }}>
           <Button
             variant="contained"
@@ -455,7 +543,7 @@ const AddAppraisalCycle = () => {
             sx={{ mt: 3 }}
           >Save
           </Button>
-          <Button variant="contained" color="error" sx={{ mt: 3, ml:3 }}>
+          <Button variant="contained" onClick={handleCancel} color="error" sx={{ mt: 3, ml:3 }}>
             Cancel
           </Button>
         </Grid>
@@ -473,3 +561,4 @@ const AddAppraisalCycle = () => {
 };
 
 export default AddAppraisalCycle;
+
