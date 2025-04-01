@@ -83,11 +83,11 @@ export default function DataGridDemo() {
     { field: "previous_reporting_manager", headerName: "Previous Manager", width: 200 },
   ];
 
-  //Function to define row height
+
   const getRowHeight = () => 35;
 
   return (
-    <Box item sx={{ height: 400, width: '50%', overflow: 'auto'}}>
+    <Box item sx={{ height: 600, width: '90%', overflow: 'auto', ml:5, mt:20}}>
       <DataGrid
         rows={rows}
         columns={columns}
