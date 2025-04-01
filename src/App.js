@@ -19,7 +19,7 @@ const MainApp = () => {
 
   return (
     <div>
-      {/* Conditionally render components */
+      {/* Conditionally render components */}
       {screen === 1 && <AddAppraisalCycle />}
       {screen === 2 && <DataGridDemo />}
       {screen === 3 && <Questionnaire />}
