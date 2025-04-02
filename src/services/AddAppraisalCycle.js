@@ -53,3 +53,29 @@ export const submitAssessment = async (data) => {
     console.error("Error submitting assessment:", error);
   }
 };
+
+
+export const fetchAppraisalCycles = async () => {
+  try {
+    const response = await fetch(`${BASE_URL}/appraisal_cycle/with-stage-names`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" }
+    });
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error while fetching appraisal cycles:", error);
+  }
+};
+
+export const deleteAppraisalCycle = async (cycle_id) => {
+  try {
+    const response = await fetch(`${BASE_URL}/appraisal_cycle/${cycle_id}`, {
+      method: "DELETE"
+    });
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error while deleting appraisal cycle:", error);
+  }
+};
