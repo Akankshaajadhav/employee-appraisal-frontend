@@ -14,10 +14,8 @@ import {
 import { DataGrid } from "@mui/x-data-grid";
 import CustomToolbar from "./CustomeToolbar";
 import { Edit, Delete, Visibility } from "@mui/icons-material";
-import {
-  fetchAppraisalCycles,
-  deleteAppraisalCycle,
-} from "../services/AddAppraisalCycle";
+import {fetchAppraisalCycles,deleteAppraisalCycle,} from "../services/AddAppraisalCycle";
+import Assignment from "./Assignment";
 
 const HRLandingPage = () => {
   const navigate = useNavigate();
@@ -99,17 +97,27 @@ const HRLandingPage = () => {
 
   const [detailsVisible, setDetailsVisible] = useState(false);
   const [selectedCycleId, setSelectedCycleId] = useState(null);
-  // Function to toggle visibility of details components
-  const toggleDetailsView = (cycleId) => {
-    if (selectedCycleId === cycleId && detailsVisible) {
-      // If clicking on the same cycle, toggle visibility
-      setDetailsVisible(false);
-      setSelectedCycleId(null);
-    } else {
-      // If clicking on a different cycle, show details for that cycle
-      setDetailsVisible(true);
-      setSelectedCycleId(cycleId);
-    }
+  const [selectedCycleName, setSelectedCycleName] = useState(null);
+
+    const toggleDetailsView = (cycleId) => {
+      const selectedCycle = appraisalCycles.find((cycle) => cycle.cycle_id === cycleId);
+      
+      if (selectedCycleId === cycleId && detailsVisible) {
+        setDetailsVisible(false);
+        setSelectedCycleId(null);
+        setSelectedCycleName(null);
+      } else {
+        setDetailsVisible(true);
+        setSelectedCycleId(cycleId);
+        setSelectedCycleName(selectedCycle?.cycle_name || "Unknown Cycle");
+      }
+    };
+
+
+  // Close handler for hiding Assignment component
+  const handleCloseAssignment = () => {
+    setDetailsVisible(false);
+    setSelectedCycleId(null);
   };
 
   React.useEffect(() => {
@@ -165,50 +173,52 @@ const HRLandingPage = () => {
       ),
     },
   ];
+  const getRowHeight = () => 38;
 
   return (
-    <Card sx={{ p: 3, width: "90%", margin: "auto", mt: 5, mb: 3 }}>
-      <Grid container alignItems="center" justifyContent="space-between">
-        {/* Left Side: Appraisal Cycle */}
-        <Grid item>
-          <Typography variant="h6" color="primary">
-            Appraisal Cycle
-          </Typography>
-        </Grid>
-
-        {/* Right Side: Links & Button */}
-        <Grid item>
-          <Grid container spacing={2} alignItems="center">
-            <Grid item>
-              <Link onClick={() => navigate("/reports")} color="primary">
-                Reports
-              </Link>
-            </Grid>
-            <Grid item>
-              <Link onClick={() => navigate("/questionnaire")} color="primary">
-                Questionnaire
-              </Link>
-            </Grid>
-            <Grid item>
-              <Button
-                variant="contained"
-                onClick={() => navigate("/add-appraisal")}
-                color="primary"
-              >
-                Add
-              </Button>
-            </Grid>
-          </Grid>
-        </Grid>
-      </Grid>
-
+    <>
+    <Card>
       <CardContent>
-        <Card sx={{ p: 1, width: "100%" }}>
+        <Card sx={{ width: "100%" }}>
           <CardContent sx={{ height: 300, maxHeight: 300 }}>
+            <Grid container alignItems="center" justifyContent="space-between" sx={{mb:2}}>
+              {/* Left Side: Appraisal Cycle */}
+              <Grid item>
+                <Typography variant="h6" color="primary" fontWeight={"bold"}>
+                  Appraisal Cycle
+                </Typography>
+              </Grid>
+
+              {/* Right Side: Links & Button */}
+              <Grid item>
+                <Grid container spacing={2} alignItems="center">
+                  <Grid item>
+                    <Link onClick={() => navigate("/reports")} color="primary">
+                      Reports
+                    </Link>
+                  </Grid>
+                  <Grid item>
+                    <Link onClick={() => navigate("/questionnaire")} color="primary">
+                      Questionnaire
+                    </Link>
+                  </Grid>
+                  <Grid item>
+                    <Button
+                      variant="contained"
+                      onClick={() => navigate("/add-appraisal")}
+                      color="primary"
+                    >
+                      Add
+                    </Button>
+                  </Grid>
+                </Grid>
+              </Grid>
+            </Grid>
+
             <Grid container spacing={2} style={{ height: "100%" }}>
               {loading ? (
                 <Grid item xs={12}>
-                  <p>Loading questions...</p>
+                  <p>Loading appraisal cycles...</p>
                 </Grid>
               ) : error ? (
                 <Grid item xs={12}>
@@ -221,84 +231,28 @@ const HRLandingPage = () => {
                     columns={columnsWithStage}
                     getRowId={(row) => row.cycle_id}
                     slots={{ toolbar: CustomToolbar }}
-                    initialState={{
-                      pagination: {
-                        paginationModel: { pageSize: 5 },
-                      },
-                    }}
-                    pageSizeOptions={[5, 10, 15]}
+                    pageSizeOptions={[5]}
                     sx={{
-                      "& .MuiDataGrid-root": {
-                        maxHeight: "100%",
-                      },
-                      "& .MuiDataGrid-virtualScroller": {
-                        overflow: "auto",
-                      },
+                      height:250,
+                      overflow:"auto",
+                      "& .MuiDataGrid-columnHeaderTitle": {
+                        fontWeight: "bold", // Make column headers bold
+                    }
                     }}
+                    rowHeight={getRowHeight()}
+                    // hideFooterPagination
+                    hideFooter
                   />
                 </Grid>
               )}
             </Grid>
           </CardContent>
         </Card>
-        {/* Details Components - Only show when detailsVisible is true */}
-        <Card sx={{ p: 2, width: "100%", mt: 2 }}>
-          {detailsVisible && selectedCycleId && (
-            <>
-              <Grid
-                container
-                spacing={2}
-                sx={{ mt: 2, display: "flex", justifyContent: "space-between" }}
-              >
-                <Grid item xs={12} md={6} sx={{ flex: 1, m: 1 }}>
-                  <Card>
-                    <CardContent>
-                      <Typography variant="h6" color="primary" gutterBottom>
-                        Select Employees
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                </Grid>
-                <Grid item xs={12} md={6} sx={{ flex: 1, m: 1 }}>
-                  <Card>
-                    <CardContent>
-                      <Typography variant="h6" color="primary" gutterBottom>
-                        Select Questions
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              </Grid>
-              <Grid display="flex" flexDirection="row-reverse">
-                <Grid container sx={{ m: 2 }}>
-                  <Button
-                    variant="contained"
-                    color="error"
-                    onClick={() => {
-                      setDetailsVisible(false);
-                    }}
-                  >
-                    Close
-                  </Button>
-                </Grid>
-                <Grid container sx={{ m: 2 }}>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => {
-                      console.log(
-                        "Assigning questions to employees for cycle:",
-                        selectedCycleId
-                      );
-                    }}
-                  >
-                    Assign
-                  </Button>
-                </Grid>
-              </Grid>
-            </>
-          )}
-        </Card>
+
+        {detailsVisible && selectedCycleId && (
+            <Assignment cycleId={selectedCycleId} onClose={handleCloseAssignment} cycleName={selectedCycleName}  />
+        )}
+
 
         <Snackbar
           open={snackbar.open}
@@ -310,6 +264,7 @@ const HRLandingPage = () => {
         </Snackbar>
       </CardContent>
     </Card>
+    </>
   );
 };
 
