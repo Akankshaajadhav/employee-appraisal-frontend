@@ -221,7 +221,7 @@ export default function Questionnaire({onClose}) {
           }}
         >
           <h2 style={{ margin: 0 }}>Questionnaire</h2>
-          <IconButton onClick={() => {navigate("/home")}} color="error">
+          <IconButton onClick={() => {navigate("/hr-home")}} color="error">
             <CloseIcon />
           </IconButton>
         </Box>

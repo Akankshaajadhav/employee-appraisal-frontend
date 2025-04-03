@@ -13,10 +13,20 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await login_auth(parseInt(employeeId), password); 
+      const response = await login_auth(parseInt(employeeId), password);
       console.log(response);
+  
       if (response.message === "Login successful") {
-        navigate("/home"); // Navigate to home on success
+        const userRole = response.role.toLowerCase(); // Ensure role is in lowercase
+        localStorage.setItem("employee_id", employeeId); // Store ID
+        localStorage.setItem("user_role", userRole); // Store role
+  
+        // Redirect based on role
+        if (userRole === "hr") {
+          navigate("/hr-home"); // HR landing page
+        } else {
+          navigate("/employee-home"); // Employee landing page
+        }
       } else {
         setError(response.detail || "Invalid credentials");
         setOpen(true);
@@ -26,6 +36,7 @@ const Login = () => {
       setOpen(true);
     }
   };
+  
 
   return (
     <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>

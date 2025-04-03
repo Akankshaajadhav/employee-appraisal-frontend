@@ -283,7 +283,7 @@ const AddAppraisalCycle = ({ onClose }) => {
           </Typography>
         </Grid>
         <Grid size={1} sx={{ textAlign: "right" }}>
-          <IconButton onClick={() => navigate("/home")} color="error">
+          <IconButton onClick={() => navigate("/hr-home")} color="error">
             <CloseIcon />
           </IconButton>
         </Grid>
