@@ -24,7 +24,10 @@ import Select from "@mui/material/Select";
 // API function
 import { fetchQuestions, addQuestion } from "../services/questionnaireService";
 
+import { useNavigate } from "react-router-dom";
+
 export default function Questionnaire({onClose}) {
+  const navigate = useNavigate();
   // To display question list.
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -218,7 +221,7 @@ export default function Questionnaire({onClose}) {
           }}
         >
           <h2 style={{ margin: 0 }}>Questionnaire</h2>
-          <IconButton onClick={onClose} color="error">
+          <IconButton onClick={() => {navigate("/home")}} color="error">
             <CloseIcon />
           </IconButton>
         </Box>

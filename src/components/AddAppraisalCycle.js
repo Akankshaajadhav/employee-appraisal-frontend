@@ -1,7 +1,3 @@
-
-
-
-
 import React, { useState, useEffect } from "react";
 import {
   Button,
@@ -13,23 +9,22 @@ import {
   IconButton,
   Snackbar,
   Alert,
-  FormControl, 
+  FormControl,
   Radio,
   RadioGroup,
-  Box
-
+  Box,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import AddIcon from "@mui/icons-material/Add";
-import TextField from '@mui/material/TextField';
-import DeleteIcon from '@mui/icons-material/Delete';
+import TextField from "@mui/material/TextField";
+import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
 import {
   createAppraisalCycle,
   createStage,
   createParameter,
 } from "../services/AddAppraisalCycle";
-
+import { useNavigate } from "react-router-dom";
 
 const AddAppraisalCycle = ({ onClose }) => {
   // Appraisal Cycle State
@@ -60,9 +55,8 @@ const AddAppraisalCycle = ({ onClose }) => {
     { name: "Closure", startDate: "", endDate: "" },
   ]);
 
-  
-//new
-const [parameterErrors, setParameterErrors] = useState({});
+  //new
+  const [parameterErrors, setParameterErrors] = useState({});
 
   // Parameters State
   const [parameters, setParameters] = useState([
@@ -75,13 +69,13 @@ const [parameterErrors, setParameterErrors] = useState({});
     },
   ]);
 
-    const handleCancel = () => {
+  const handleCancel = () => {
     setCycleName("");
     setDescription("");
     setStartDate("");
     setEndDate("");
     setStatus("");
-  
+
     // Reset stages to the initial state
     setStages([
       { name: "Setup", startDate: "", endDate: "" },
@@ -90,7 +84,7 @@ const [parameterErrors, setParameterErrors] = useState({});
       { name: "HR/VL Validation", startDate: "", endDate: "" },
       { name: "Closure", startDate: "", endDate: "" },
     ]);
-  
+
     // Reset parameters to the initial state
     setParameters([
       {
@@ -101,12 +95,12 @@ const [parameterErrors, setParameterErrors] = useState({});
         fixed: true,
       },
     ]);
-  
+
     // Reset validation errors
     setStartDateError("");
     setEndDateError("");
     setStageErrors({});
-  
+
     // Close the snackbar
     setSnackbar({
       open: false,
@@ -114,7 +108,7 @@ const [parameterErrors, setParameterErrors] = useState({});
       severity: "success",
     });
   };
-  
+
   const [formValid, setFormValid] = useState(false);
 
   useEffect(() => {
@@ -122,27 +116,26 @@ const [parameterErrors, setParameterErrors] = useState({});
   }, [cycleName, description, status, startDate, endDate, stages, parameters]);
 
   const validateForm = () => {
-    
     let valid = true;
-    if(!status){
-      valid=false;
+    if (!status) {
+      valid = false;
     }
     if (!startDate) {
-        setStartDateError("Start date is required");
-        valid = false;
-      } else {
-        setStartDateError("");
-      }
-    
-      if (!endDate) {
-        setEndDateError("End date is required");
-        valid = false;
-      } else if (startDate > endDate) {
-        setEndDateError("End date must be after start date");
-        valid = false;
-      } else {
-        setEndDateError("");
-      }
+      setStartDateError("Start date is required");
+      valid = false;
+    } else {
+      setStartDateError("");
+    }
+
+    if (!endDate) {
+      setEndDateError("End date is required");
+      valid = false;
+    } else if (startDate > endDate) {
+      setEndDateError("End date must be after start date");
+      valid = false;
+    } else {
+      setEndDateError("");
+    }
 
     if (startDate && endDate && startDate > endDate) {
       setEndDateError("End date must be after start date");
@@ -167,14 +160,10 @@ const [parameterErrors, setParameterErrors] = useState({});
         error.start = "Start date must be within cycle period";
         valid = false;
       }
-      if(stage.endDate && (stage.endDate < stage.startDate)){
+      if (stage.endDate && stage.endDate < stage.startDate) {
         error.end = "End date must be after start date";
         valid = false;
-      }
-      else if (
-        stage.endDate &&
-        (stage.endDate > endDate)
-      ) {
+      } else if (stage.endDate && stage.endDate > endDate) {
         error.end = "End date must be within cycle period";
         valid = false;
       }
@@ -202,7 +191,8 @@ const [parameterErrors, setParameterErrors] = useState({});
         valid = false;
       }
       if (!param.employee && !param.teamLead) {
-        error.selection = "At least one selection (Employee or Team Lead) is required";
+        error.selection =
+          "At least one selection (Employee or Team Lead) is required";
         valid = false;
       }
       newParameterErrors[index] = error;
@@ -214,7 +204,6 @@ const [parameterErrors, setParameterErrors] = useState({});
   };
 
   const handleSave = async () => {
-    
     try {
       console.log("Saving Appraisal Cycle...");
 
@@ -282,31 +271,32 @@ const [parameterErrors, setParameterErrors] = useState({});
     const updatedParameters = parameters.filter((_, i) => i !== index);
     setParameters(updatedParameters);
   };
-  
+
+  const navigate = useNavigate();
+
   return (
-   
-    <Card sx={{ p: 3, width: "90%", margin: "auto", mt: 5, mb:3 }}>
-         <Grid container alignItems="center">
-    <Grid size={11}>
-      <Typography variant="h6" color="primary">
-        Add Appraisal Cycle
-      </Typography>
-    </Grid>
-    <Grid size={1} sx={{ textAlign: "right" }}> 
-      <IconButton onClick={onClose} color="error">
-        <CloseIcon />
-      </IconButton>
-    </Grid>
-  </Grid>
+    <Card sx={{ p: 3, width: "90%", margin: "auto", mt: 5, mb: 3 }}>
+      <Grid container alignItems="center">
+        <Grid size={11}>
+          <Typography variant="h6" color="primary">
+            Add Appraisal Cycle
+          </Typography>
+        </Grid>
+        <Grid size={1} sx={{ textAlign: "right" }}>
+          <IconButton onClick={() => navigate("/home")} color="error">
+            <CloseIcon />
+          </IconButton>
+        </Grid>
+      </Grid>
       <CardContent>
         <Card sx={{ p: 1, width: "100%" }}>
-          <Typography  color="primary" fontWeight="bold">
+          <Typography color="primary" fontWeight="bold">
             Appraisal Cycle Details
           </Typography>
           <CardContent>
             {/* Appraisal Cycle Inputs */}
             <Grid container spacing={2}>
-              <Grid  size={12}>
+              <Grid size={12}>
                 <TextField
                   fullWidth
                   label="Appraisal Cycle Name"
@@ -315,7 +305,7 @@ const [parameterErrors, setParameterErrors] = useState({});
                   onChange={(e) => setCycleName(e.target.value)}
                 />
               </Grid>
-              <Grid  size={12}>
+              <Grid size={12}>
                 <TextField
                   fullWidth
                   label="Description"
@@ -326,7 +316,7 @@ const [parameterErrors, setParameterErrors] = useState({});
                   onChange={(e) => setDescription(e.target.value)}
                 />
               </Grid>
-              <Grid  size={6}>
+              <Grid size={6}>
                 <TextField
                   fullWidth
                   label="Start Date"
@@ -336,7 +326,7 @@ const [parameterErrors, setParameterErrors] = useState({});
                   onChange={(e) => setStartDate(e.target.value)}
                 />
               </Grid>
-              <Grid  size={6}>
+              <Grid size={6}>
                 <TextField
                   fullWidth
                   label="End Date"
@@ -356,8 +346,16 @@ const [parameterErrors, setParameterErrors] = useState({});
                     value={status}
                     onChange={(e) => setStatus(e.target.value)}
                   >
-                    <FormControlLabel value="active" control={<Radio />} label="Active" />
-                    <FormControlLabel value="inactive" control={<Radio />} label="Inactive" />
+                    <FormControlLabel
+                      value="active"
+                      control={<Radio />}
+                      label="Active"
+                    />
+                    <FormControlLabel
+                      value="inactive"
+                      control={<Radio />}
+                      label="Inactive"
+                    />
                   </RadioGroup>
                 </FormControl>
               </Grid>
@@ -370,12 +368,12 @@ const [parameterErrors, setParameterErrors] = useState({});
             {/* <Typography variant="h6" sx={{ mt: 3, color: "primary.main" }}>Stages</Typography> */}
             {/* <Typography variant="h6" sx={{ mt: 3, color: "primary.main" }}>Parameters</Typography> */}
             <Grid container spacing={2} sx={{ mt: 1 }}>
-              <Grid  size={4}>
+              <Grid size={4}>
                 <Typography fontWeight="bold" sx={{ color: "primary.main" }}>
                   Stages
                 </Typography>
               </Grid>
-              <Grid  size={4}>
+              <Grid size={4}>
                 <Typography
                   fontWeight="bold"
                   sx={{ ml: 2, color: "primary.main" }}
@@ -383,7 +381,7 @@ const [parameterErrors, setParameterErrors] = useState({});
                   Start Date
                 </Typography>
               </Grid>
-              <Grid  size={4}>
+              <Grid size={4}>
                 <Typography
                   fontWeight="bold"
                   sx={{ ml: 2, color: "primary.main" }}
@@ -400,14 +398,14 @@ const [parameterErrors, setParameterErrors] = useState({});
                 key={index}
                 sx={{ mt: 1, alignItems: "center" }}
               >
-                <Grid  size={4}>
+                <Grid size={4}>
                   <Typography
                     sx={{ fontWeight: "bold", color: "primary.main" }}
                   >
                     {stage.name}
                   </Typography>
                 </Grid>
-                <Grid  size={4}>
+                <Grid size={4}>
                   <TextField
                     fullWidth
                     type="date"
@@ -422,7 +420,7 @@ const [parameterErrors, setParameterErrors] = useState({});
                     helperText={stageErrors[index]?.start}
                   />
                 </Grid>
-                <Grid  size={4}>
+                <Grid size={4}>
                   <TextField
                     fullWidth
                     type="date"
@@ -442,98 +440,128 @@ const [parameterErrors, setParameterErrors] = useState({});
           </CardContent>
         </Card>
         {/* Parameters Section */}
-  
+
         <Card sx={{ p: 2, width: "100%", mt: 1 }}>
-  <CardContent>
-    {/* Header Row */}
-    <Box sx={{ display: "flex", alignItems: "center", gap: 2, flexWrap: "wrap" }}>
-      <Typography fontWeight="bold" sx={{ flex: 2, color: "primary.main" }}>
-        Parameters For Lead Assessment
-      </Typography>
-      <Typography fontWeight="bold" sx={{ flex: 2, color: "primary.main" }}>
-        Help Text
-      </Typography>
-      <Typography fontWeight="bold" sx={{ flex: 1,  color: "primary.main" }}>
-        Employee
-      </Typography>
-      <Typography fontWeight="bold" sx={{ flex: 1, color: "primary.main" }}>
-        Team Lead
-      </Typography>
-     
-    </Box>
+          <CardContent>
+            {/* Header Row */}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+                flexWrap: "wrap",
+              }}
+            >
+              <Typography
+                fontWeight="bold"
+                sx={{ flex: 2, color: "primary.main" }}
+              >
+                Parameters For Lead Assessment
+              </Typography>
+              <Typography
+                fontWeight="bold"
+                sx={{ flex: 2, color: "primary.main" }}
+              >
+                Help Text
+              </Typography>
+              <Typography
+                fontWeight="bold"
+                sx={{ flex: 1, color: "primary.main" }}
+              >
+                Employee
+              </Typography>
+              <Typography
+                fontWeight="bold"
+                sx={{ flex: 1, color: "primary.main" }}
+              >
+                Team Lead
+              </Typography>
+            </Box>
 
-    {/* Parameters List */}
-    {parameters.map((param, index) => (
-      <Box
-        key={index}
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 2,
-          flexWrap: "wrap",
-          mt: 1,
-        }}
-      >
-        <TextField
-          fullWidth
-          sx={{ flex: 2 }}
-          disabled={param.fixed}
-          value={param.name}
-          onChange={(e) => {
-            const newParams = [...parameters];
-            newParams[index].name = e.target.value;
-            setParameters(newParams);
-          }}
-        />
-        <TextField
-          fullWidth
-          sx={{ flex: 2 }}
-          value={param.helptext}
-          onChange={(e) => {
-            const newParams = [...parameters];
-            newParams[index].helptext = e.target.value;
-            setParameters(newParams);
-          }}
-        />
-        <Box sx={{ flex: 1, display: "flex", justifyContent: "center" }}>
-          <Checkbox
-            checked={param.employee}
-            disabled={param.fixed}
-            onChange={(e) => {
-              const newParams = [...parameters];
-              newParams[index].employee = e.target.checked;
-              setParameters(newParams);
-            }}
-          />
-        </Box>
-        <Box sx={{ flex: 1, display: "flex", justifyContent: "center" }}>
-          <Checkbox
-            checked={param.teamLead}
-            disabled={param.fixed}
-            onChange={(e) => {
-              const newParams = [...parameters];
-              newParams[index].teamLead = e.target.checked;
-              setParameters(newParams);
-            }}
-          />
-        </Box>
-        <Box sx={{ flex: "none", display: "flex", justifyContent: "center" }}>
-          <IconButton onClick={() => removeParameter(index)} color="error">
-            <DeleteIcon />
-          </IconButton>
-        </Box>
-      </Box>
-    ))}
+            {/* Parameters List */}
+            {parameters.map((param, index) => (
+              <Box
+                key={index}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 2,
+                  flexWrap: "wrap",
+                  mt: 1,
+                }}
+              >
+                <TextField
+                  fullWidth
+                  sx={{ flex: 2 }}
+                  disabled={param.fixed}
+                  value={param.name}
+                  onChange={(e) => {
+                    const newParams = [...parameters];
+                    newParams[index].name = e.target.value;
+                    setParameters(newParams);
+                  }}
+                />
+                <TextField
+                  fullWidth
+                  sx={{ flex: 2 }}
+                  value={param.helptext}
+                  onChange={(e) => {
+                    const newParams = [...parameters];
+                    newParams[index].helptext = e.target.value;
+                    setParameters(newParams);
+                  }}
+                />
+                <Box
+                  sx={{ flex: 1, display: "flex", justifyContent: "center" }}
+                >
+                  <Checkbox
+                    checked={param.employee}
+                    disabled={param.fixed}
+                    onChange={(e) => {
+                      const newParams = [...parameters];
+                      newParams[index].employee = e.target.checked;
+                      setParameters(newParams);
+                    }}
+                  />
+                </Box>
+                <Box
+                  sx={{ flex: 1, display: "flex", justifyContent: "center" }}
+                >
+                  <Checkbox
+                    checked={param.teamLead}
+                    disabled={param.fixed}
+                    onChange={(e) => {
+                      const newParams = [...parameters];
+                      newParams[index].teamLead = e.target.checked;
+                      setParameters(newParams);
+                    }}
+                  />
+                </Box>
+                <Box
+                  sx={{
+                    flex: "none",
+                    display: "flex",
+                    justifyContent: "center",
+                  }}
+                >
+                  <IconButton
+                    onClick={() => removeParameter(index)}
+                    color="error"
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </Box>
+              </Box>
+            ))}
 
-    {/* Add Button */}
-    <Box sx={{ display: "flex", justifyContent: "flex-start", mt: 2 }}>
-      <IconButton color="primary" onClick={addParameter}>
-        <AddIcon />
-      </IconButton>
-    </Box>
-  </CardContent>
-</Card>
-
+            {/* Add Button */}
+            <Box sx={{ display: "flex", justifyContent: "flex-start", mt: 2 }}>
+              <IconButton color="primary" onClick={addParameter}>
+                <AddIcon />
+              </IconButton>
+            </Box>
+          </CardContent>
+        </Card>
 
         <Grid container justifyContent="flex-end" sx={{ mt: 3 }}>
           <Button
@@ -542,9 +570,15 @@ const [parameterErrors, setParameterErrors] = useState({});
             onClick={handleSave}
             disabled={!formValid}
             sx={{ mt: 3 }}
-          >Save
+          >
+            Save
           </Button>
-          <Button variant="contained" onClick={handleCancel} color="error" sx={{ mt: 3, ml:3 }}>
+          <Button
+            variant="contained"
+            onClick={handleCancel}
+            color="error"
+            sx={{ mt: 3, ml: 3 }}
+          >
             Cancel
           </Button>
         </Grid>
@@ -562,4 +596,3 @@ const [parameterErrors, setParameterErrors] = useState({});
 };
 
 export default AddAppraisalCycle;
-
