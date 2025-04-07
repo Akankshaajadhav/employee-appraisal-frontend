@@ -68,13 +68,11 @@ export default function CheckboxList({ onSelect }) {
                 console.log("Passing Selected Questions:", selectedQuestions);
                 onSelect(selectedQuestions);
             }
-    
+
             return updatedChecked;
         });
     };
     
-      
-
     const handleQuestionClick = (questionId) => {
         setExpandedQuestion(expandedQuestion === questionId ? null : questionId);
     };
@@ -88,9 +86,11 @@ export default function CheckboxList({ onSelect }) {
     const handleRemoveQuestion = (questionId) => {
         setChecked((prev) => {
             const updatedChecked = prev.filter((id) => id !== questionId);
-            // If all selected questions are removed, exit preview mode
-            if (updatedChecked.length === 0) {
-                setIsPreviewMode(false);
+            const updatedSelected = questions.filter((q) => updatedChecked.includes(q.question_id));
+
+            // Notify parent of updated selection
+            if (onSelect) {
+                onSelect(updatedSelected);
             }
     
             return updatedChecked;
@@ -123,7 +123,7 @@ export default function CheckboxList({ onSelect }) {
                 <MenuItem value="Yes/No">Yes/No</MenuItem>
                 <MenuItem value="Descriptive">Descriptive</MenuItem>
                 <MenuItem value="Single choice">Single choice</MenuItem>
-                <MenuItem value="Rating scale">Rating scale</MenuItem>
+                {/* <MenuItem value="Rating scale">Rating scale</MenuItem> */}
             </Select>
         </FormControl>
 
@@ -196,12 +196,12 @@ export default function CheckboxList({ onSelect }) {
                                     <Box sx={{ ml: 2 }}>{isExpanded ? <ExpandLess /> : <ExpandMore />}</Box>
                                 )}
                             </ListItemButton>
-
+                            {/* 
                             {isPreviewMode && (
                                 <IconButton onClick={() => handleRemoveQuestion(question.question_id)} color="error">
                                     <DeleteIcon />
                                 </IconButton>
-                            )}
+                            )} */}
                         </ListItem>
 
                         {isExpandable && (

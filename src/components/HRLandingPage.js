@@ -193,12 +193,22 @@ const HRLandingPage = () => {
               <Grid item>
                 <Grid container spacing={2} alignItems="center">
                   <Grid item>
-                    <Link onClick={() => navigate("/reports")} color="primary">
+                    <Link onClick={() => navigate("/reports")} color="primary" sx={{ 
+      cursor: 'pointer',
+      '&:hover': { 
+        cursor: 'pointer' 
+      } 
+    }}>
                       Reports
                     </Link>
                   </Grid>
                   <Grid item>
-                    <Link onClick={() => navigate("/questionnaire")} color="primary">
+                    <Link onClick={() => navigate("/questionnaire")} color="primary" sx={{ 
+      cursor: 'pointer',
+      '&:hover': { 
+        cursor: 'pointer' 
+      } 
+    }}>
                       Questionnaire
                     </Link>
                   </Grid>

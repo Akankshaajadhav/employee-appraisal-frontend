@@ -286,7 +286,7 @@ export default function Questionnaire({onClose}) {
                         color: "#3b7dda",
                       }}
                     >
-                      <h3>Add New Question</h3>
+                      <h3>Add A New Question</h3>
                     </Box>
                     <Box
                       sx={{
