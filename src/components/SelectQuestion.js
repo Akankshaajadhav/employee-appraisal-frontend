@@ -68,7 +68,11 @@ export default function CheckboxList({ onSelect }) {
                 console.log("Passing Selected Questions:", selectedQuestions);
                 onSelect(selectedQuestions);
             }
-    
+            //  Exit preview mode if all checkboxes are unchecked
+            if (isPreviewMode && updatedChecked.length === 0) {
+                setIsPreviewMode(false);
+            }
+
             return updatedChecked;
         });
     };
@@ -84,18 +88,38 @@ export default function CheckboxList({ onSelect }) {
         setIsPreviewMode((prev) => !prev); 
     };
 
-    // Remove questions in preview mode
-    const handleRemoveQuestion = (questionId) => {
-        setChecked((prev) => {
-            const updatedChecked = prev.filter((id) => id !== questionId);
-            // If all selected questions are removed, exit preview mode
-            if (updatedChecked.length === 0) {
-                setIsPreviewMode(false);
-            }
+    // // Remove questions in preview mode
+    // const handleRemoveQuestion = (questionId) => {
+    //     setChecked((prev) => {
+    //         const updatedChecked = prev.filter((id) => id !== questionId);
+    //         // If all selected questions are removed, exit preview mode
+    //         if (updatedChecked.length === 0) {
+    //             setIsPreviewMode(false);
+    //         }
     
-            return updatedChecked;
-        });
-    };
+    //         return updatedChecked;
+    //     });
+    // };
+
+// Remove questions in preview mode
+const handleRemoveQuestion = (questionId) => {
+    setChecked((prev) => {
+        const updatedChecked = prev.filter((id) => id !== questionId);
+        const updatedSelected = questions.filter((q) => updatedChecked.includes(q.question_id));
+
+        // Notify parent of updated selection
+        if (onSelect) {
+            onSelect(updatedSelected);
+        }
+        
+        // If all selected questions are removed, exit preview mode
+        if (updatedChecked.length === 0) {
+            setIsPreviewMode(false);
+        }
+
+        return updatedChecked;
+    });
+};
 
      // Filter questions based on selected type & search key word
      const filteredQuestions = questions.filter((question) =>
