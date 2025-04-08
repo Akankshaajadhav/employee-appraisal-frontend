@@ -1,6 +1,5 @@
 // Screen for the asignment -RHS (Questions)
 
-
 import React, {useState, useEffect} from 'react'; 
 import SearchIcon from "@mui/icons-material/Search";
 import RefreshOutlinedIcon from '@mui/icons-material/RefreshOutlined';
@@ -27,7 +26,7 @@ import {
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import DeleteIcon from '@mui/icons-material/Delete';
-
+const API_URL = process.env.REACT_APP_BASE_URL; 
 export default function CheckboxList({ onSelect }) {
 // export default function CheckboxList() {
     const [questions, setQuestions] = useState([]);
@@ -36,6 +35,8 @@ export default function CheckboxList({ onSelect }) {
     const [searchTerm, setSearchTerm] = useState("");
     const [expandedQuestion, setExpandedQuestion] = useState(null);
     const [isPreviewMode, setIsPreviewMode] = useState(false); 
+    const [previousChecked, setPreviousChecked] = useState([]);
+
 
     const fetchQuestions = () => {
         setQuestions([]); 
@@ -43,11 +44,12 @@ export default function CheckboxList({ onSelect }) {
         setSearchTerm("");
         setType("");
         setIsPreviewMode(false);
-        fetch("http://localhost:8000/question")
+        fetch(`${API_URL}/question`)
             .then((response) => response.json())
             .then((data) => setQuestions(data))
             .catch((error) => console.error("Error fetching questions:", error));
     };
+    console.log("questions :",questions);
     
     useEffect(() => {
         fetchQuestions();
@@ -68,17 +70,11 @@ export default function CheckboxList({ onSelect }) {
                 console.log("Passing Selected Questions:", selectedQuestions);
                 onSelect(selectedQuestions);
             }
-            //  Exit preview mode if all checkboxes are unchecked
-            if (isPreviewMode && updatedChecked.length === 0) {
-                setIsPreviewMode(false);
-            }
 
             return updatedChecked;
         });
     };
     
-      
-
     const handleQuestionClick = (questionId) => {
         setExpandedQuestion(expandedQuestion === questionId ? null : questionId);
     };
@@ -88,39 +84,6 @@ export default function CheckboxList({ onSelect }) {
         setIsPreviewMode((prev) => !prev); 
     };
 
-    // // Remove questions in preview mode
-    // const handleRemoveQuestion = (questionId) => {
-    //     setChecked((prev) => {
-    //         const updatedChecked = prev.filter((id) => id !== questionId);
-    //         // If all selected questions are removed, exit preview mode
-    //         if (updatedChecked.length === 0) {
-    //             setIsPreviewMode(false);
-    //         }
-    
-    //         return updatedChecked;
-    //     });
-    // };
-
-// Remove questions in preview mode
-const handleRemoveQuestion = (questionId) => {
-    setChecked((prev) => {
-        const updatedChecked = prev.filter((id) => id !== questionId);
-        const updatedSelected = questions.filter((q) => updatedChecked.includes(q.question_id));
-
-        // Notify parent of updated selection
-        if (onSelect) {
-            onSelect(updatedSelected);
-        }
-        
-        // If all selected questions are removed, exit preview mode
-        if (updatedChecked.length === 0) {
-            setIsPreviewMode(false);
-        }
-
-        return updatedChecked;
-    });
-};
-
      // Filter questions based on selected type & search key word
      const filteredQuestions = questions.filter((question) =>
         (type === "" || question.question_type === type) &&  // Filter by type
@@ -129,10 +92,20 @@ const handleRemoveQuestion = (questionId) => {
 
     const selectedQuestions = questions.filter((q) => checked.includes(q.question_id));
 
+    // Filtering of questions in preview mode as per type and search keyword
+    const visibleQuestions = isPreviewMode
+    ? selectedQuestions.filter((question) =>
+        (type === "" || question.question_type === type) &&
+        question.question_text.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : filteredQuestions;
+
+
     return (
     <Box sx={{ width: "100%", display: "flex", flexDirection: "column", height: "550px" }}> 
-    {/* Top Section: Filters and Search */}
+    {/* Dropdown , refresh and Search */}
     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+        {/* Dropdown */}
         <FormControl>
             <Select
                 labelId="question-type-label"
@@ -146,11 +119,12 @@ const handleRemoveQuestion = (questionId) => {
                 <MenuItem value="MCQ">MCQ</MenuItem>
                 <MenuItem value="Yes/No">Yes/No</MenuItem>
                 <MenuItem value="Descriptive">Descriptive</MenuItem>
-                <MenuItem value="Single choice">Single choice</MenuItem>
-                <MenuItem value="Rating scale">Rating scale</MenuItem>
+                <MenuItem value="Single Choice">Single choice</MenuItem>
+                {/* <MenuItem value="Rating scale">Rating scale</MenuItem> */}
             </Select>
         </FormControl>
 
+        {/* Refresh and search */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <IconButton onClick={fetchQuestions} disabled={isPreviewMode}>
                 <RefreshOutlinedIcon color={isPreviewMode ? "disabled" : "primary"} />
@@ -176,27 +150,162 @@ const handleRemoveQuestion = (questionId) => {
     {/* Questions List - Fixed Height to Keep Button at Bottom */}
     <Box sx={{ flex: 1, overflowY: "auto", maxHeight: "600px" }}>  
         <List sx={{ width: "100%", bgcolor: "background.paper" }}>
+
+            {/* In preview mode - deselect all and restore selections  */}
+            {isPreviewMode && (
+                <ListItem disablePadding>
+                    <ListItemIcon>
+                        <Checkbox
+                            edge="start"
+                            checked={false}
+                            indeterminate={false}
+                            onChange={() => {
+                                if (checked.length === 0 && previousChecked.length > 0 || 
+                                    (previousChecked.length > 0 && 
+                                    !previousChecked.some(id => {
+                                        const q = questions.find(q => q.question_id === id);
+                                        return q && (type === "" || q.question_type === type);
+                                    }))) {
+                                    // Restoration logic - restore ALL previously checked items
+                                    console.log("Restoring ALL selections:", previousChecked);
+                                    
+                                    // Create a new checked array with all previousChecked items
+                                    const newChecked = [...checked, ...previousChecked];
+                                    
+                                    // Update state
+                                    setChecked(newChecked);
+                                    setPreviousChecked([]);
+                                    
+                                    // Ensure we're passing ALL selected questions to the parent
+                                    if (onSelect) {
+                                        const allSelectedQuestions = questions.filter(q => 
+                                            newChecked.includes(q.question_id)
+                                        );
+                                        console.log("Passing all restored questions to parent:", allSelectedQuestions);
+                                        onSelect(allSelectedQuestions);
+                                    }
+                                } else if (previousChecked.length > 0) {
+                                    // Type-specific restoration
+                                    // Get previously checked questions of current type
+                                    const typeSpecificPreviousIds = previousChecked.filter(id => {
+                                        const q = questions.find(q => q.question_id === id);
+                                        return q && (type === "" || q.question_type === type);
+                                    });
+                                    
+                                    console.log("Restoring type-specific selections:", typeSpecificPreviousIds);
+                                    
+                                    // Create a new checked array adding back type-specific items
+                                    const newChecked = [...checked, ...typeSpecificPreviousIds];
+                                    
+                                    // Remove restored IDs from previousChecked
+                                    const newPreviousChecked = previousChecked.filter(
+                                        id => !typeSpecificPreviousIds.includes(id)
+                                    );
+                                    
+                                    // Update state
+                                    setChecked(newChecked);
+                                    setPreviousChecked(newPreviousChecked);
+                                    
+                                    if (onSelect) {
+                                        const allSelectedQuestions = questions.filter(q => 
+                                            newChecked.includes(q.question_id)
+                                        );
+                                        console.log("Passing type-specific restored questions:", allSelectedQuestions);
+                                        onSelect(allSelectedQuestions);
+                                    }
+                                } else {
+                                    // Deselection logic
+                                    const visibleIds = visibleQuestions.map(q => q.question_id);
+                                    const visibleCheckedIds = visibleIds.filter(id => checked.includes(id));
+                                    
+                                    console.log("Deselecting visible questions:", visibleCheckedIds);
+                                    
+                                    // Store deselected items for later restoration
+                                    setPreviousChecked(prev => [...prev, ...visibleCheckedIds]);
+                                    
+                                    // Remove deselected items from checked
+                                    const newChecked = checked.filter(id => !visibleCheckedIds.includes(id));
+                                    setChecked(newChecked);
+                                    
+                                    if (onSelect) {
+                                        const remainingSelectedQuestions = questions.filter(q => 
+                                            newChecked.includes(q.question_id)
+                                        );
+                                        console.log("Passing remaining selected questions to parent:", remainingSelectedQuestions);
+                                        onSelect(remainingSelectedQuestions);
+                                    }
+                                }
+                            }}
+                        />
+                    </ListItemIcon>
+                    <ListItemText
+                        primary={
+                            checked.some(id => visibleQuestions.some(q => q.question_id === id))
+                                ? "Deselect All"
+                                : (previousChecked.length > 0
+                                ? "Restore Selection"
+                                : `No selected questions`)
+                        }
+                        sx={{ ml: 2 }}
+                    />
+                </ListItem>
+            )}
+
+            {/* In Selection mode : select all  */}
             {!isPreviewMode && (
                 <ListItem disablePadding>
                     <ListItemIcon>
                         <Checkbox
                             edge="start"
-                            checked={filteredQuestions.length > 0 && checked.length === filteredQuestions.length}
-                            indeterminate={checked.length > 0 && checked.length < filteredQuestions.length}
+                            checked={
+                                filteredQuestions.length > 0 && 
+                                filteredQuestions.every(q => checked.includes(q.question_id))
+                            }
+                            indeterminate={
+                                filteredQuestions.some(q => checked.includes(q.question_id)) && 
+                                !filteredQuestions.every(q => checked.includes(q.question_id))
+                            }
                             onChange={() => {
-                                if (checked.length === filteredQuestions.length) {
-                                    setChecked([]);
+                                // Get current filtered question IDs
+                                const filteredIds = filteredQuestions.map(q => q.question_id);
+                                
+                                if (filteredQuestions.every(q => checked.includes(q.question_id))) {
+                                    // If all filtered questions are checked, uncheck only those filtered questions
+                                    const newChecked = checked.filter(id => !filteredIds.includes(id));
+                                    setChecked(newChecked);
+                                    
+                                    if (onSelect) {
+                                        const selectedQuestions = questions.filter(q => newChecked.includes(q.question_id));
+                                        onSelect(selectedQuestions);
+                                    }
                                 } else {
-                                    setChecked(filteredQuestions.map((q) => q.question_id));
+                                    // If not all filtered questions are checked, check all filtered questions
+                                    // while maintaining other checked items
+                                    
+                                    // First, remove any existing filtered questions to avoid duplicates
+                                    const nonFilteredChecked = checked.filter(id => !filteredIds.includes(id));
+                                    
+                                    // Then add all the current filtered questions
+                                    const newChecked = [...nonFilteredChecked, ...filteredIds];
+                                    setChecked(newChecked);
+                                    
+                                    if (onSelect) {
+                                        const selectedQuestions = questions.filter(q => newChecked.includes(q.question_id));
+                                        onSelect(selectedQuestions);
+                                    }
                                 }
                             }}
                         />
                     </ListItemIcon>
-                    <ListItemText primary="Select All" sx={{ ml: 2 }} />
+                    <ListItemText 
+                        primary="Select All" 
+                        sx={{ ml: 2 }} 
+                    />
                 </ListItem>
             )}
 
-            {(isPreviewMode ? selectedQuestions : filteredQuestions).map((question) => {
+            {visibleQuestions.map((question) => {
+
                 const isExpanded = expandedQuestion === question.question_id;
                 const isExpandable = question.question_type !== "Descriptive";
 
@@ -220,12 +329,6 @@ const handleRemoveQuestion = (questionId) => {
                                     <Box sx={{ ml: 2 }}>{isExpanded ? <ExpandLess /> : <ExpandMore />}</Box>
                                 )}
                             </ListItemButton>
-
-                            {isPreviewMode && (
-                                <IconButton onClick={() => handleRemoveQuestion(question.question_id)} color="error">
-                                    <DeleteIcon />
-                                </IconButton>
-                            )}
                         </ListItem>
 
                         {isExpandable && (

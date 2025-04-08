@@ -3,7 +3,7 @@ import { Button, Box, Card, Snackbar, Alert,Typography,Grid } from "@mui/materia
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
 import DataGridDemo from "./SelectEmployee"; // Employee Selection Component
 import CheckboxList from "./SelectQuestion"; // Question Selection Component
-
+const API_URL = process.env.REACT_APP_BASE_URL; 
 export default function Assignment({ cycleId, onClose,cycleName }) {
   const [selectedEmployees, setSelectedEmployees] = useState([]);
   const [selectedQuestions, setSelectedQuestions] = useState([]);
@@ -34,7 +34,7 @@ export default function Assignment({ cycleId, onClose,cycleName }) {
       question_ids: selectedQuestions.map((q) => q.question_id),
     };
 
-    fetch("http://localhost:8000/assignments/", {
+    fetch(`${API_URL}/assignments/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(assignmentData),
