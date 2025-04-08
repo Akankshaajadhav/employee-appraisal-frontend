@@ -110,7 +110,7 @@ export default function Questionnaire({ onClose }) {
 
     let options = null;
 
-    if (question_type === "MCQ" || question_type === "Single_Choice") {
+    if (question_type === "MCQ" || question_type === "Single Choice") {
       options = mcqOptions
         .filter((opt) => opt.trim() !== "")
         .map((opt) => ({ option_text: opt }));
@@ -308,7 +308,7 @@ export default function Questionnaire({ onClose }) {
                       onChange={(e) => setQuestionText(e.target.value)}
                       placeholder="Type your question here"
                       variant="standard"
-                      sx={{ flex: 1, mr: 2 }} // Takes remaining space
+                      sx={{ flex: 1, mr: 20,  }} // Takes remaining space
                     />
 
                     <FormControl sx={{ minWidth: 160 }}>
@@ -334,40 +334,53 @@ export default function Questionnaire({ onClose }) {
                         <MenuItem value="MCQ">MCQ</MenuItem>
                         <MenuItem value="Yes/No">Yes/No</MenuItem>
                         <MenuItem value="Descriptive">Descriptive</MenuItem>
-                        <MenuItem value="Single_Choice">Single Choice</MenuItem>
+                        <MenuItem value="Single Choice">Single Choice</MenuItem>
                         {/* <MenuItem value="Rating_Scale">Rating_Scale</MenuItem> */}
                       </Select>
                     </FormControl>
                   </Box>
                   {/* MCQ (Conditional Rendering) */}
                   {question_type === "MCQ" && (
+
                     <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      width: "50%",
+                      minWidth: "250px",
+                      padding: "7px",
+                      marginTop: "15px",
+                      borderRadius: "8px",
+                      bgcolor: "background.paper",
+                      maxHeight: "600px",
+                    }}
+                  >
+                    {/* Options Title */}
+                    <Typography
+                      variant="subtitle1"
                       sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "10px",
-                        width: "100%",
-                        minWidth: "500px",
-                        padding: "7px",
-                        marginTop: "15px",
-                        borderRadius: "8px",
-                        maxHeight: "200px",
-                        overflowY: "auto",
-                        bgcolor: "background.paper", // optional
+                        fontSize: "16px",
+                        fontWeight: 500,
+                        color: "#202124",
+                        alignSelf: "flex-start",
+                        marginBottom: "10px",
                       }}
                     >
-                      <Typography
-                        variant="subtitle1"
-                        sx={{
-                          fontSize: "15px",
-                          fontWeight: 500,
-                          color: "#202124",
-                          alignSelf: "flex-start",
-                        }}
-                      >
-                        Options
-                      </Typography>
-
+                      Options
+                    </Typography>
+                  
+                    {/* Scrollable Options */}
+                    <Box
+                      sx={{
+                        flex: 1,
+                        overflowY: "auto",
+                        display: "flex",
+                        flexDirection: "column",
+                        maxHeight:"300px",
+                        gap: "10px",
+                        paddingRight: "4px", // optional: for better scroll space
+                      }}
+                    >
                       {mcqOptions.map((option, index) => (
                         <Box
                           key={index}
@@ -412,49 +425,68 @@ export default function Questionnaire({ onClose }) {
                           </IconButton>
                         </Box>
                       ))}
-                      <AddIcon
-                        sx={{
-                          fontSize: "25px",
-                          color: "#5f6368",
-                          textTransform: "none",
-                          "&:hover": {
-                            color: "#1a73e8",
-                          },
-                        }}
-                        onClick={handleAddMcqOption}
-                      />
                     </Box>
+                  
+                    {/* Add Icon at Bottom */}
+                    <IconButton
+                      onClick={handleAddMcqOption}
+                      sx={{
+                        alignSelf: "flex-start",
+                        fontSize: "25px",
+                        color: "#5f6368",
+                        textTransform: "none",
+                        marginTop: "10px",
+                        "&:hover": {
+                          color: "#1a73e8",
+                        },
+                      }}
+                    >
+                      <AddIcon fontSize="inherit" />
+                    </IconButton>
+                  </Box>
                   )}
 
                   {/* Single_Choice Options (Conditional Rendering) */}
-                  {question_type === "Single_Choice" && (
+                  {question_type === "Single Choice" && (
                     <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      width: "50%",
+                      minWidth: "250px",
+                      padding: "7px",
+                      marginTop: "15px",
+                      borderRadius: "8px",
+                      bgcolor: "background.paper",
+                      maxHeight: "600px",
+                    }}
+                  >
+                    {/* Options Title */}
+                    <Typography
+                      variant="subtitle1"
                       sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "10px",
-                        width: "100%",
-                        minWidth: "500px",
-                        padding: "7px",
-                        marginTop: "15px",
-                        borderRadius: "8px",
-                        maxHeight: "200px",
-                        overflowY: "auto",
-                        bgcolor: "background.paper", // optional
+                        fontSize: "16px",
+                        fontWeight: 500,
+                        color: "#202124",
+                        alignSelf: "flex-start",
+                        marginBottom: "10px",
                       }}
                     >
-                      <Typography
-                        variant="subtitle1"
-                        sx={{
-                          fontSize: "16px",
-                          fontWeight: 500,
-                          color: "#202124",
-                          alignSelf: "flex-start",
-                        }}
-                      >
-                        Options
-                      </Typography>
-
+                      Options
+                    </Typography>
+                  
+                    {/* Scrollable Options */}
+                    <Box
+                      sx={{
+                        flex: 1,
+                        overflowY: "auto",
+                        display: "flex",
+                        flexDirection: "column",
+                        maxHeight:"300px",
+                        gap: "10px",
+                        paddingRight: "4px", // optional: for better scroll space
+                      }}
+                    >
                       {mcqOptions.map((option, index) => (
                         <Box
                           key={index}
@@ -499,19 +531,25 @@ export default function Questionnaire({ onClose }) {
                           </IconButton>
                         </Box>
                       ))}
-
-                      <AddIcon
-                        sx={{
-                          fontSize: "25px",
-                          color: "#5f6368",
-                          textTransform: "none",
-                          "&:hover": {
-                            color: "#1a73e8",
-                          },
-                        }}
-                        onClick={handleAddMcqOption}
-                      />
                     </Box>
+                  
+                    {/* Add Icon at Bottom */}
+                    <IconButton
+                      onClick={handleAddMcqOption}
+                      sx={{
+                        alignSelf: "flex-start",
+                        fontSize: "25px",
+                        color: "#5f6368",
+                        textTransform: "none",
+                        marginTop: "10px",
+                        "&:hover": {
+                          color: "#1a73e8",
+                        },
+                      }}
+                    >
+                      <AddIcon fontSize="inherit" />
+                    </IconButton>
+                  </Box>
                   )}
 
                   {/* Customizable Yes/No options */}
@@ -521,7 +559,7 @@ export default function Questionnaire({ onClose }) {
                         display: "flex",
                         flexDirection: "column",
                         gap: 2,
-                        width: "100%",
+                        width: "50%",     //changed width
                         minWidth: "300px",
                         padding: 2,
                         mt: 2,
