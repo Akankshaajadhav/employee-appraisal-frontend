@@ -335,6 +335,7 @@ export default function Questionnaire({ onClose }) {
                         <MenuItem value="Yes/No">Yes/No</MenuItem>
                         <MenuItem value="Descriptive">Descriptive</MenuItem>
                         <MenuItem value="Single_Choice">Single Choice</MenuItem>
+                        {/* <MenuItem value="Rating_Scale">Rating_Scale</MenuItem> */}
                       </Select>
                     </FormControl>
                   </Box>
