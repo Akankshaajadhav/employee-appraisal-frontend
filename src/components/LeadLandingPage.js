@@ -257,9 +257,10 @@
 // export default DropdownPage;
 
 import { useState, useEffect } from "react";
-import { MenuItem, Select, FormControl, InputLabel, Box, Typography, TextField } from "@mui/material";
+import { MenuItem, Select, FormControl, InputLabel, Box, Typography, TextField, Tooltip } from "@mui/material";
 import axios from "axios";
 import LeadAssessmentModal from "./LeadAssessmentModal";
+const API_URL = process.env.REACT_APP_BASE_URL; // from .env file
 
 const DropdownPage = () => {
   const [appraisalCycles, setAppraisalCycles] = useState([]);
@@ -277,13 +278,19 @@ const DropdownPage = () => {
 
   // Fetch appraisal cycles
   useEffect(() => {
-    axios.get("http://127.0.0.1:8000/appraisal_cycle/")
+    axios.get(`${API_URL}/appraisal_cycle/`)
       .then((response) => {
         // Filter only "Completed" and "Active" cycles
         const filteredCycles = response.data.filter(
           (cycle) => cycle.status === "completed" || cycle.status === "active"
         );
         setAppraisalCycles(filteredCycles);
+        // Find the active cycle and set it as selected
+        const activeCycle = response.data.find(cycle => cycle.status === "active");
+        if (activeCycle) {
+            setSelectedCycle(activeCycle.cycle_id);
+        }
+
       })
       .catch((error) => console.error("Error fetching appraisal cycles:", error));
   }, []);
@@ -293,15 +300,15 @@ const DropdownPage = () => {
     if (!employeeId) return; // Ensure employee ID is available
 
     // Fetch user role first
-    axios.get(`http://127.0.0.1:8000/employee_details/${employeeId}`)
+    axios.get(`${API_URL}/employee_details/${employeeId}`)
       .then((response) => {
         setUserRole(response.data.role);
         
         // Based on role, fetch appropriate employees
         if (response.data.role.toLowerCase() === "hr") {
-          return axios.get("http://127.0.0.1:8000/");
+          return axios.get(`${API_URL}/`);
         } else {
-          return axios.get(`http://127.0.0.1:8000/reporting/${employeeId}`);
+          return axios.get(`${API_URL}/reporting/${employeeId}`);
         }
       })
       .then((empResponse) => {
@@ -315,7 +322,7 @@ const DropdownPage = () => {
           setTeamLeadName(currentUser.reporting_manager_name);
         } else {
           // If not found in the initial response, fetch specifically
-          axios.get(`http://127.0.0.1:8000/reporting_manager/${employeeId}`)
+          axios.get(`${API_URL}/reporting_manager/${employeeId}`)
             .then((managerResponse) => setTeamLeadName(managerResponse.data.reporting_manager_name))
             .catch((error) => console.error("Error fetching reporting manager:", error));
         }
@@ -331,13 +338,13 @@ const DropdownPage = () => {
     setPrefilledData(null); // Reset previously filled data when employee changes
 
     // Fetch reporting manager from backend
-    axios.get(`http://127.0.0.1:8000/reporting_manager/${empId}`)
+    axios.get(`${API_URL}/reporting_manager/${empId}`)
       .then((response) => setTeamLeadName(response.data.reporting_manager_name))
       .catch((error) => console.error("Error fetching reporting manager:", error));
 
     // Fetch previously filled data if cycle is inactive
     if (!isCycleActive && selectedCycle) {
-      axios.get(`http://127.0.0.1:8000/lead_assessment/previous_data/${selectedCycle}/${empId}`)
+      axios.get(`${API_URL}/lead_assessment/previous_data/${selectedCycle}/${empId}`)
         .then((response) => {
           // Remove duplicates based on `parameter_id`
           const uniqueRatings = response.data.ratings.reduce((acc, curr) => {
@@ -361,13 +368,13 @@ const DropdownPage = () => {
     setPrefilledData(null); // Reset previous data when changing cycles
 
     try {
-      const response = await axios.get(`http://127.0.0.1:8000/appraisal_cycle/${cycleId}`);
+      const response = await axios.get(`${API_URL}/appraisal_cycle/${cycleId}`);
       const isActive = response.data.status === "active";
       setIsCycleActive(isActive);
       setCycleStatus(response.data.status);
      
       // Fetch employees under the logged-in team lead for the selected cycle 
-      const employeesResponse = await axios.get(`http://127.0.0.1:8000/employees/${cycleId}/${employeeId}`);
+      const employeesResponse = await axios.get(`${API_URL}/employees/${cycleId}/${employeeId}`);
       setEmployees(employeesResponse.data);
       
       // Maintain the current user selection if they exist in the new employee list
@@ -383,7 +390,7 @@ const DropdownPage = () => {
 
       // Fetch previous ratings if the selected cycle is inactive
       if (!isActive && selectedEmployee) {
-        const ratingsResponse = await axios.get(`http://127.0.0.1:8000/lead_assessment/lead_assessment/previous_data/${cycleId}/${selectedEmployee}`);
+        const ratingsResponse = await axios.get(`${API_URL}/lead_assessment/lead_assessment/previous_data/${cycleId}/${selectedEmployee}`);
         setPrefilledData(ratingsResponse.data);
       }
     } catch (error) {
@@ -459,11 +466,27 @@ const DropdownPage = () => {
               },
             }}
           >
-            {employees.map((emp) => (
+            {/* {employees.map((emp) => (
               <MenuItem key={emp.employee_id} value={emp.employee_id}>
+                
                 {emp.employee_id} - {emp.employee_name}
               </MenuItem>
-            ))}
+            ))} */}
+
+      {employees.map((emp) => (
+      <MenuItem key={emp.employee_id} value={emp.employee_id}>
+        <Tooltip
+          title={`${emp.employee_id} - ${emp.employee_name}`}
+          placement="top"
+          arrow
+          
+        >
+          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'inline-block', maxWidth: '200px' }}>
+            {emp.employee_id} - {emp.employee_name}
+          </span>
+        </Tooltip>
+      </MenuItem>
+    ))}
           </Select>
         </FormControl>
 
