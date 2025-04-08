@@ -545,6 +545,7 @@ const AddAppraisalCycle = ({ onClose }) => {
                   }}
                 >
                   <IconButton
+                    disabled={param.fixed}
                     onClick={() => removeParameter(index)}
                     color="error"
                   >
