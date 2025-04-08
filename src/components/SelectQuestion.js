@@ -27,7 +27,7 @@ import {
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import DeleteIcon from '@mui/icons-material/Delete';
-
+const API_URL = process.env.REACT_APP_BASE_URL; 
 export default function CheckboxList({ onSelect }) {
 // export default function CheckboxList() {
     const [questions, setQuestions] = useState([]);
@@ -45,7 +45,7 @@ export default function CheckboxList({ onSelect }) {
         setSearchTerm("");
         setType("");
         setIsPreviewMode(false);
-        fetch("http://localhost:8000/question")
+        fetch(`${API_URL}/`)
             .then((response) => response.json())
             .then((data) => setQuestions(data))
             .catch((error) => console.error("Error fetching questions:", error));
@@ -89,6 +89,12 @@ export default function CheckboxList({ onSelect }) {
         (type === "" || question.question_type === type) &&  // Filter by type
         question.question_text.toLowerCase().includes(searchTerm.toLowerCase())  // Filter by search term
     );
+
+    // const filteredQuestions = Array.isArray(questions) ? 
+    //  filteredQuestions = questions.filter((question) =>
+    //         (type === "" || question.question_type === type) &&  // Filter by type
+    //         question.question_text.toLowerCase().includes(searchTerm.toLowerCase())  // Filter by search term
+    //     );
 
     const selectedQuestions = questions.filter((q) => checked.includes(q.question_id));
 

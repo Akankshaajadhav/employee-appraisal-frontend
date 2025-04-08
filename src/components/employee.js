@@ -8,7 +8,7 @@ import {
   GridToolbarExport,
   GridToolbarQuickFilter,
 } from "@mui/x-data-grid";
-
+const API_URL = process.env.REACT_APP_BASE_URL;
 // Custom Toolbar Component
 function CustomToolbar() {
   return (
@@ -32,7 +32,7 @@ export default function DataGridDemo() {
   const [selectedIds, setSelectedIds] = React.useState([]); // Track selected rows
 
   React.useEffect(() => {
-    fetch("http://127.0.0.1:8000/") // API call to FastAPI
+    fetch(`${API_URL}/`) // API call to FastAPI
       .then((response) => response.json())
       .then((data) => {
 
