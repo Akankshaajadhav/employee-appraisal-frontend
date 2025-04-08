@@ -1,5 +1,6 @@
+const BASE_URL = process.env.REACT_APP_BASE_URL; // from .env file
 
-const BASE_URL = "http://127.0.0.1:8000";
+// const BASE_URL = "http://127.0.0.1:8000";
 
 export const createAppraisalCycle = async (cycleData) => {
   const response = await fetch(`${BASE_URL}/appraisal_cycle/`, {
@@ -41,7 +42,7 @@ export const createParameter = async (parameterData) => {
 };
 
 //for lead
-export const submitAssessment = async (data) => {
+/*export const submitAssessment = async (data) => {
   try {
     const response = await fetch("https://your-api-endpoint.com/submit", {
       method: "POST",
@@ -53,7 +54,7 @@ export const submitAssessment = async (data) => {
     console.error("Error submitting assessment:", error);
   }
 };
-
+*/
 
 export const fetchAppraisalCycles = async () => {
   try {
