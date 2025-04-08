@@ -1,6 +1,5 @@
 // Screen for the asignment -RHS (Questions)
 
-
 import React, {useState, useEffect} from 'react'; 
 import SearchIcon from "@mui/icons-material/Search";
 import RefreshOutlinedIcon from '@mui/icons-material/RefreshOutlined';
@@ -45,11 +44,12 @@ export default function CheckboxList({ onSelect }) {
         setSearchTerm("");
         setType("");
         setIsPreviewMode(false);
-        fetch(`${API_URL}/`)
+        fetch(`${API_URL}/question`)
             .then((response) => response.json())
             .then((data) => setQuestions(data))
             .catch((error) => console.error("Error fetching questions:", error));
     };
+    console.log("questions :",questions);
     
     useEffect(() => {
         fetchQuestions();
@@ -90,12 +90,6 @@ export default function CheckboxList({ onSelect }) {
         question.question_text.toLowerCase().includes(searchTerm.toLowerCase())  // Filter by search term
     );
 
-    // const filteredQuestions = Array.isArray(questions) ? 
-    //  filteredQuestions = questions.filter((question) =>
-    //         (type === "" || question.question_type === type) &&  // Filter by type
-    //         question.question_text.toLowerCase().includes(searchTerm.toLowerCase())  // Filter by search term
-    //     );
-
     const selectedQuestions = questions.filter((q) => checked.includes(q.question_id));
 
     // Filtering of questions in preview mode as per type and search keyword
@@ -125,7 +119,7 @@ export default function CheckboxList({ onSelect }) {
                 <MenuItem value="MCQ">MCQ</MenuItem>
                 <MenuItem value="Yes/No">Yes/No</MenuItem>
                 <MenuItem value="Descriptive">Descriptive</MenuItem>
-                <MenuItem value="Single choice">Single choice</MenuItem>
+                <MenuItem value="Single Choice">Single choice</MenuItem>
                 {/* <MenuItem value="Rating scale">Rating scale</MenuItem> */}
             </Select>
         </FormControl>
