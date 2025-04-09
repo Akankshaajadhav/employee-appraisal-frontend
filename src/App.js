@@ -6,7 +6,8 @@ import Questionnaire from "./components/Questionnaire";
 import HRLandingPage from "./components/HRLandingPage";
 import Login from "./components/LoginCompo"; 
 import DropdownPage from "./components/LeadLandingPage";                      //Change it as per your file
-
+// import HistoricalReportTable from "./components/HistoricalReport";
+import HistoricalReportTable from "./components/Historical_report";
 export default function App() {
   return (
     <Router>           
@@ -16,6 +17,8 @@ export default function App() {
         <Route path="/employee-home" element={<DropdownPage />} />
         <Route path="/add-appraisal" element={<AddAppraisalCycle />} />
         <Route path="/questionnaire" element={<Questionnaire />} />
+        <Route path="/historical-report" element={<HistoricalReportTable />} />
+        
       </Routes>
     </Router>
   );

@@ -252,7 +252,7 @@ const HRLandingPage = () => {
                   <Grid container spacing={2} alignItems="center">
                     <Grid item>
                       <Link
-                        onClick={() => navigate("/reports")}
+                        onClick={() => navigate("/historical-report")}
                         color="primary"
                         sx={{
                           cursor: "pointer",
