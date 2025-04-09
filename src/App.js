@@ -5,9 +5,8 @@ import AddAppraisalCycle from "./components/AddAppraisalCycle";
 import Questionnaire from "./components/Questionnaire";
 import HRLandingPage from "./components/HRLandingPage";
 import Login from "./components/LoginCompo"; 
-import DropdownPage from "./components/LeadLandingPage";                      //Change it as per your file
-// import HistoricalReportTable from "./components/HistoricalReport";
-import HistoricalReportTable from "./components/Historical_report";
+import DropdownPage from "./components/LeadLandingPage";                     
+import HistoricalReportTable from "./components/HistoricalReport";
 export default function App() {
   return (
     <Router>           
