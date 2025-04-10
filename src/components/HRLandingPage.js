@@ -10,6 +10,7 @@ import {
   IconButton,
   Snackbar,
   Alert,
+ Menu, MenuItem
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import CustomToolbar from "./CustomeToolbar";
@@ -237,6 +238,16 @@ const HRLandingPage = () => {
   ];
   const getRowHeight = () => 38;
 
+  const [anchorEl, setAnchorEl] = useState(null);
+  
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget); // open menu
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null); // close menu
+  };
+
   return (
     <>
       <Card>
@@ -263,7 +274,7 @@ const HRLandingPage = () => {
                   <Grid container spacing={2} alignItems="center">
                     <Grid item>
                       <Link
-                        onClick={() => navigate("/historical-and-lead-report")}
+                        onClick={handleClick}                     
                         color="primary"
                         sx={{
                           cursor: "pointer",
@@ -274,6 +285,31 @@ const HRLandingPage = () => {
                       >
                         Reports
                       </Link>
+
+                        <Menu
+                                anchorEl={anchorEl}
+                                open={Boolean(anchorEl)}
+                                onClose={handleClose}
+                              >
+                                <MenuItem
+                                  onClick={() => {
+                                    navigate("/historical-report");
+                                    handleClose();
+                                  }}
+                                >
+                                  Historical Report
+                                </MenuItem>
+                        
+                                <MenuItem
+                                  onClick={() => {
+                                    navigate("/self-assessment-report"); 
+                                    handleClose();
+                                  }}
+                                >
+                                  Self Assessment Report
+                                </MenuItem>
+                              </Menu>
+
                     </Grid>
                     <Grid item>
                       <Link

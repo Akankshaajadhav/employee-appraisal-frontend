@@ -101,12 +101,7 @@ const AddAppraisalCycle = ({ onClose }) => {
     setEndDateError("");
     setStageErrors({});
 
-    // Close the snackbar
-    setSnackbar({
-      open: false,
-      message: "",
-      severity: "success",
-    });
+    
   };
 
   const [formValid, setFormValid] = useState(false);
@@ -245,6 +240,11 @@ const AddAppraisalCycle = ({ onClose }) => {
         message: "Cycle Created Successfully!",
         severity: "success",
       });
+      // Refresh form after 2 seconds
+    setTimeout(() => {
+      handleCancel();  // Clear the form
+    }, 2000);
+ 
     } catch (error) {
       setSnackbar({
         open: true,
@@ -569,6 +569,10 @@ const AddAppraisalCycle = ({ onClose }) => {
             variant="contained"
             color="primary"
             onClick={handleSave}
+            // onClick={async () => {
+            //   await handleSave();  // Wait for save to complete
+            //   handleCancel();      // Then clear / reset the form
+            // }}
             disabled={!formValid}
             sx={{ mt: 3 }}
           >
@@ -586,7 +590,7 @@ const AddAppraisalCycle = ({ onClose }) => {
 
         <Snackbar
           open={snackbar.open}
-          autoHideDuration={3000}
+          autoHideDuration={4000}
           onClose={() => setSnackbar({ ...snackbar, open: false })}
         >
           <Alert severity={snackbar.severity}>{snackbar.message}</Alert>

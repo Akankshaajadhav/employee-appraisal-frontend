@@ -10,8 +10,7 @@ import axios from "axios";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import CloseIcon from "@mui/icons-material/Close";
-import dayjs from "dayjs"; // Import dayjs
-// import VisibilityIcon from '@mui/icons-material/Visibility';  // Eye icon
+import dayjs from "dayjs"; 
 import InfoOutlineIcon from '@mui/icons-material/InfoOutline';
 const API_URL = process.env.REACT_APP_BASE_URL; // from .env file
 
@@ -158,8 +157,12 @@ const LeadAssessmentModal = ({ open, onClose, selectedCycle, employees, selected
         setSnackbar({ open: true, message: "Assessment submitted successfully!", severity: "success" });
       })
       .catch(error => {
-        console.error("Error submitting assessment:", error);
-        setSnackbar({ open: true, message: "Failed to submit assessment. Try again.", severity: "error" });
+        if (error.response && error.response.status === 400) {
+          // Show backend validation message
+          setSnackbar({ open: true, message: error.response.data.detail, severity: "error" });
+        } else {
+          setSnackbar({ open: true, message: "Failed to submit assessment. Try again.", severity: "error" });
+        }
       });
   };
 
@@ -289,75 +292,7 @@ const LeadAssessmentModal = ({ open, onClose, selectedCycle, employees, selected
                 ))}
               </TableRow>
             </TableHead>
-            {/* <TableBody>
-              {parameters.map(param => (
-                <TableRow key={param.parameter_id} sx={{ height: "1" ,padding: "0px"}}>
-                  <TableCell>{param.parameter_title}</TableCell>
-                  {[1, 2, 3, 4].map(value => (
-                    <TableCell align="center" key={value}>
-                      <Radio
-                        name={`rating-${param.parameter_id}`}
-                        value={value}
-                        checked={currentRatings[param.parameter_id] === value}
-                        onChange={() => handleRatingChange(param.parameter_id, value)}
-                        disabled={readOnly}
-                        sx={{ padding: "0px" }} 
-                      />
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))}
-            </TableBody> */}
-
-
-{/* <TableBody>
-  {parameters.map(param => (
-    <TableRow key={param.parameter_id} sx={{ height: "1", padding: "0px" }}>
-      
-      <TableCell>
-        <Tooltip
-          title={param.helptext || "No help text available"}
-          placement="top"
-          arrow
-          componentsProps={{
-            tooltip: {
-              sx: {
-                backgroundColor: '#1976d2',
-                color: 'white',
-                fontSize: '13px',
-                padding: '8px 12px',
-                borderRadius: '4px',
-                boxShadow: '0px 0px 8px rgba(0,0,0,0.2)',
-              },
-            },
-            arrow: {
-              sx: {
-                color: '#1976d2',
-              },
-            },
-          }}
-        >
-          <span style={{ cursor: 'pointer' }}>{param.parameter_title}</span>
-        </Tooltip>
-      </TableCell>
-
-      {[1, 2, 3, 4].map(value => (
-        <TableCell align="center" key={value}>
-          <Radio
-            name={`rating-${param.parameter_id}`}
-            value={value}
-            checked={currentRatings[param.parameter_id] === value}
-            onChange={() => handleRatingChange(param.parameter_id, value)}
-            disabled={readOnly}
-            sx={{ padding: "0px" }}
-          />
-        </TableCell>
-      ))}
-
-    </TableRow>
-  ))}
-</TableBody> */}
-
+          
 
 <TableBody>
   {parameters.map(param => (
@@ -432,7 +367,7 @@ const LeadAssessmentModal = ({ open, onClose, selectedCycle, employees, selected
         <Button variant="contained" color="primary" onClick={handleSubmit} disabled={readOnly} align="right">Submit</Button>
 
         </Box>
-               <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={() => setSnackbar({ ...snackbar, open: false })}>
+               <Snackbar open={snackbar.open} autoHideDuration={5000} onClose={() => setSnackbar({ ...snackbar, open: false })}>
                         <Alert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity}>
                           {snackbar.message}
                         </Alert>
