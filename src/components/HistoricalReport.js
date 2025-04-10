@@ -257,41 +257,10 @@ export default function HistoricalReportTable({ onSelect }) {
             </IconButton>
           </Grid>
           </Grid>
-      {/* Cycle Selection Dropdown
-      <FormControl sx={{ mb: 2, width: '100%' }}>
-        <InputLabel id="cycle-multiple-chip-label">Select App Cycles</InputLabel>
-        <Select
-          labelId="cycle-multiple-chip-label"
-          id="cycle-multiple-chip"
-          multiple
-          value={selectedCycles}
-          onChange={handleCycleChange}
-          input={<OutlinedInput id="select-multiple-chip" label="Select App Cycles" />}
-          renderValue={(selected) => (
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-              {selected.map((value) => {
-                const cycleInfo = cycles.find(c => c.cycle_id === value);
-                return (
-                  <Chip key={value} label={cycleInfo ? cycleInfo.cycle_name : `Cycle ${value}`} />
-                );
-              })}
-            </Box>
-          )}
-          MenuProps={MenuProps}
-        >
-          {cycles.map((cycle) => (
-            <MenuItem
-              key={cycle.cycle_id}
-              value={cycle.cycle_id}
-            >
-              {cycle.cycle_name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl> */}
+     
        {/* Cycle Selection Dropdown with Checkboxes */}
        <FormControl sx={{ mt:2,mb:1,width: 'auto' , minWidth:'20%'}}>
-        <InputLabel id="checkbox-cycles-label">Select App Cycles</InputLabel>
+        <InputLabel id="checkbox-cycles-label" sx={{background:"white"}}>Select Appraisal Cycles</InputLabel>
         <Select
           labelId="checkbox-cycles-label"
           id="checkbox-cycles"
