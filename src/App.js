@@ -7,6 +7,7 @@ import HRLandingPage from "./components/HRLandingPage";
 import Login from "./components/LoginCompo"; 
 import DropdownPage from "./components/LeadLandingPage";                     
 import HistoricalReportTable from "./components/HistoricalReport";
+
 export default function App() {
   return (
     <Router>           
