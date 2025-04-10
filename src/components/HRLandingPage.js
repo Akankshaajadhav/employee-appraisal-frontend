@@ -188,14 +188,21 @@ const HRLandingPage = () => {
       renderCell: (params) => {
         const isDeletable =
           params.row.status !== "active" && params.row.status !== "completed";
+        const isVisible = params.row.status !== "completed";
+        const isEditable = params.row.status !== "completed";
+        
         return (
           <>
             <IconButton
               color="primary"
               onClick={(e) => {
                 e.stopPropagation();
-                toggleDetailsView(params.row.cycle_id);
+                if(isVisible){
+                  toggleDetailsView(params.row.cycle_id);
+                  console.log(params.row.cycle_id)
+                }
               }}
+              disabled={!isVisible}
             >
               <Visibility />
             </IconButton>
@@ -203,8 +210,12 @@ const HRLandingPage = () => {
               color="primary"
               onClick={(e) => {
                 e.stopPropagation();
-                alert("Clicked on edit icon");
+                if(isEditable){
+                  const cycle_id = params.row.cycle_id;
+                  navigate(`/edit-appraisal/${cycle_id}`);
+                }
               }}
+              disabled={!isEditable}
             >
               <Edit />
             </IconButton>
@@ -212,7 +223,7 @@ const HRLandingPage = () => {
               color="error"
               onClick={(e) => {
                 e.stopPropagation();
-                if (isDeletable) {
+                if(isDeletable){
                   handleDelete(params.row.cycle_id);
                 }
               }}
@@ -263,7 +274,7 @@ const HRLandingPage = () => {
                   <Grid container spacing={2} alignItems="center">
                     <Grid item>
                       <Link
-                        onClick={handleClick}
+                        onClick={handleClick}                     
                         color="primary"
                         sx={{
                           cursor: "pointer",
@@ -291,7 +302,7 @@ const HRLandingPage = () => {
                         
                                 <MenuItem
                                   onClick={() => {
-                                    navigate("/historical-report"); //here add self assessment component path
+                                    navigate("/self-assessment-report"); 
                                     handleClose();
                                   }}
                                 >
