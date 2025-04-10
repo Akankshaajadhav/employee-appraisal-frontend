@@ -16,7 +16,9 @@ import Chip from '@mui/material/Chip';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import Checkbox from '@mui/material/Checkbox';
 import ListItemText from '@mui/material/ListItemText';
-import {Grid,Typography, Card, IconButton} from '@mui/material';
+import {Grid,Typography, Card, IconButton,Skeleton} from '@mui/material';
+import HourglassBottomIcon from '@mui/icons-material/HourglassBottom';
+import { motion } from 'framer-motion';
 import { useNavigate } from "react-router-dom";
 import CloseIcon from "@mui/icons-material/Close";
 const API_URL = process.env.REACT_APP_BASE_URL; 
@@ -89,8 +91,12 @@ export default function HistoricalReportTable({ onSelect }) {
   ]);
   const [columns, setColumns] = React.useState(baseColumns);
   const navigate = useNavigate();
+  const [loadingEmployees, setLoadingEmployees] = React.useState(true);
+const [loadingCycles, setLoadingCycles] = React.useState(true);
+
   // Fetch employee data
   React.useEffect(() => {
+    setLoadingEmployees(true);
     fetch(`${API_URL}/employees`)
       .then((response) => response.json())
       .then((data) => {
@@ -114,17 +120,20 @@ export default function HistoricalReportTable({ onSelect }) {
         setRows(formattedData);
         setOriginalRows(formattedData);
       })
-      .catch((error) => console.error("Error fetching employee data:", error));
+      .catch((error) => console.error("Error fetching employee data:", error))
+      .finally(() => setLoadingEmployees(false));
   }, []);
 
   // Fetch completed cycles data
   React.useEffect(() => {
+    setLoadingCycles(true);
     fetch(`${API_URL}/appraisal_cycle/appraisal-cycles/completed`) // Replace with your actual API endpoint
       .then((response) => response.json())
       .then((data) => {
         setCycles(data);
       })
-      .catch((error) => console.error("Error fetching cycle data:", error));
+      .catch((error) => console.error("Error fetching cycle data:", error))
+      .finally(() => setLoadingCycles(false));
   }, []);
 
   // Handle cycle selection change
@@ -305,6 +314,30 @@ export default function HistoricalReportTable({ onSelect }) {
       </FormControl>
 
       {/* DataGrid Table */}
+      {(loadingEmployees || loadingCycles) ?  (
+  <Box sx={{ width: '100%', mt: 2 }}>
+    {[...Array(20)].map((_, index) => (
+      <Skeleton key={index} variant="rectangular" height={30} sx={{
+        mb: 1,
+        bgcolor: '#e6e9ed',
+        opacity: 0.3
+      }}/>
+    ))}
+  </Box> 
+
+  // <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: 200 }}>
+  //   <HourglassBottomIcon sx={{ fontSize: 60, color: 'primary.main', animation: 'spin 1.5s linear infinite' }} />
+  //   <Typography variant="body2" mt={1}>Please wait...</Typography>
+  // </Box>
+//   <motion.div
+//   animate={{ opacity: [0, 1, 0] }}
+//   transition={{ duration: 1.5, repeat: Infinity }}
+// >
+//   <Typography variant="h6" color="primary.main" fontWeight="bold">
+//     Loading Employee Data...
+//   </Typography>
+// </motion.div>
+) : (
       <DataGrid
         sx={{ 
         //   height: 600, 
@@ -324,7 +357,7 @@ export default function HistoricalReportTable({ onSelect }) {
         selectionModel={selectedIds}
         rowHeight={getRowHeight()}
         hideFooter
-      />
+      />)}
     </Box>
     </Card>
   );
