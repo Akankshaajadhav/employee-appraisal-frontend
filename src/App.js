@@ -5,9 +5,10 @@ import AddAppraisalCycle from "./components/AddAppraisalCycle";
 import EditAppraisalCycle from "./components/EditAppraisalCycle";
 import Questionnaire from "./components/Questionnaire";
 import HRLandingPage from "./components/HRLandingPage";
-import Login from "./components/LoginCompo"; 
-import DropdownPage from "./components/LeadLandingPage";                      //Change it as per your file
+import Login from "./components/LoginCompo";                  
 import SelfAssessmentRepo from "./components/SelfAssessmentRepo";
+import DropdownPage from "./components/employee_assessment";                   
+
 
 export default function App() {
   return (

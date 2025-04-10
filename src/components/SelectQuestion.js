@@ -333,11 +333,11 @@ export default function CheckboxList({ onSelect }) {
 
                         {isExpandable && (
                             <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-                                <List component="div" disablePadding sx={{ pl: 4 }}>
+                                <List component="div" disablePadding sx={{ pl: 10 }}>
                                     {question.options.length > 0 ? (
                                         question.options.map((option, index) => (
                                             <ListItem key={index}>
-                                                <ListItemText primary={option.option_text} />
+                                                <ListItemText primary={option.option_text}/>
                                             </ListItem>
                                         ))
                                     ) : (
