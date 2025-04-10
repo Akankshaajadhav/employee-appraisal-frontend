@@ -16,7 +16,9 @@ import Chip from '@mui/material/Chip';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import Checkbox from '@mui/material/Checkbox';
 import ListItemText from '@mui/material/ListItemText';
-import {Grid,Typography, Card} from '@mui/material';
+import {Grid,Typography, Card, IconButton} from '@mui/material';
+import { useNavigate } from "react-router-dom";
+import CloseIcon from "@mui/icons-material/Close";
 const API_URL = process.env.REACT_APP_BASE_URL; 
 
 // Custom Toolbar Component with Better Alignment
@@ -86,7 +88,7 @@ export default function HistoricalReportTable({ onSelect }) {
     { field: "previous_reporting_manager", headerName: "Previous Manager", width: 200 },
   ]);
   const [columns, setColumns] = React.useState(baseColumns);
-
+  const navigate = useNavigate();
   // Fetch employee data
   React.useEffect(() => {
     fetch(`${API_URL}/employees`)
@@ -243,11 +245,18 @@ export default function HistoricalReportTable({ onSelect }) {
   return (
     <Card sx={{ width: '100%', m:1 }}>
     <Box sx={{ width: '98%' ,m:1}}>
-         <Grid item>
+      <Grid container alignItems="center" >
+         <Grid item size={11}>
             <Typography variant="h6" color="primary" fontWeight={"bold"} pl="10px">
               Historical Report
             </Typography>
         </Grid>
+        <Grid size={1} sx={{ textAlign: "right" }}>
+            <IconButton onClick={() => navigate("/hr-home")} color="error">
+              <CloseIcon />
+            </IconButton>
+          </Grid>
+          </Grid>
       {/* Cycle Selection Dropdown
       <FormControl sx={{ mb: 2, width: '100%' }}>
         <InputLabel id="cycle-multiple-chip-label">Select App Cycles</InputLabel>
