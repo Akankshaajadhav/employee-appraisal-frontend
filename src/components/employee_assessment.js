@@ -38,11 +38,11 @@ const DropdownPage = () => {
   const [isCycleActive, setIsCycleActive] = useState(false);
   const [assessmentData, setAssessmentData] = useState([]);
   const [responses, setResponses] = useState({});
-
-  // new added 
+  const [cachedEmployee, setCachedEmployee] = useState("");
+  const [cachedManager, setCachedManager] = useState("");
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState("success"); // 'success' | 'error' | 'warning' | 'info'
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success"); 
 
 
   useEffect(() => {
@@ -129,7 +129,7 @@ const DropdownPage = () => {
         
             setSelectedEmployee(employeeId);
         
-            // 🔥 Add this line to make sure the dropdown gets the employee list
+            //  Add this line to make sure the dropdown gets the employee list
             const employeesResponse = await axios.get(`${API_URL}/employees/${activeCycle.cycle_id}/${employeeId}`);
             setEmployees(employeesResponse.data);
         
@@ -194,7 +194,17 @@ const DropdownPage = () => {
     fetchAssessmentDataAndResponses();
   }, [selectedCycle, selectedEmployee, userRole]);
   
-
+  const openModal = () => {
+    setCachedEmployee(selectedEmployee);
+    setCachedManager(teamLeadName);
+    setModalOpen(true);
+  };
+  
+  const closeModal = () => {
+    setSelectedEmployee(cachedEmployee);
+    setTeamLeadName(cachedManager);
+    setModalOpen(false);
+  };
 
   const handleEmployeeChange = async (e) => {
     const empId = e.target.value;
@@ -456,10 +466,10 @@ const DropdownPage = () => {
             )}
 
             {(userRole === "team lead" || userRole === "Team Lead") && (
-              <Box sx={{ position: "absolute", left: "90%", top: "6%" }}>
+              <Box sx={{ position: "absolute", left: "85%", top: "10%" }}>
                 <a
-                  onClick={() => setModalOpen(true)}
-                  style={{ cursor: "pointer", color: "blue", textDecoration: "underline", fontSize: "20px", }}
+                  onClick={openModal}
+                  style={{ cursor: "pointer", color: "blue", textDecoration: "underline", fontSize: "20px" }}
                 >
                   Lead Assessment
                 </a>
@@ -513,7 +523,7 @@ const DropdownPage = () => {
 
           <LeadAssessmentModal
             open={isModalOpen}
-            onClose={() => setModalOpen(false)}
+            onClose={closeModal}
             selectedCycle={selectedCycle}
             employees={employees}
             selectedEmployee={selectedEmployee}
@@ -541,3 +551,6 @@ const DropdownPage = () => {
 };
 
 export default DropdownPage;
+
+
+
