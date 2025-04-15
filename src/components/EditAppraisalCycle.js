@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import {
@@ -83,6 +84,7 @@ const EditAppraisalCycle = ({ onClose }) => {
 
       if (data.stages && Array.isArray(data.stages)) {
         const formattedStages = data.stages.map((stage) => ({
+          stage_id: stage.stage_id,
           name: stage.stage_name,
           startDate: stage.start_date_of_stage,
           endDate: stage.end_date_of_stage,
@@ -92,6 +94,7 @@ const EditAppraisalCycle = ({ onClose }) => {
 
       if (data.parameters && Array.isArray(data.parameters)) {
         const formattedParameters = data.parameters.map((parameter) => ({
+          parameter_id: parameter.parameter_id,
           name: parameter.parameter_title,
           helptext: parameter.helptext,
           employee: parameter.applicable_to_employee,
@@ -281,7 +284,7 @@ const EditAppraisalCycle = ({ onClose }) => {
   const addParameter = () => {
     setParameters([
       ...parameters,
-      {
+      { 
         name: "",
         helptext: "",
         employee: false,

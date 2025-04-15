@@ -1,18 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Button,
   Typography,
   Card,
   CardContent,
-  Checkbox,
-  FormControlLabel,
   IconButton,
-  Snackbar,
-  Alert,
   FormControl,
-  Radio,
-  RadioGroup,
   Box,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
@@ -104,14 +97,12 @@ const SelfAssessmentRepo = () => {
   const [response, setResponseData] = useState(null);
   const [employees, setEmployee] = useState(null);
   const [baseColumns] = useState([
-    { field: "employee_id", headerName: "Employee ID", width: 120 },
-    { field: "employee_name", headerName: "Name", width: 150 },
-    { field: "role", headerName: "Role", width: 120 },
+    { field: "employee_id", headerName: "Employee ID", width: 200 },
+    { field: "employee_name", headerName: "Name", width: 200 },
+    { field: "role", headerName: "Role", width: 200 },
     { field: "reporting_manager", headerName: "Reporting Manager", width: 200 },
     { field: "previous_reporting_manager", headerName: "Previous Manager", width: 200 },
   ]);
-
-
 
 
   useEffect(() => {
@@ -189,7 +180,7 @@ const MenuProps = {
   return (
     <>
       <Box sx={{ width: "100%" }}>
-        <Grid container alignItems="center" sx={{ m: 3 }}>
+        <Grid container alignItems="center" sx={{ m: 2, mb:0}}>
           <Grid size={11}>
             <Typography variant="h6" color="primary">
               Self Assessment Report
@@ -201,7 +192,7 @@ const MenuProps = {
             </IconButton>
           </Grid>
         </Grid>
-        <Card sx={{ m: 3, mt: 1 }}>
+        <Card sx={{ m: 2,mt:0 }}>
           <CardContent>
             <FormControl sx={{ mt:2,mb:1,width: 'auto' , minWidth:'20%'}}>
               <InputLabel
