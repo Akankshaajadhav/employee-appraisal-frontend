@@ -4,9 +4,13 @@ import {
   Modal, Box, Typography, FormControl, InputLabel, Select, MenuItem,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
   TextField, Button, Tooltip, Snackbar, Alert, IconButton, Radio,
-  colors
+  colors,  TextareaAutosize
+
 } from "@mui/material";
 import axios from "axios";
+import Backdrop from '@mui/material/Backdrop';
+import CircularProgress from '@mui/material/CircularProgress';
+import { styled } from "@mui/material/styles";  
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import CloseIcon from "@mui/icons-material/Close";
@@ -23,7 +27,7 @@ const LeadAssessmentModal = ({ open, onClose, selectedCycle, employees, selected
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "error" });
   const [readOnly, setReadOnly] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
-
+    const [saving, setSaving] = useState(false);
   useEffect(() => {
     if (!selectedCycle || !selectedEmployee) return;
 
@@ -151,7 +155,7 @@ const LeadAssessmentModal = ({ open, onClose, selectedCycle, employees, selected
       ratings: formattedRatings,
       discussion_date: formattedDate,
     };
-
+    setSaving(true); // Show loading backdrop
     axios.post(`${API_URL}/lead_assessment/save_rating`, payload)
       .then(() => {
         setSnackbar({ open: true, message: "Assessment submitted successfully!", severity: "success" });
@@ -163,6 +167,9 @@ const LeadAssessmentModal = ({ open, onClose, selectedCycle, employees, selected
         } else {
           setSnackbar({ open: true, message: "Failed to submit assessment. Try again.", severity: "error" });
         }
+      })
+      .finally(() => {
+        setSaving(false); // Hide loading backdrop
       });
   };
 
@@ -172,11 +179,13 @@ const LeadAssessmentModal = ({ open, onClose, selectedCycle, employees, selected
     setSelectedEmployee("");
   };
   const filteredEmployees = employees.filter(emp => emp.employee_id != employeeId);
-
+// height: "83%", 86vh
   return (
+    <>
+    <Box> 
     <Modal open={open}  onClose={(event, reason) => reason !== "backdropClick" && onClose()} disableEscapeKeyDown>
-      <Box sx={{ width: "60%", height: "85vh", p: 4, mx: "auto", mt: 2, bgcolor: "white", borderRadius: 2 }}>
-        <Typography variant="h6" gutterBottom align="center" color="primary">
+      <Box sx={{ width: "60%", height: "auto", p: 4, mx: "auto", mt: 2, bgcolor: "white", borderRadius: 2 }}>
+        <Typography variant="h6" gutterBottom align="center" color="primary" fontWeight= 'bold'>
           Lead Assessment {readOnly}
         </Typography>
 
@@ -187,27 +196,26 @@ const LeadAssessmentModal = ({ open, onClose, selectedCycle, employees, selected
         <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
           <FormControl sx={{ width: "30%" }}>
             <InputLabel sx={{ backgroundColor: "white", px: 1, top: "-4px" }}>Employee</InputLabel>
-            <Select value={selectedEmployee} onChange={handleEmployeeChange} disabled={readOnly} 
+            <Select value={selectedEmployee} onChange={handleEmployeeChange} 
             sx={{
               height: 40, 
               display: "flex",
-              width:"180px",
+              width:"190px",
               alignItems: "center",
-              "& .MuiSelect-icon": {
-                backgroundColor: "primary.main",
-                color: "white",
-                padding: "3px",
-                borderRadius: "4px",
-                height: "32px", 
-                width: "32px",
-                right: "2px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                position: "absolute",
-              },
             }}>
               {filteredEmployees.map(emp => (
-                <MenuItem key={emp.employee_id} value={emp.employee_id}>{emp.employee_name}</MenuItem>
+                // <MenuItem key={emp.employee_id} value={emp.employee_id} >{emp.employee_name}
+                // </MenuItem><MenuItem key={emp.employee_id} value={emp.employee_id}>
+                <MenuItem key={emp.employee_id} value={emp.employee_id} >
+                                    <Tooltip title={`${emp.employee_id} - ${emp.employee_name}`} placement="top" arrow>
+                                      <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "inline-block", maxWidth: "200px" }}>
+                                        {emp.employee_id} - {emp.employee_name}
+                                      </span>
+                                    </Tooltip>
+                                  </MenuItem>
+
+
+
               ))}
             </Select>
           </FormControl>
@@ -263,7 +271,7 @@ const LeadAssessmentModal = ({ open, onClose, selectedCycle, employees, selected
 
 <LocalizationProvider dateAdapter={AdapterDayjs} >
   <Box sx={{ display: 'flex', alignItems: 'center'}}>
-    <Typography  sx={{ color: 'primary.main', fontWeight: 'bold', mr:1 }}>
+    <Typography  sx={{ color: 'primary.main', fontWeight: 'bold' }}>
       One-on-one discussion with employee completed on
     </Typography>
     <DatePicker
@@ -281,7 +289,7 @@ const LeadAssessmentModal = ({ open, onClose, selectedCycle, employees, selected
 </LocalizationProvider>
 
         </Box>
-
+       
         <TableContainer component={Paper} sx={{ maxHeight: "50vh", mb: 2 }}>
           <Table stickyHeader>
             <TableHead>
@@ -293,11 +301,15 @@ const LeadAssessmentModal = ({ open, onClose, selectedCycle, employees, selected
               </TableRow>
             </TableHead>
           
-
-<TableBody>
-  {parameters.map(param => (
-    <TableRow key={param.parameter_id} sx={{ height: "1", padding: "0px" }}>
-      
+<TableBody sx={{ maxHeight: "50vh", overflowY: "auto" }}>
+  {parameters
+  .filter(param => !param.is_fixed_parameter)
+  .map(param => (
+    <TableRow
+    key={param.parameter_id}
+    
+  >
+  
       <TableCell sx={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
         {param.parameter_title}
 
@@ -330,40 +342,108 @@ const LeadAssessmentModal = ({ open, onClose, selectedCycle, employees, selected
         </Tooltip>
       </TableCell>
 
-      {[1, 2, 3, 4].map(value => (
-        <TableCell align="center" key={value}>
-          <Radio
-            name={`rating-${param.parameter_id}`}
-            value={value}
-            checked={currentRatings[param.parameter_id] === value}
-            onChange={() => handleRatingChange(param.parameter_id, value)}
-            disabled={readOnly}
-            sx={{ padding: "0px" }}
-          />
-        </TableCell>
-      ))}
+        {[1, 2, 3, 4].map(value => (
+          <TableCell align="center" key={value}>
+            <Radio
+              name={`rating-${param.parameter_id}`}
+              value={value}
+              checked={currentRatings[param.parameter_id] === value}
+              onChange={() => handleRatingChange(param.parameter_id, value)}
+              disabled={readOnly}
+              sx={{ padding: 0 }}
+            />
+          </TableCell>
+        ))}
+  
+
+
+    </TableRow>
+  ))}
+
+  {parameters
+  .filter(param => param.is_fixed_parameter)
+  .map(param => (
+    <TableRow
+    key={param.parameter_id}
+    
+  >
+  
+      <TableCell sx={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+        {param.parameter_title}
+
+        <Tooltip
+          title={param.helptext || "No help text available"}
+          placement="top"
+          arrow
+          componentsProps={{
+            tooltip: {
+              sx: {
+                backgroundColor: '#1976d2',
+                color: 'white',
+                fontSize: '13px',
+                padding: '6px',
+                borderRadius: '4px',
+                boxShadow: '0px 0px 8px rgba(0,0,0,0.2)',
+                maxWidth: '200px', 
+              },
+            },
+            arrow: {
+              sx: {
+                color: '#1976d2',
+              },
+            },
+          }}
+        >
+          <IconButton size="small" sx={{ p: 0.5 }}>
+            <InfoOutlineIcon sx={{ color: '#1976d2', fontSize: '18px' }} />
+          </IconButton>
+        </Tooltip>
+      </TableCell>
+
+        {[1, 2, 3, 4].map(value => (
+          <TableCell align="center" key={value}>
+            <Radio
+              name={`rating-${param.parameter_id}`}
+              value={value}
+              checked={currentRatings[param.parameter_id] === value}
+              onChange={() => handleRatingChange(param.parameter_id, value)}
+              disabled={readOnly}
+              sx={{ padding: 0 }}
+            />
+          </TableCell>
+        ))}
+  
+
 
     </TableRow>
   ))}
 </TableBody>
 
-
-
           </Table>
         </TableContainer>
-        <TextField
+    
+
+        <TextareaAutosize
           label="Any specific inputs"
-          multiline
-          rows={2}
+          minRows={3}
           fullWidth
-          sx={{ mb: 2 }}
+          sx={{ mb: 2, p:1 }}
           value={currentComments}
           disabled={readOnly}
           InputProps={{ readOnly: readOnly }}
           onChange={handleCommentsChange}
-        />
+          placeholder="Any specific inputs"
+          style={{ 
+            maxWidth: "100%",
+            minWidth: "100%",
+            fontFamily: "Roboto, Helvetica, Arial, sans-serif",
+            fontSize: "1rem",
+            borderRadius: "4px",
+            border: "1px solid #ccc",
+          }}
+          />
 
-        <Box sx={{ display: "flex", justifyContent: "flex-end", position: "sticky", bottom: 0, p: 1 }}>
+        <Box sx={{ display: "flex", justifyContent: "flex-end", position: "sticky",p:1}}>
         <Button variant="contained" color="primary" onClick={handleSubmit} disabled={readOnly} align="right">Submit</Button>
 
         </Box>
@@ -373,7 +453,16 @@ const LeadAssessmentModal = ({ open, onClose, selectedCycle, employees, selected
                         </Alert>
                 </Snackbar>
       </Box>
+
     </Modal>
+    </Box>
+    <Backdrop
+          sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.modal + 10 }}
+          open={saving}
+        >
+          <CircularProgress color="inherit" />
+        </Backdrop>
+    </>
   );
 };
 

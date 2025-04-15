@@ -16,6 +16,7 @@ import {
   RadioGroup,
   TextareaAutosize,
   Button,
+  Skeleton
 } from "@mui/material";
 import axios from "axios";
 import LeadAssessmentModal from "./LeadAssessmentModal";
@@ -43,16 +44,18 @@ const DropdownPage = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success"); 
+  const [loadingCycles, setLoadingCycles] = useState(true);
 
 
   useEffect(() => {
     if (!employeeId) return;
     const fetchUserRoleAndCycles = async () => {
       try {
+       
         const userResponse = await axios.get(`${API_URL}/employee_details/${employeeId}`);
         const role = userResponse.data.role.toLowerCase();
         setUserRole(role);
-    
+        setLoadingCycles(true);
         if (role === "hr") {
           const cyclesResponse = await axios.get(`${API_URL}/appraisal_cycle/`);
           const filteredCycles = cyclesResponse.data.filter(
@@ -139,8 +142,11 @@ const DropdownPage = () => {
         }
         
       } catch (error) {
-        console.error("Error fetching user role or cycles:", error);
+        console.error("Error fetching user role or cycles:", error)
+      } finally {
+        setLoadingCycles(false);
       }
+
     };
 
     
@@ -430,18 +436,31 @@ const DropdownPage = () => {
     <Card sx={{m:2,  justifyContent: "center" }}>
         <CardContent>
           <Box sx={{ display: "flex", gap: 4, alignItems: "center", flexWrap: "wrap", mt:2 }}>
+          {loadingCycles ? (
+  // Skeleton placeholder when loading
+  <Skeleton variant="rectangular" width={200} height={40} sx={{ borderRadius: 1 }} />
+) : (
             <FormControl sx={{ minWidth: 200 }} size="small">
               <InputLabel sx={{background:"white", pl:1,pr:1}}>Appraisal Cycle</InputLabel>
               <Select value={selectedCycle} onChange={handleCycleChange}>
                 {appraisalCycles.map((cycle) => (
                   <MenuItem key={cycle.cycle_id} value={cycle.cycle_id}>
-                    {cycle.cycle_name}
+                    {/* {cycle.cycle_name} */}
+                    <Tooltip title={`${cycle.cycle_id} - ${cycle.cycle_name}`} placement="top" arrow>
+                      <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "inline-block", maxWidth: "200px" }}>
+                         {cycle.cycle_name}
+                      </span>
+                    </Tooltip>
                   </MenuItem>
                 ))}
               </Select>
             </FormControl>
-
-            <FormControl sx={{ minWidth: 200 }} size="small">
+)}
+ {loadingCycles ? (
+  // Skeleton placeholder when loading
+  <Skeleton variant="rectangular" width={200} height={40} sx={{ borderRadius: 1 }} />
+) : (
+            <FormControl sx={{ minWidth: 200  }} size="small">
               <InputLabel sx={{background:"white", pl:1,pr:1}}>Employee</InputLabel>
               <Select value={selectedEmployee} onChange={handleEmployeeChange}>
                 {employees.map((emp) => (
@@ -455,7 +474,7 @@ const DropdownPage = () => {
                 ))}
               </Select>
             </FormControl>
-
+)}
             {selectedEmployee && (
               <TextField
                 label="Reporting Manager"
