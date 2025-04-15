@@ -362,3 +362,4 @@ const [loadingCycles, setLoadingCycles] = React.useState(true);
     </Card>
   );
 }
+
