@@ -8,8 +8,7 @@ import HRLandingPage from "./components/HRLandingPage";
 import Login from "./components/LoginCompo";                    
 import HistoricalReportTable from "./components/HistoricalReport";                 
 import SelfAssessmentRepo from "./components/SelfAssessmentRepo";
-import DropdownPage from "./components/employee_assessment";                   
-// import DropdownPage from "./components/LeadLandingPage"
+import DropdownPage from "./components/employee_assessment"; 
 export default function App() {
   return (
     <Router>           

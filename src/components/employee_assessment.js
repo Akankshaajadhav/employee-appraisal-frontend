@@ -83,39 +83,41 @@ const DropdownPage = () => {
             }
           }
         }
-    
+
         else if (role === "team lead") {
-          const allCyclesRes = await axios.get(`${API_URL}/appraisal_cycle/`);
-          const cycles = allCyclesRes.data;
-    
-          const tlAssignedCycles = [];
-    
-          for (const cycle of cycles) {
-            const empRes = await axios.get(`${API_URL}/employees/${cycle.cycle_id}/${employeeId}`);
-            if (empRes.data && empRes.data.length > 0) {
-              tlAssignedCycles.push({ ...cycle, employees: empRes.data });
+            const allCyclesRes = await axios.get(`${API_URL}/appraisal_cycle/`);
+            const cycles = allCyclesRes.data;
+          
+            const tlAssignedCycles = [];
+          
+            for (const cycle of cycles) {
+              const empRes = await axios.get(`${API_URL}/employees/${cycle.cycle_id}/${employeeId}`);
+              // console.log(`Employees for cycle ${cycle.cycle_id}:`, empRes.data);
+              if (empRes.data && empRes.data.length > 0) {
+                tlAssignedCycles.push({ ...cycle, employees: empRes.data });
+              }
+            }
+          
+            const filteredCycles = tlAssignedCycles.filter(
+              (cycle) => cycle.status === "active" || cycle.status === "completed"
+            );
+          
+            setAppraisalCycles(filteredCycles);
+          
+            const activeCycle = filteredCycles.find((cycle) => cycle.status === "active");
+            if (activeCycle) {
+              setSelectedCycle(activeCycle.cycle_id);
+              setIsCycleActive(true);
+          
+              // Set default employee to team lead themselves
+              // console.log("Setting employees for team lead:", activeCycle.employees);
+              setEmployees(activeCycle.employees);
+              setSelectedEmployee(employeeId);
+          
+              const managerResponse = await axios.get(`${API_URL}/reporting_manager/${employeeId}`);
+              setTeamLeadName(managerResponse.data.reporting_manager_name);
             }
           }
-    
-          const filteredCycles = tlAssignedCycles.filter(
-            (cycle) => cycle.status === "active" || cycle.status === "completed"
-          );
-    
-          setAppraisalCycles(filteredCycles);
-    
-          const activeCycle = filteredCycles.find((cycle) => cycle.status === "active");
-          if (activeCycle) {
-            setSelectedCycle(activeCycle.cycle_id);
-            setIsCycleActive(true);
-    
-            // Set default employee to team lead themselves
-            setEmployees(activeCycle.employees);
-            setSelectedEmployee(employeeId);
-    
-            const managerResponse = await axios.get(`${API_URL}/reporting_manager/${employeeId}`);
-            setTeamLeadName(managerResponse.data.reporting_manager_name);
-          }
-        }
 
         else {
           // Regular employee
@@ -153,37 +155,37 @@ const DropdownPage = () => {
     fetchUserRoleAndCycles();
   }, [employeeId]);
 
-  useEffect(() => {
+useEffect(() => {
     const fetchAssessmentDataAndResponses = async () => {
       if (!selectedCycle || !selectedEmployee) return;
-  
-      const questionOwnerId = userRole === "team lead" ? employeeId : selectedEmployee; // Who owns the questions
-      // const questionOwnerId = selectedEmployee; // Always the target of the assessment
-
-
-      // const responseOwnerId = selectedEmployee; // Who's being assessed
-      const responseOwnerId = userRole === "team lead" ? employeeId : selectedEmployee;
-
+      
+      // Who owns the questions - always the selected employee now
+      const questionOwnerId = selectedEmployee; 
+      const responseOwnerId = selectedEmployee;
+      
+      // Check if viewing another employee's assessment
+      const isViewingOtherEmployee = userRole === "team lead" && selectedEmployee !== employeeId;
+      
       try {
         const questionsRes = await axios.get(`${API_URL}/assessment/questions/${questionOwnerId}/${selectedCycle}`);
         const questions = questionsRes.data || [];
-        console.log("Fetched Questions:", questions);
         setAssessmentData(questions);
-      
+        
         try {
           const responseRes = await axios.get(`${API_URL}/assessment/responses/${responseOwnerId}/${selectedCycle}`);
+          
           const previous = {};
-      
           responseRes.data?.forEach((res) => {
             previous[res.question_id] = res.option_ids?.length > 0
               ? res.option_ids
               : res.response_text?.[0] || "";
           });
-      
+          
+          // console.log("Processed responses:", previous);
           setResponses(previous);
         } catch (err) {
-          // Allow 404s for no responses yet
           if (err.response?.status === 404) {
+            console.log("No responses found (404)");
             setResponses({});
           } else {
             console.error("Error fetching responses:", err);
@@ -194,12 +196,11 @@ const DropdownPage = () => {
         setAssessmentData([]);
         setResponses({});
       }
-      
     };
   
     fetchAssessmentDataAndResponses();
-  }, [selectedCycle, selectedEmployee, userRole]);
-  
+  }, [selectedCycle, selectedEmployee, userRole, employeeId]);
+
   const openModal = () => {
     setCachedEmployee(selectedEmployee);
     setCachedManager(teamLeadName);
@@ -212,19 +213,22 @@ const DropdownPage = () => {
     setModalOpen(false);
   };
 
-  const handleEmployeeChange = async (e) => {
+const handleEmployeeChange = async (e) => {
     const empId = e.target.value;
     setSelectedEmployee(empId);
     setTeamLeadName("");
   
-    if (userRole !== "team lead") {
-      setAssessmentData([]);
-      setResponses({});
-    }
+    // Always clear existing data when changing employee
+    setAssessmentData([]);
+    setResponses({});
   
     try {
       const managerResponse = await axios.get(`${API_URL}/reporting_manager/${empId}`);
-      setTeamLeadName(managerResponse.data.reporting_manager_name);
+      // setTeamLeadName(managerResponse.data.reporting_manager_name);
+      const { reporting_manager_id, reporting_manager_name } = managerResponse.data;
+      console.log("Manager Response:", managerResponse.data);
+      setTeamLeadName(`${reporting_manager_id} - ${reporting_manager_name}`);
+
     } catch (error) {
       console.error("Error fetching reporting manager:", error);
     }
@@ -273,8 +277,13 @@ const DropdownPage = () => {
     }));
   };
 
-  const renderInputField = (question) => {
+const renderInputField = (question) => {
     const { question_id, question_type, options = [] } = question;
+    
+    // Determine if fields should be read-only
+    const isViewingOtherEmployee = userRole === "team lead" && String(selectedEmployee) !== String(employeeId);
+
+    const isDisabled = !isCycleActive || isViewingOtherEmployee;
   
     switch (question_type.toLowerCase()) {
       case "mcq":
@@ -292,7 +301,7 @@ const DropdownPage = () => {
                         : responses[question_id].filter((id) => id !== option.option_id);
                       handleResponseChange(question_id, newValue);
                     }}
-                    disabled={!isCycleActive}
+                    disabled={isDisabled}
                   />
                 }
                 label={option.option_text}
@@ -313,7 +322,7 @@ const DropdownPage = () => {
                 <FormControlLabel
                   key={option.option_id}
                   value={option.option_id}
-                  control={<Radio disabled={!isCycleActive} />}
+                  control={<Radio disabled={isDisabled} />}
                   label={option.option_text}
                 />
               ))}
@@ -328,7 +337,7 @@ const DropdownPage = () => {
               minRows={2}
               value={responses[question_id] || ""}
               onChange={(e) => handleResponseChange(question_id, e.target.value)}
-              disabled={!isCycleActive}
+              disabled={isDisabled}
               style={{ 
                 width: "30%",
                 fontFamily: "Roboto, Helvetica, Arial, sans-serif",
@@ -389,19 +398,18 @@ const DropdownPage = () => {
       setSnackbarSeverity("success");
       setSnackbarOpen(true);
     } catch (error) {
-      console.error("Error submitting responses:", error);
       setSnackbarMessage("Failed to submit responses.");
       setSnackbarSeverity("error");
       setSnackbarOpen(true);
     }
   };
-  
 
-  const refreshAssessmentData = async () => {
+const refreshAssessmentData = async () => {
     if (!selectedCycle || !selectedEmployee) return;
   
-    const questionOwnerId = userRole === "team lead" ? employeeId : selectedEmployee;
-    const responseOwnerId = userRole === "team lead" ? employeeId : selectedEmployee;
+    // Always use the selected employee's data
+    const questionOwnerId = selectedEmployee;
+    const responseOwnerId = selectedEmployee;
   
     try {
       const questionsRes = await axios.get(`${API_URL}/assessment/questions/${questionOwnerId}/${selectedCycle}`);
@@ -425,7 +433,6 @@ const DropdownPage = () => {
         }
       }
     } catch (error) {
-      console.error("Error refreshing assessment data:", error);
       setAssessmentData([]);
       setResponses({});
     }
@@ -477,9 +484,13 @@ const DropdownPage = () => {
 )}
             {selectedEmployee && (
               <TextField
-                label="Reporting Manager"
+                // value={teamLeadName || "N/A"}
                 value={teamLeadName || "N/A"}
-                InputProps={{ readOnly: true }}
+
+                InputProps={{ 
+                  readOnly: true,
+                  disableUnderline: true,
+                 }}
                 variant="standard"
               />
             )}
@@ -501,7 +512,10 @@ const DropdownPage = () => {
         <CardContent>
           <Typography variant="h5" sx={{ mb: 4, display: "flex", alignItems: "center", justifyContent: "space-between" }} color="primary" fontWeight={"bold"}>
             <span>
-              Self Assessment {selectedCycle && `: ${appraisalCycles.find(cycle => cycle.cycle_id === selectedCycle)?.cycle_name || ''}`}
+              {userRole === "team lead" && selectedEmployee !== employeeId 
+                ? `Employee Self Assessment (${employees.find(emp => emp.employee_id === selectedEmployee)?.employee_name || 'Unknown'})` 
+                : `Self Assessment`}
+              {selectedCycle && `: ${appraisalCycles.find(cycle => cycle.cycle_id === selectedCycle)?.cycle_name || ''}`}
             </span>
             <Tooltip title="Refresh responses" arrow>
               <IconButton onClick={refreshAssessmentData} size="small" color="primary">
@@ -521,16 +535,15 @@ const DropdownPage = () => {
                   {renderInputField(question)}
                 </Box>
               ))}
-              
+      
 
-            {isCycleActive && (
-              <Box mt={3} display="flex" justifyContent="flex-end">
-                <Button variant="contained" color="primary" onClick={handleSubmit}>
-                  Submit
-                </Button>
-              </Box>
-            )}
-
+              {isCycleActive && (!userRole === "team lead" || selectedEmployee === employeeId) && (
+                <Box mt={3} display="flex" justifyContent="flex-end">
+                  <Button variant="contained" color="primary" onClick={handleSubmit}>
+                    Submit
+                  </Button>
+                </Box>
+              )}
             </Box>
           ) : (
             <Box mt={4}>
