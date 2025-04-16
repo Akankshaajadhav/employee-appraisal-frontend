@@ -253,7 +253,7 @@ const [loadingCycles, setLoadingCycles] = React.useState(true);
 
   return (
     <Card sx={{ width: '100%', m:1 }}>
-    <Box sx={{ width: '98%' ,m:1}}>
+    <Box sx={{ width: '98%' ,ml:1}}>
       <Grid container alignItems="center" >
          <Grid item size={11}>
             <Typography variant="h6" color="primary" fontWeight={"bold"} pl="10px">
@@ -268,7 +268,7 @@ const [loadingCycles, setLoadingCycles] = React.useState(true);
           </Grid>
      
        {/* Cycle Selection Dropdown with Checkboxes */}
-       <FormControl sx={{ mt:2,mb:1,width: 'auto' , minWidth:'20%'}}>
+       <FormControl sx={{ mt:1,mb:1,width: 'auto' , minWidth:'20%'}}>
         <InputLabel id="checkbox-cycles-label" sx={{background:"white"}}>Select Appraisal Cycles</InputLabel>
         <Select
           labelId="checkbox-cycles-label"
@@ -362,3 +362,4 @@ const [loadingCycles, setLoadingCycles] = React.useState(true);
     </Card>
   );
 }
+

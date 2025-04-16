@@ -164,8 +164,15 @@ const HRLandingPage = () => {
         const dateStr = params.value;
         if (!dateStr) return "";
 
-        const [year, month, day] = dateStr.split("T")[0].split("-");
-        return `${day}-${month}-${year}`;
+        // const [year, month, day] = dateStr.split("T")[0].split("-");
+        // return `${day}-${month}-${year}`;
+        const date = new Date(dateStr);
+    return date.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }).replace(/ /g, " "); // Format the date as "dd-MMM-yyyy"
+       
       },
     },
     {
@@ -176,8 +183,16 @@ const HRLandingPage = () => {
         const dateStr = params.value;
         if (!dateStr) return "";
 
-        const [year, month, day] = dateStr.split("T")[0].split("-");
-        return `${day}-${month}-${year}`;
+        // const [year, month, day] = dateStr.split("T")[0].split("-");
+        // return `${day}-${month}-${year}`;
+
+        const date = new Date(dateStr);
+      return date.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }).replace(/ /g, " "); // Format the date as "dd-MMM-yyyy"
+       
       },
     },
     {
