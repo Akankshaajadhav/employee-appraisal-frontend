@@ -212,15 +212,18 @@ const HRLandingPage = () => {
               color="primary"
               onClick={(e) => {
                 e.stopPropagation();
-                if(isVisible){
+                if (isVisible) {
                   toggleDetailsView(params.row.cycle_id);
-                  console.log(params.row.cycle_id)
                 }
               }}
-              disabled={!isVisible}
+              disabled={
+                !isVisible || (detailsVisible && selectedCycleId !== params.row.cycle_id)
+              }
             >
               <Visibility />
             </IconButton>
+
+
             <IconButton
               color="primary"
               onClick={(e) => {
