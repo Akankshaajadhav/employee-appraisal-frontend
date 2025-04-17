@@ -1090,7 +1090,7 @@ const refreshAssessmentData = async () => {
               />
             )}
    
-            {(userRole === "team lead" || userRole === "Team Lead") && (
+            {(userRole === "team lead" || userRole === "Team Lead" || userRole === "admin") && (
               
               <Box sx={{ position: "absolute", left: "85%", top: "10%" }}>
                  {loadingCycles ? (
