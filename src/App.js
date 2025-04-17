@@ -17,7 +17,7 @@ export default function App() {
         <Route path="/" element={<Login />} />
         <Route path="/hr-home" element={<HRLandingPage />} />
         <Route path="/employee-home" element={<DropdownPage />} />
-        <Route path="/team-lead-home" element={<MainPage />} /> {/* Updated to use MainPage */}
+        <Route path="/admin-home" element={<MainPage />} /> {/* Updated to use MainPage */}
         <Route path="/add-appraisal" element={<AddAppraisalCycle />} />
         <Route path="/questionnaire" element={<Questionnaire />} />
         <Route path="/historical-report" element={<HistoricalReportTable />} />        
