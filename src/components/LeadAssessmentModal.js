@@ -189,7 +189,7 @@ const LeadAssessmentModal = ({ open, onClose, selectedCycle, employees, selected
           Lead Assessment {readOnly}
         </Typography>
 
-        <IconButton color="error" onClick={() => { resetFields(); onClose(); }} sx={{ position: "absolute", left: "78%", top: "4%" }}>
+        <IconButton color="error" onClick={() => { resetFields(); onClose(); }} sx={{ position: "absolute", left: "76%", top: "4%" }}>
           <CloseIcon />
         </IconButton>
 

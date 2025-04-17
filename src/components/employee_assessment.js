@@ -677,7 +677,7 @@ const DropdownPage = () => {
           }
         }
 
-        else if (role === "team lead") {
+        else if (role === "team lead" || role === "admin") {
             const allCyclesRes = await axios.get(`${API_URL}/appraisal_cycle/`);
             const cycles = allCyclesRes.data;
           
@@ -838,7 +838,7 @@ const handleEmployeeChange = async (e) => {
       const employeesResponse = await axios.get(`${API_URL}/employees/${cycleId}/${employeeId}`);
       setEmployees(employeesResponse.data);
   
-      if (userRole === "team lead") {
+      if (userRole === "team lead" || userRole === "admin") {
         // For Team Leads, always default to themselves
         setSelectedEmployee(employeeId);
   
@@ -874,7 +874,7 @@ const renderInputField = (question) => {
     const { question_id, question_type, options = [] } = question;
     
     // Determine if fields should be read-only
-    const isViewingOtherEmployee = userRole === "team lead" && String(selectedEmployee) !== String(employeeId);
+    const isViewingOtherEmployee = (userRole === "team lead" || userRole === "admin")&& String(selectedEmployee) !== String(employeeId);
 
     const isDisabled = !isCycleActive || isViewingOtherEmployee;
   
@@ -1032,7 +1032,7 @@ const refreshAssessmentData = async () => {
     }
   };
   
-  const isTeamLeadSubmittingOwnAssessment = userRole === "team lead" && String(selectedEmployee) === String(employeeId);
+  const isTeamLeadSubmittingOwnAssessment = (userRole === "team lead" || userRole === "admin") && String(selectedEmployee) === String(employeeId);
   return (
     <Card sx={{m:2,  justifyContent: "center" }}>
         <CardContent>
@@ -1117,7 +1117,7 @@ const refreshAssessmentData = async () => {
   <Skeleton variant="rectangular" width={500} height={25} sx={{ borderRadius: 1 }} />
 ) : (<Typography variant="h5" sx={{ mb: 4, display: "flex", alignItems: "center", justifyContent: "space-between" }} color="primary" fontWeight={"bold"}>
             <span>
-              {userRole === "team lead" && selectedEmployee !== employeeId 
+              {(userRole === "team lead" || userRole === "admin")&& selectedEmployee !== employeeId 
                 ? `Employee Self Assessment (${employees.find(emp => emp.employee_id === selectedEmployee)?.employee_name || 'Unknown'})` 
                 : `Self Assessment`}
               {selectedCycle && `: ${appraisalCycles.find(cycle => cycle.cycle_id === selectedCycle)?.cycle_name || ''}`}
