@@ -46,7 +46,7 @@ const DropdownPage = () => {
   const [snackbarSeverity, setSnackbarSeverity] = useState("success"); 
   const [loadingCycles, setLoadingCycles] = useState(true);
 
-
+  
   useEffect(() => {
     if (!employeeId) return;
     const fetchUserRoleAndCycles = async () => {
