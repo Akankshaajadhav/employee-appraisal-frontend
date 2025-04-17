@@ -189,7 +189,9 @@ const MenuProps = {
   return (
     <>
       <Box sx={{ width: "100%" }}>
-        <Grid container alignItems="center" sx={{ m: 3 }}>
+        
+        <Card sx={{ m: 3, mt: 1 }}>
+        <Grid container alignItems="center" sx={{ ml: 1 }}>
           <Grid size={11}>
             <Typography variant="h6" color="primary">
               Self Assessment Report
@@ -201,9 +203,8 @@ const MenuProps = {
             </IconButton>
           </Grid>
         </Grid>
-        <Card sx={{ m: 3, mt: 1 }}>
           <CardContent>
-            <FormControl sx={{ mt:2,mb:1,width: 'auto' , minWidth:'20%'}}>
+            <FormControl sx={{width: 'auto' , minWidth:'20%', mb:1}}>
               <InputLabel
                 sx={{ backgroundColor: "white", px: 1, top: "-4px", pr: "2px" }}
               >
