@@ -24,7 +24,9 @@ const Login = () => {
         // Redirect based on role
         if (userRole === "hr") {
           navigate("/hr-home"); // HR landing page
-        } else {
+        } else if (userRole === "team lead") {
+          navigate("/team-lead-home"); // Team lead landing page
+        }else{
           navigate("/employee-home"); // Employee landing page
         }
       } else {

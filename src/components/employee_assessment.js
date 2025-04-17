@@ -947,55 +947,6 @@ const renderInputField = (question) => {
     }
   };
 
-  // const handleSubmit = async () => {
-  //   try {
-  //     const payload = assessmentData.map((question) => {
-  //       const response = responses[question.question_id];
-  //       const question_type = question.question_type.toLowerCase();
-  
-  //       if (question_type === "mcq") {
-  //         return {
-  //           question_id: question.question_id,
-  //           allocation_id: question.allocation_id,
-  //           cycle_id: selectedCycle,
-  //           employee_id: selectedEmployee,
-  //           option_ids: response || [],
-  //           response_text: null,
-  //         };
-  //       } else if (["single choice", "yes/no"].includes(question_type)) {
-  //         return {
-  //           question_id: question.question_id,
-  //           allocation_id: question.allocation_id,
-  //           cycle_id: selectedCycle,
-  //           employee_id: selectedEmployee,
-  //           option_ids: [parseInt(response)],
-  //           response_text: null,
-  //         };
-  //       } else if (question_type === "descriptive") {
-  //         return {
-  //           question_id: question.question_id,
-  //           allocation_id: question.allocation_id,
-  //           cycle_id: selectedCycle,
-  //           employee_id: selectedEmployee,
-  //           option_ids: [],
-  //           response_text: [response],
-  //         };
-  //       } else {
-  //         return null;
-  //       }
-  //     }).filter(Boolean);
-  
-  //     await axios.post(`${API_URL}/assessment/submit`, payload);
-  
-  //     setSnackbarMessage("Responses submitted successfully!");
-  //     setSnackbarSeverity("success");
-  //     setSnackbarOpen(true);
-  //   } catch (error) {
-  //     setSnackbarMessage("Failed to submit responses.");
-  //     setSnackbarSeverity("error");
-  //     setSnackbarOpen(true);
-  //   }
-  // };
 
   const handleSubmit = async () => {
     try {
