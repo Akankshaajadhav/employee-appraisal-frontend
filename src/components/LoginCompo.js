@@ -24,7 +24,9 @@ const Login = () => {
         // Redirect based on role
         if (userRole === "hr") {
           navigate("/hr-home"); // HR landing page
-        } else {
+        } else if (userRole === "admin") {
+          navigate("/admin-home"); // admin landing page (Can see both appraisal cycle steup and assessment)
+        }else{
           navigate("/employee-home"); // Employee landing page
         }
       } else {

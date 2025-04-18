@@ -677,7 +677,7 @@ const DropdownPage = () => {
           }
         }
 
-        else if (role === "team lead") {
+        else if (role === "team lead" || role === "admin") {
             const allCyclesRes = await axios.get(`${API_URL}/appraisal_cycle/`);
             const cycles = allCyclesRes.data;
           
@@ -838,7 +838,7 @@ const handleEmployeeChange = async (e) => {
       const employeesResponse = await axios.get(`${API_URL}/employees/${cycleId}/${employeeId}`);
       setEmployees(employeesResponse.data);
   
-      if (userRole === "team lead") {
+      if (userRole === "team lead" || userRole === "admin") {
         // For Team Leads, always default to themselves
         setSelectedEmployee(employeeId);
   
@@ -874,7 +874,7 @@ const renderInputField = (question) => {
     const { question_id, question_type, options = [] } = question;
     
     // Determine if fields should be read-only
-    const isViewingOtherEmployee = userRole === "team lead" && String(selectedEmployee) !== String(employeeId);
+    const isViewingOtherEmployee = (userRole === "team lead" || userRole === "admin")&& String(selectedEmployee) !== String(employeeId);
 
     const isDisabled = !isCycleActive || isViewingOtherEmployee;
   
@@ -947,55 +947,6 @@ const renderInputField = (question) => {
     }
   };
 
-  // const handleSubmit = async () => {
-  //   try {
-  //     const payload = assessmentData.map((question) => {
-  //       const response = responses[question.question_id];
-  //       const question_type = question.question_type.toLowerCase();
-  
-  //       if (question_type === "mcq") {
-  //         return {
-  //           question_id: question.question_id,
-  //           allocation_id: question.allocation_id,
-  //           cycle_id: selectedCycle,
-  //           employee_id: selectedEmployee,
-  //           option_ids: response || [],
-  //           response_text: null,
-  //         };
-  //       } else if (["single choice", "yes/no"].includes(question_type)) {
-  //         return {
-  //           question_id: question.question_id,
-  //           allocation_id: question.allocation_id,
-  //           cycle_id: selectedCycle,
-  //           employee_id: selectedEmployee,
-  //           option_ids: [parseInt(response)],
-  //           response_text: null,
-  //         };
-  //       } else if (question_type === "descriptive") {
-  //         return {
-  //           question_id: question.question_id,
-  //           allocation_id: question.allocation_id,
-  //           cycle_id: selectedCycle,
-  //           employee_id: selectedEmployee,
-  //           option_ids: [],
-  //           response_text: [response],
-  //         };
-  //       } else {
-  //         return null;
-  //       }
-  //     }).filter(Boolean);
-  
-  //     await axios.post(`${API_URL}/assessment/submit`, payload);
-  
-  //     setSnackbarMessage("Responses submitted successfully!");
-  //     setSnackbarSeverity("success");
-  //     setSnackbarOpen(true);
-  //   } catch (error) {
-  //     setSnackbarMessage("Failed to submit responses.");
-  //     setSnackbarSeverity("error");
-  //     setSnackbarOpen(true);
-  //   }
-  // };
 
   const handleSubmit = async () => {
     try {
@@ -1081,7 +1032,7 @@ const refreshAssessmentData = async () => {
     }
   };
   
-  const isTeamLeadSubmittingOwnAssessment = userRole === "team lead" && String(selectedEmployee) === String(employeeId);
+  const isTeamLeadSubmittingOwnAssessment = (userRole === "team lead" || userRole === "admin") && String(selectedEmployee) === String(employeeId);
   return (
     <Card sx={{m:2,  justifyContent: "center" }}>
         <CardContent>
@@ -1139,7 +1090,7 @@ const refreshAssessmentData = async () => {
               />
             )}
    
-            {(userRole === "team lead" || userRole === "Team Lead") && (
+            {(userRole === "team lead" || userRole === "Team Lead" || userRole === "admin") && (
               
               <Box sx={{ position: "absolute", left: "85%", top: "10%" }}>
                  {loadingCycles ? (
@@ -1166,7 +1117,7 @@ const refreshAssessmentData = async () => {
   <Skeleton variant="rectangular" width={500} height={25} sx={{ borderRadius: 1 }} />
 ) : (<Typography variant="h5" sx={{ mb: 4, display: "flex", alignItems: "center", justifyContent: "space-between" }} color="primary" fontWeight={"bold"}>
             <span>
-              {userRole === "team lead" && selectedEmployee !== employeeId 
+              {(userRole === "team lead" || userRole === "admin")&& selectedEmployee !== employeeId 
                 ? `Employee Self Assessment (${employees.find(emp => emp.employee_id === selectedEmployee)?.employee_name || 'Unknown'})` 
                 : `Self Assessment`}
               {selectedCycle && `: ${appraisalCycles.find(cycle => cycle.cycle_id === selectedCycle)?.cycle_name || ''}`}
