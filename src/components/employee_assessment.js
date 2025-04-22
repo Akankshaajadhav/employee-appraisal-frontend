@@ -46,6 +46,7 @@
 //   const [snackbarSeverity, setSnackbarSeverity] = useState("success"); 
 //   const [loadingCycles, setLoadingCycles] = useState(true);
 
+
   
 //   useEffect(() => {
 //     if (!employeeId) return;
@@ -78,13 +79,15 @@
 //             setSelectedEmployee(defaultEmployeeId);
     
 //             if (defaultEmployeeId) {
+              
 //               const managerResponse = await axios.get(`${API_URL}/reporting_manager/${defaultEmployeeId}`);
-//               setTeamLeadName(managerResponse.data.reporting_manager_name);
+//               const { reporting_manager_id, reporting_manager_name } = managerResponse.data;
+//               setTeamLeadName(`${reporting_manager_id} - ${reporting_manager_name}`);
 //             }
 //           }
 //         }
 
-//         else if (role === "team lead") {
+//         else if (role === "team lead" || role === "admin") {
 //             const allCyclesRes = await axios.get(`${API_URL}/appraisal_cycle/`);
 //             const cycles = allCyclesRes.data;
           
@@ -92,7 +95,6 @@
           
 //             for (const cycle of cycles) {
 //               const empRes = await axios.get(`${API_URL}/employees/${cycle.cycle_id}/${employeeId}`);
-//               // console.log(`Employees for cycle ${cycle.cycle_id}:`, empRes.data);
 //               if (empRes.data && empRes.data.length > 0) {
 //                 tlAssignedCycles.push({ ...cycle, employees: empRes.data });
 //               }
@@ -110,12 +112,12 @@
 //               setIsCycleActive(true);
           
 //               // Set default employee to team lead themselves
-//               // console.log("Setting employees for team lead:", activeCycle.employees);
 //               setEmployees(activeCycle.employees);
 //               setSelectedEmployee(employeeId);
           
 //               const managerResponse = await axios.get(`${API_URL}/reporting_manager/${employeeId}`);
-//               setTeamLeadName(managerResponse.data.reporting_manager_name);
+//               const { reporting_manager_id, reporting_manager_name } = managerResponse.data;
+//               setTeamLeadName(`${reporting_manager_id} - ${reporting_manager_name}`);
 //             }
 //           }
 
@@ -137,9 +139,10 @@
 //             //  Add this line to make sure the dropdown gets the employee list
 //             const employeesResponse = await axios.get(`${API_URL}/employees/${activeCycle.cycle_id}/${employeeId}`);
 //             setEmployees(employeesResponse.data);
-        
+
 //             const managerResponse = await axios.get(`${API_URL}/reporting_manager/${employeeId}`);
-//             setTeamLeadName(managerResponse.data.reporting_manager_name);
+//             const { reporting_manager_id, reporting_manager_name } = managerResponse.data;
+//             setTeamLeadName(`${reporting_manager_id} - ${reporting_manager_name}`);
 //           }
 //         }
         
@@ -181,7 +184,7 @@
 //               : res.response_text?.[0] || "";
 //           });
           
-//           // console.log("Processed responses:", previous);
+          
 //           setResponses(previous);
 //         } catch (err) {
 //           if (err.response?.status === 404) {
@@ -213,27 +216,25 @@
 //     setModalOpen(false);
 //   };
 
-// const handleEmployeeChange = async (e) => {
-//     const empId = e.target.value;
-//     setSelectedEmployee(empId);
-//     setTeamLeadName("");
-  
-//     // Always clear existing data when changing employee
-//     setAssessmentData([]);
-//     setResponses({});
-  
-//     try {
-//       const managerResponse = await axios.get(`${API_URL}/reporting_manager/${empId}`);
-//       // setTeamLeadName(managerResponse.data.reporting_manager_name);
-//       const { reporting_manager_id, reporting_manager_name } = managerResponse.data;
-//       console.log("Manager Response:", managerResponse.data);
-//       setTeamLeadName(`${reporting_manager_id} - ${reporting_manager_name}`);
+//   const handleEmployeeChange = async (e) => {
+//       const empId = e.target.value;
+//       setSelectedEmployee(empId);
+//       setTeamLeadName("");
+    
+//       // Always clear existing data when changing employee
+//       setAssessmentData([]);
+//       setResponses({});
+    
+//       try {
+//         const managerResponse = await axios.get(`${API_URL}/reporting_manager/${empId}`);
+//         const { reporting_manager_id, reporting_manager_name } = managerResponse.data;
+//         setTeamLeadName(`${reporting_manager_id} - ${reporting_manager_name}`);
 
-//     } catch (error) {
-//       console.error("Error fetching reporting manager:", error);
-//     }
-//   };
-  
+//       } catch (error) {
+//         console.error("Error fetching reporting manager:", error);
+//       }
+//     };
+
 //   const handleCycleChange = async (e) => {
 //     const cycleId = e.target.value;
 //     setSelectedCycle(cycleId);
@@ -245,12 +246,13 @@
 //       const employeesResponse = await axios.get(`${API_URL}/employees/${cycleId}/${employeeId}`);
 //       setEmployees(employeesResponse.data);
   
-//       if (userRole === "team lead") {
+//       if (userRole === "team lead" || userRole === "admin") {
 //         // For Team Leads, always default to themselves
 //         setSelectedEmployee(employeeId);
-  
 //         const managerRes = await axios.get(`${API_URL}/reporting_manager/${employeeId}`);
-//         setTeamLeadName(managerRes.data.reporting_manager_name);
+//         const { reporting_manager_id, reporting_manager_name } = managerRes.data;
+// setTeamLeadName(`${reporting_manager_id} - ${reporting_manager_name}`);
+
 //       } else {
 //         // HR or employee flow
 //         const userExists = employeesResponse.data.some((emp) => emp.employee_id === employeeId);
@@ -262,7 +264,8 @@
   
 //         if (defaultEmpId) {
 //           const managerRes = await axios.get(`${API_URL}/reporting_manager/${defaultEmpId}`);
-//           setTeamLeadName(managerRes.data.reporting_manager_name);
+//           const { reporting_manager_id, reporting_manager_name } = managerRes.data;
+//           setTeamLeadName(`${reporting_manager_id} - ${reporting_manager_name}`);
 //         }
 //       }
 //     } catch (error) {
@@ -281,7 +284,7 @@
 //     const { question_id, question_type, options = [] } = question;
     
 //     // Determine if fields should be read-only
-//     const isViewingOtherEmployee = userRole === "team lead" && String(selectedEmployee) !== String(employeeId);
+//     const isViewingOtherEmployee = (userRole === "team lead" || userRole === "admin")&& String(selectedEmployee) !== String(employeeId);
 
 //     const isDisabled = !isCycleActive || isViewingOtherEmployee;
   
@@ -353,6 +356,7 @@
 //         return null;
 //     }
 //   };
+
 
 //   const handleSubmit = async () => {
 //     try {
@@ -438,7 +442,7 @@
 //     }
 //   };
   
-
+//   const isTeamLeadSubmittingOwnAssessment = (userRole === "team lead" || userRole === "admin") && String(selectedEmployee) === String(employeeId);
 //   return (
 //     <Card sx={{m:2,  justifyContent: "center" }}>
 //         <CardContent>
@@ -496,15 +500,20 @@
 //               />
 //             )}
    
-//             {(userRole === "team lead" || userRole === "Team Lead") && (
+//             {(userRole === "team lead" || userRole === "Team Lead" || userRole === "admin") && (
               
 //               <Box sx={{ position: "absolute", left: "85%", top: "10%" }}>
+//                  {loadingCycles ? (
+//   // Skeleton placeholder when loading
+//   <Skeleton variant="rectangular" width={150} height={25} sx={{ borderRadius: 1 }} />
+// ) : (
 //                 <a
 //                   onClick={openModal}
 //                   style={{ cursor: "pointer", color: "blue", textDecoration: "underline", fontSize: "20px" }}
 //                 >
 //                   Lead Assessment
 //                 </a>
+// )}
 //               </Box>
 //             )}
               
@@ -518,7 +527,7 @@
 //   <Skeleton variant="rectangular" width={500} height={25} sx={{ borderRadius: 1 }} />
 // ) : (<Typography variant="h5" sx={{ mb: 4, display: "flex", alignItems: "center", justifyContent: "space-between" }} color="primary" fontWeight={"bold"}>
 //             <span>
-//               {userRole === "team lead" && selectedEmployee !== employeeId 
+//               {(userRole === "team lead" || userRole === "admin")&& selectedEmployee !== employeeId 
 //                 ? `Employee Self Assessment (${employees.find(emp => emp.employee_id === selectedEmployee)?.employee_name || 'Unknown'})` 
 //                 : `Self Assessment`}
 //               {selectedCycle && `: ${appraisalCycles.find(cycle => cycle.cycle_id === selectedCycle)?.cycle_name || ''}`}
@@ -543,7 +552,9 @@
 //               ))}
       
 
-//               {isCycleActive && (!userRole === "team lead" || selectedEmployee === employeeId) && (
+//       {isCycleActive && (
+//                 (userRole !== "team lead" && selectedEmployee === employeeId) || isTeamLeadSubmittingOwnAssessment
+//               ) && (
 //                 <Box mt={3} display="flex" justifyContent="flex-end">
 //                   <Button variant="contained" color="primary" onClick={handleSubmit}>
 //                     Submit
@@ -553,12 +564,17 @@
 //             </Box>
 //           ) : (
 //             <Box mt={4}>
+//                   {loadingCycles ? (
+//   // Skeleton placeholder when loading
+//   <Skeleton variant="rectangular" width={200} height={25} sx={{ borderRadius: 1 }} />
+// ) :(
 //               <Typography variant="body1" color="text.secondary">
 //                 No questions allocated for you.
 //               </Typography>
+// )}
 //             </Box>
 //           )}
-
+        
 //           <LeadAssessmentModal
 //             open={isModalOpen}
 //             onClose={closeModal}
@@ -591,6 +607,14 @@
 // export default DropdownPage;
 
 
+
+
+
+
+
+
+
+// code 2 - with submit at all cycles working final
 import React, { useState, useEffect } from "react";
 import {
   MenuItem,
@@ -639,6 +663,7 @@ const DropdownPage = () => {
   const [snackbarSeverity, setSnackbarSeverity] = useState("success"); 
   const [loadingCycles, setLoadingCycles] = useState(true);
 
+
   
   useEffect(() => {
     if (!employeeId) return;
@@ -671,8 +696,10 @@ const DropdownPage = () => {
             setSelectedEmployee(defaultEmployeeId);
     
             if (defaultEmployeeId) {
+              
               const managerResponse = await axios.get(`${API_URL}/reporting_manager/${defaultEmployeeId}`);
-              setTeamLeadName(managerResponse.data.reporting_manager_name);
+              const { reporting_manager_id, reporting_manager_name } = managerResponse.data;
+              setTeamLeadName(`${reporting_manager_id} - ${reporting_manager_name}`);
             }
           }
         }
@@ -685,7 +712,6 @@ const DropdownPage = () => {
           
             for (const cycle of cycles) {
               const empRes = await axios.get(`${API_URL}/employees/${cycle.cycle_id}/${employeeId}`);
-              // console.log(`Employees for cycle ${cycle.cycle_id}:`, empRes.data);
               if (empRes.data && empRes.data.length > 0) {
                 tlAssignedCycles.push({ ...cycle, employees: empRes.data });
               }
@@ -703,12 +729,12 @@ const DropdownPage = () => {
               setIsCycleActive(true);
           
               // Set default employee to team lead themselves
-              // console.log("Setting employees for team lead:", activeCycle.employees);
               setEmployees(activeCycle.employees);
               setSelectedEmployee(employeeId);
           
               const managerResponse = await axios.get(`${API_URL}/reporting_manager/${employeeId}`);
-              setTeamLeadName(managerResponse.data.reporting_manager_name);
+              const { reporting_manager_id, reporting_manager_name } = managerResponse.data;
+              setTeamLeadName(`${reporting_manager_id} - ${reporting_manager_name}`);
             }
           }
 
@@ -730,9 +756,10 @@ const DropdownPage = () => {
             //  Add this line to make sure the dropdown gets the employee list
             const employeesResponse = await axios.get(`${API_URL}/employees/${activeCycle.cycle_id}/${employeeId}`);
             setEmployees(employeesResponse.data);
-        
+
             const managerResponse = await axios.get(`${API_URL}/reporting_manager/${employeeId}`);
-            setTeamLeadName(managerResponse.data.reporting_manager_name);
+            const { reporting_manager_id, reporting_manager_name } = managerResponse.data;
+            setTeamLeadName(`${reporting_manager_id} - ${reporting_manager_name}`);
           }
         }
         
@@ -748,7 +775,7 @@ const DropdownPage = () => {
     fetchUserRoleAndCycles();
   }, [employeeId]);
 
-useEffect(() => {
+  useEffect(() => {
     const fetchAssessmentDataAndResponses = async () => {
       if (!selectedCycle || !selectedEmployee) return;
       
@@ -774,7 +801,7 @@ useEffect(() => {
               : res.response_text?.[0] || "";
           });
           
-          // console.log("Processed responses:", previous);
+          
           setResponses(previous);
         } catch (err) {
           if (err.response?.status === 404) {
@@ -806,32 +833,39 @@ useEffect(() => {
     setModalOpen(false);
   };
 
-const handleEmployeeChange = async (e) => {
-    const empId = e.target.value;
-    setSelectedEmployee(empId);
-    setTeamLeadName("");
-  
-    // Always clear existing data when changing employee
-    setAssessmentData([]);
-    setResponses({});
-  
-    try {
-      const managerResponse = await axios.get(`${API_URL}/reporting_manager/${empId}`);
-      // setTeamLeadName(managerResponse.data.reporting_manager_name);
-      const { reporting_manager_id, reporting_manager_name } = managerResponse.data;
-      console.log("Manager Response:", managerResponse.data);
-      setTeamLeadName(`${reporting_manager_id} - ${reporting_manager_name}`);
+  const handleEmployeeChange = async (e) => {
+      const empId = e.target.value;
+      setSelectedEmployee(empId);
+      setTeamLeadName("");
+    
+      // Always clear existing data when changing employee
+      setAssessmentData([]);
+      setResponses({});
+    
+      try {
+        const managerResponse = await axios.get(`${API_URL}/reporting_manager/${empId}`);
+        const { reporting_manager_id, reporting_manager_name } = managerResponse.data;
+        setTeamLeadName(`${reporting_manager_id} - ${reporting_manager_name}`);
 
-    } catch (error) {
-      console.error("Error fetching reporting manager:", error);
-    }
+      } catch (error) {
+        console.error("Error fetching reporting manager:", error);
+      }
   };
-  
+
   const handleCycleChange = async (e) => {
     const cycleId = e.target.value;
     setSelectedCycle(cycleId);
   
     try {
+      // First, find the selected cycle in the already loaded cycles
+      const selectedCycleObj = appraisalCycles.find(cycle => cycle.cycle_id === cycleId);
+      
+      // Immediately update the isCycleActive state based on the local data
+      if (selectedCycleObj) {
+        setIsCycleActive(selectedCycleObj.status === "active");
+      }
+      
+      // Then also verify with the API (as a backup)
       const cycleResponse = await axios.get(`${API_URL}/appraisal_cycle/${cycleId}`);
       setIsCycleActive(cycleResponse.data.status === "active");
   
@@ -841,9 +875,9 @@ const handleEmployeeChange = async (e) => {
       if (userRole === "team lead" || userRole === "admin") {
         // For Team Leads, always default to themselves
         setSelectedEmployee(employeeId);
-  
         const managerRes = await axios.get(`${API_URL}/reporting_manager/${employeeId}`);
-        setTeamLeadName(managerRes.data.reporting_manager_name);
+        const { reporting_manager_id, reporting_manager_name } = managerRes.data;
+        setTeamLeadName(`${reporting_manager_id} - ${reporting_manager_name}`);
       } else {
         // HR or employee flow
         const userExists = employeesResponse.data.some((emp) => emp.employee_id === employeeId);
@@ -855,14 +889,43 @@ const handleEmployeeChange = async (e) => {
   
         if (defaultEmpId) {
           const managerRes = await axios.get(`${API_URL}/reporting_manager/${defaultEmpId}`);
-          setTeamLeadName(managerRes.data.reporting_manager_name);
+          const { reporting_manager_id, reporting_manager_name } = managerRes.data;
+          setTeamLeadName(`${reporting_manager_id} - ${reporting_manager_name}`);
         }
       }
     } catch (error) {
       console.error("Error handling cycle change:", error);
+      // In case of error, ensure we check the local data
+      const selectedCycleObj = appraisalCycles.find(cycle => cycle.cycle_id === cycleId);
+      if (selectedCycleObj) {
+        setIsCycleActive(selectedCycleObj.status === "active");
+      }
     }
   };
   
+  const canUserSubmit = () => {
+    // For debugging - log the key values affecting the decision
+    console.log({
+      userRole,
+      selectedEmployee,
+      employeeId,
+      isCycleActive,
+      isEqual: String(selectedEmployee) === String(employeeId)
+    });
+    
+    // Regular employee viewing their own assessment
+    if (userRole !== "team lead" && userRole !== "admin" && String(selectedEmployee) === String(employeeId)) {
+      return isCycleActive;
+    }
+    
+    // Team lead submitting their own assessment
+    if ((userRole === "team lead" || userRole === "admin") && String(selectedEmployee) === String(employeeId)) {
+      return isCycleActive;
+    }
+    
+    return false;
+  };
+
   const handleResponseChange = (questionId, value) => {
     setResponses((prevResponses) => ({
       ...prevResponses,
@@ -870,7 +933,7 @@ const handleEmployeeChange = async (e) => {
     }));
   };
 
-const renderInputField = (question) => {
+  const renderInputField = (question) => {
     const { question_id, question_type, options = [] } = question;
     
     // Determine if fields should be read-only
@@ -998,7 +1061,7 @@ const renderInputField = (question) => {
     }
   };
 
-const refreshAssessmentData = async () => {
+  const refreshAssessmentData = async () => {
     if (!selectedCycle || !selectedEmployee) return;
   
     // Always use the selected employee's data
@@ -1032,56 +1095,54 @@ const refreshAssessmentData = async () => {
     }
   };
   
-  const isTeamLeadSubmittingOwnAssessment = (userRole === "team lead" || userRole === "admin") && String(selectedEmployee) === String(employeeId);
+
   return (
     <Card sx={{m:2,  justifyContent: "center" }}>
         <CardContent>
           <Box sx={{ display: "flex", gap: 4, alignItems: "center", flexWrap: "wrap", mt:2 }}>
-          {loadingCycles ? (
-  // Skeleton placeholder when loading
-  <Skeleton variant="rectangular" width={200} height={40} sx={{ borderRadius: 1 }} />
-) : (
-            <FormControl sx={{ minWidth: 200 }} size="small">
-              <InputLabel sx={{background:"white", pl:1,pr:1}}>Appraisal Cycle</InputLabel>
-              <Select value={selectedCycle} onChange={handleCycleChange}>
-                {appraisalCycles.map((cycle) => (
-                  <MenuItem key={cycle.cycle_id} value={cycle.cycle_id}>
-                    {/* {cycle.cycle_name} */}
-                    <Tooltip title={`${cycle.cycle_id} - ${cycle.cycle_name}`} placement="top" arrow>
-                      <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "inline-block", maxWidth: "200px" }}>
-                         {cycle.cycle_name}
-                      </span>
-                    </Tooltip>
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-)}
- {loadingCycles ? (
-  // Skeleton placeholder when loading
-  <Skeleton variant="rectangular" width={200} height={40} sx={{ borderRadius: 1 }} />
-) : (
-            <FormControl sx={{ minWidth: 200  }} size="small">
-              <InputLabel sx={{background:"white", pl:1,pr:1}}>Employee</InputLabel>
-              <Select value={selectedEmployee} onChange={handleEmployeeChange}>
-                {employees.map((emp) => (
-                  <MenuItem key={emp.employee_id} value={emp.employee_id}>
-                    <Tooltip title={`${emp.employee_id} - ${emp.employee_name}`} placement="top" arrow>
-                      <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "inline-block", maxWidth: "200px" }}>
-                        {emp.employee_id} - {emp.employee_name}
-                      </span>
-                    </Tooltip>
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-)}
+            {loadingCycles ? (
+              // Skeleton placeholder when loading
+              <Skeleton variant="rectangular" width={200} height={40} sx={{ borderRadius: 1 }} />
+              ) : (
+                        <FormControl sx={{ minWidth: 200 }} size="small">
+                          <InputLabel sx={{background:"white", pl:1,pr:1}}>Appraisal Cycle</InputLabel>
+                          <Select value={selectedCycle} onChange={handleCycleChange}>
+                            {appraisalCycles.map((cycle) => (
+                              <MenuItem key={cycle.cycle_id} value={cycle.cycle_id}>
+                                <Tooltip title={`${cycle.cycle_id} - ${cycle.cycle_name}`} placement="top" arrow>
+                                  <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "inline-block", maxWidth: "200px" }}>
+                                    {cycle.cycle_name}
+                                  </span>
+                                </Tooltip>
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+            )}
+            
+            {loadingCycles ? (
+              // Skeleton placeholder when loading
+              <Skeleton variant="rectangular" width={200} height={40} sx={{ borderRadius: 1 }} />
+              ) : (
+                        <FormControl sx={{ minWidth: 200  }} size="small">
+                          <InputLabel sx={{background:"white", pl:1,pr:1}}>Employee</InputLabel>
+                          <Select value={selectedEmployee} onChange={handleEmployeeChange}>
+                            {employees.map((emp) => (
+                              <MenuItem key={emp.employee_id} value={emp.employee_id}>
+                                <Tooltip title={`${emp.employee_id} - ${emp.employee_name}`} placement="top" arrow>
+                                  <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "inline-block", maxWidth: "200px" }}>
+                                    {emp.employee_id} - {emp.employee_name}
+                                  </span>
+                                </Tooltip>
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+            )}
 
             {selectedEmployee && (
               <TextField
-                // value={teamLeadName || "N/A"}
                 value={teamLeadName || "N/A"}
-
                 InputProps={{ 
                   readOnly: true,
                   disableUnderline: true,
@@ -1091,19 +1152,17 @@ const refreshAssessmentData = async () => {
             )}
    
             {(userRole === "team lead" || userRole === "Team Lead" || userRole === "admin") && (
-              
-              <Box sx={{ position: "absolute", left: "85%", top: "10%" }}>
-                 {loadingCycles ? (
-  // Skeleton placeholder when loading
-  <Skeleton variant="rectangular" width={150} height={25} sx={{ borderRadius: 1 }} />
-) : (
-                <a
-                  onClick={openModal}
-                  style={{ cursor: "pointer", color: "blue", textDecoration: "underline", fontSize: "20px" }}
-                >
-                  Lead Assessment
-                </a>
-)}
+              <Box sx={{ display: "flex", justifyContent: "flex-end", alignItems: "center", flex: 1 }}>
+                {loadingCycles ? (
+                  <Skeleton variant="rectangular" width={150} height={25} sx={{ borderRadius: 1 }} />
+                ) : (
+                  <a
+                    onClick={openModal}
+                    style={{ cursor: "pointer", color: "blue", textDecoration: "underline", fontSize: "16px" }}
+                  >
+                    Lead Assessment
+                  </a>
+                )}
               </Box>
             )}
               
@@ -1112,23 +1171,23 @@ const refreshAssessmentData = async () => {
 
       <Card sx={{ width: "100%",mt:2 }}>
         <CardContent>
-        {loadingCycles ? (
-  // Skeleton placeholder when loading
-  <Skeleton variant="rectangular" width={500} height={25} sx={{ borderRadius: 1 }} />
-) : (<Typography variant="h5" sx={{ mb: 4, display: "flex", alignItems: "center", justifyContent: "space-between" }} color="primary" fontWeight={"bold"}>
-            <span>
-              {(userRole === "team lead" || userRole === "admin")&& selectedEmployee !== employeeId 
-                ? `Employee Self Assessment (${employees.find(emp => emp.employee_id === selectedEmployee)?.employee_name || 'Unknown'})` 
-                : `Self Assessment`}
-              {selectedCycle && `: ${appraisalCycles.find(cycle => cycle.cycle_id === selectedCycle)?.cycle_name || ''}`}
-            </span>
-            <Tooltip title="Refresh responses" arrow>
-              <IconButton onClick={refreshAssessmentData} size="small" color="primary">
-                <RefreshIcon />
-              </IconButton>
-            </Tooltip>
-          </Typography>
-)}
+          {loadingCycles ? (
+            // Skeleton placeholder when loading
+            <Skeleton variant="rectangular" width={500} height={25} sx={{ borderRadius: 1 }} />
+            ) : (<Typography variant="h5" sx={{ mb: 4, display: "flex", alignItems: "center", justifyContent: "space-between" }} color="primary" fontWeight={"bold"}>
+                      <span>
+                        {(userRole === "team lead" || userRole === "admin")&& selectedEmployee !== employeeId 
+                          ? `Employee Self Assessment (${employees.find(emp => emp.employee_id === selectedEmployee)?.employee_name || 'Unknown'})` 
+                          : `Self Assessment`}
+                        {selectedCycle && `: ${appraisalCycles.find(cycle => cycle.cycle_id === selectedCycle)?.cycle_name || ''}`}
+                      </span>
+                      <Tooltip title="Refresh responses" arrow>
+                        <IconButton onClick={refreshAssessmentData} size="small" color="primary">
+                          <RefreshIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </Typography>
+          )}
 
           {assessmentData.length > 0 ? (
             <Box mt={4}>
@@ -1141,10 +1200,8 @@ const refreshAssessmentData = async () => {
                 </Box>
               ))}
       
-
-      {isCycleActive && (
-                (userRole !== "team lead" && selectedEmployee === employeeId) || isTeamLeadSubmittingOwnAssessment
-              ) && (
+              {/* FIXED SUBMIT BUTTON LOGIC - Now using the canUserSubmit helper function */}
+              {canUserSubmit() && (
                 <Box mt={3} display="flex" justifyContent="flex-end">
                   <Button variant="contained" color="primary" onClick={handleSubmit}>
                     Submit
@@ -1154,14 +1211,14 @@ const refreshAssessmentData = async () => {
             </Box>
           ) : (
             <Box mt={4}>
-                  {loadingCycles ? (
-  // Skeleton placeholder when loading
-  <Skeleton variant="rectangular" width={200} height={25} sx={{ borderRadius: 1 }} />
-) :(
-              <Typography variant="body1" color="text.secondary">
-                No questions allocated for you.
-              </Typography>
-)}
+              {loadingCycles ? (
+              // Skeleton placeholder when loading
+              <Skeleton variant="rectangular" width={200} height={25} sx={{ borderRadius: 1 }} />
+              ) :(
+                        <Typography variant="body1" color="text.secondary">
+                          No questions allocated for you.
+                        </Typography>
+              )}
             </Box>
           )}
         
@@ -1180,19 +1237,29 @@ const refreshAssessmentData = async () => {
       </Card>
 
       <Snackbar
-  open={snackbarOpen}
-  autoHideDuration={4000}
-  onClose={() => setSnackbarOpen(false)}
-  anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
->
-  <Alert onClose={() => setSnackbarOpen(false)} severity={snackbarSeverity} sx={{ width: '100%' }}>
-    {snackbarMessage}
-  </Alert>
-</Snackbar>
+        open={snackbarOpen}
+        autoHideDuration={4000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={() => setSnackbarOpen(false)} severity={snackbarSeverity} sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
 
     </Card>
   );
+
 };
 
 export default DropdownPage;
+
+
+
+
+
+
+
+
+
 
