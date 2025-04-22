@@ -10,7 +10,11 @@ import {
   GridToolbarExport,
   GridToolbarQuickFilter,
 } from "@mui/x-data-grid";
+import { Skeleton } from '@mui/material';
+import { useNavigate } from "react-router-dom";
+
 const API_URL = process.env.REACT_APP_BASE_URL; 
+
 // Custom Toolbar Component with Better Alignment
 function CustomToolbar() {
     return (
@@ -36,8 +40,11 @@ export default function DataGridDemo({ onSelect }) {
   const [employeeMap, setEmployeeMap] = React.useState({}); // To map employee_id -> employee_name
   const [originalRows, setOriginalRows] = React.useState([]); // Store original order
   const [selectedIds, setSelectedIds] = React.useState([]); // Track selected rows
+  const navigate = useNavigate();     
+  const [loadingEmployees, setLoadingEmployees] = React.useState(true);  
 
   React.useEffect(() => {
+    setLoadingEmployees(true)
     fetch(`${API_URL}/`) // API call to FastAPI
       .then((response) => response.json())
       .then((data) => {
@@ -62,7 +69,8 @@ export default function DataGridDemo({ onSelect }) {
         setRows(formattedData);
         setOriginalRows(formattedData); // Store original order
       })
-      .catch((error) => console.error("Error fetching data:", error));
+      .catch((error) => console.error("Error fetching data:", error))
+      .finally(() => setLoadingEmployees(false));
   }, []);
   
   const handleRowSelection = (selectedRowIds) => {
@@ -99,7 +107,19 @@ export default function DataGridDemo({ onSelect }) {
   const getRowHeight = () => 35;
 
   return (
-    // <Box item sx={{ height: 600, width: '100%', overflow: 'auto'}}>
+    <>
+    {(loadingEmployees) ?  (
+      <Box sx={{ width: '100%', mt: 2 }}>
+        {[...Array(20)].map((_, index) => (
+          <Skeleton key={index} variant="rectangular" height={30} sx={{
+            mb: 1,
+            bgcolor: '#e6e9ed',
+            opacity: 0.3
+          }}/>
+        ))}
+      </Box> 
+
+      ) : (
       <DataGrid
         sx = {{height: 500, overflow: "auto",
           "& .MuiDataGrid-columnHeaderTitle": {
@@ -116,7 +136,7 @@ export default function DataGridDemo({ onSelect }) {
         selectionModel={selectedIds} // Maintain selection state
         rowHeight={getRowHeight()}
         hideFooter
-      />
-    // </Box>
+      />)}
+  </>
   );
 }

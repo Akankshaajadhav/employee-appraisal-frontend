@@ -18,6 +18,7 @@ import {
   MenuItem,
   FormControl,
   Select,
+  Skeleton,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 
@@ -43,6 +44,7 @@ export default function Questionnaire({ onClose }) {
   const [question_type, setQuestionType] = useState("");
   const [mcqOptions, setMcqOptions] = useState([""]);
   const [yesNoLabels, setYesNoLabels] = useState(["Yes", "No"]);
+  const [loadingQuestions, setLoadingquestions] = React.useState(true); 
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -192,12 +194,14 @@ export default function Questionnaire({ onClose }) {
   // Fetch question list.
   const loadQuestions = async () => {
     try {
+      setLoadingquestions(true)
       const data = await fetchQuestions();
       setQuestions(data);
     } catch (err) {
       setError("Failed to load questions");
     } finally {
-      setLoading(false);
+      // setLoading(false);
+      setLoadingquestions(false)
     }
   };
 
@@ -239,12 +243,18 @@ export default function Questionnaire({ onClose }) {
               }}
             >
               {/* Left Panel */}
-              <Box sx={{ flex: 1, p: 1, minWidth: 600, maxHeight: "100vh" }}>
-                {loading ? (
-                  <p>Loading questions...</p>
-                ) : error ? (
-                  <p>{error}</p>
-                ) : (
+                {(loadingQuestions) ?  (
+                        <Box sx={{ width: '100%', mt: 2 }}>
+                          {[...Array(20)].map((_, index) => (
+                            <Skeleton key={index} variant="rectangular" height={30} sx={{
+                              mb: 1,
+                              bgcolor: '#e6e9ed',
+                              opacity: 0.3
+                            }}/>
+                          ))}
+                        </Box> 
+                
+                        ) : (
                   <DataGrid
                     rows={questions}
                     columns={columns}
@@ -256,8 +266,7 @@ export default function Questionnaire({ onClose }) {
                       },
                     }}
                   />
-                )}
-              </Box>
+                        )}
             </Box>
           </Card>
           {/* Right Panel */}

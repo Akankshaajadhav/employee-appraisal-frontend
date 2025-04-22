@@ -22,7 +22,9 @@ import {
     Button,
     Grid,
     IconButton,
+    Skeleton,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -36,18 +38,29 @@ export default function CheckboxList({ onSelect }) {
     const [isPreviewMode, setIsPreviewMode] = useState(false); 
     const [previousChecked, setPreviousChecked] = useState([]);
     const [hasPreviewFilters, setHasPreviewFilters] = useState(false);
+    const navigate = useNavigate();     
+    const [loadingQuestions, setLoadingquestions] = React.useState(true);  
 
-    const fetchQuestions = () => {
+    const fetchQuestions = () => {             //3
+        setLoadingquestions(true); // start loading
         setQuestions([]); 
         setChecked([]);  
         setSearchTerm("");
         setType("");
         setIsPreviewMode(false);
+    
         fetch(`${API_URL}/question`)
             .then((response) => response.json())
-            .then((data) => setQuestions(data))
-            .catch((error) => console.error("Error fetching questions:", error));
+            .then((data) => {
+                setQuestions(data);
+                setLoadingquestions(false); // done loading
+            })
+            .catch((error) => {
+                console.error("Error fetching questions:", error);
+                setLoadingquestions(false); // stop loading on error too
+            });
     };
+    
     
     useEffect(() => {
         fetchQuestions();
@@ -169,6 +182,19 @@ export default function CheckboxList({ onSelect }) {
     </Box>
 
     {/* Questions List - Fixed Height to Keep Button at Bottom */}
+
+    {(loadingQuestions) ?  (
+        <Box sx={{ width: '100%', mt: 2 }}>
+          {[...Array(20)].map((_, index) => (
+            <Skeleton key={index} variant="rectangular" height={30} sx={{
+              mb: 1,
+              bgcolor: '#e6e9ed',
+              opacity: 0.3
+            }}/>
+          ))}
+        </Box> 
+
+        ) : (
     <Box sx={{ flex: 1, overflowY: "auto", maxHeight: "600px" }}>  
         <List sx={{ width: "100%", bgcolor: "background.paper" }}>
 
@@ -381,7 +407,7 @@ export default function CheckboxList({ onSelect }) {
                 );
             })}
         </List>
-    </Box>
+    </Box>)}
 
     <Box sx={{ mt: "auto", pt: 2, display: "flex", justifyContent: "flex-end" , mb:3,mr:1}}>
         <Button
