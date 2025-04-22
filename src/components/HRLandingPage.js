@@ -17,6 +17,8 @@ import {
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import CustomToolbar from "./CustomeToolbar";
+import Backdrop from '@mui/material/Backdrop';    
+import CircularProgress from '@mui/material/CircularProgress';    
 import { Edit, Delete, Visibility } from "@mui/icons-material";
 import {
   fetchAppraisalCycles,
@@ -33,6 +35,8 @@ const HRLandingPage = () => {
   const [selectedCycleId, setSelectedCycleId] = useState(null);
   const [selectedCycleName, setSelectedCycleName] = useState(null);
   const [loadingAppraisalCycles, setLoadingAppraisalCycles] = React.useState(true); 
+  const [deleting, setDeleting] = useState(false); 
+  
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -84,6 +88,7 @@ const HRLandingPage = () => {
   // Delete appraisal cycle
   const handleDelete = async (cycle_id) => {
     try {
+      setDeleting(true); // Show loading backdrop 
       let cycle = appraisalCycles.filter(
         (cycle) => cycle.cycle_id === cycle_id
       );
@@ -105,6 +110,9 @@ const HRLandingPage = () => {
       });
     } catch (err) {
       console.log("Error while deleting the cycle: " + err);
+    }
+    finally {
+      setDeleting(false); // Hide loading backdrop             
     }
   };
 
@@ -419,6 +427,12 @@ const HRLandingPage = () => {
           </Snackbar>
         </CardContent>
       </Card>
+      <Backdrop
+    sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+    open={deleting}     
+  >
+    <CircularProgress color="inherit" />
+  </Backdrop>
     </>
   );
 };

@@ -3,10 +3,15 @@ import { Button, Box, Card, Snackbar, Alert,Typography,Grid } from "@mui/materia
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
 import DataGridDemo from "./SelectEmployee"; // Employee Selection Component
 import CheckboxList from "./SelectQuestion"; // Question Selection Component
+import Backdrop from '@mui/material/Backdrop';    //1
+import CircularProgress from '@mui/material/CircularProgress';    //2
+
 const API_URL = process.env.REACT_APP_BASE_URL; 
+
 export default function Assignment({ cycleId, onClose,cycleName }) {
   const [selectedEmployees, setSelectedEmployees] = useState([]);
   const [selectedQuestions, setSelectedQuestions] = useState([]);
+  const [saving, setSaving] = useState(false); //3
 
   // Snackbar state
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -33,7 +38,7 @@ export default function Assignment({ cycleId, onClose,cycleName }) {
       employee_ids: selectedEmployees.map((emp) => emp.employee_id),
       question_ids: selectedQuestions.map((q) => q.question_id),
     };
-
+    setSaving(true); // Show loading backdrop  
     fetch(`${API_URL}/assignments/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -46,7 +51,11 @@ export default function Assignment({ cycleId, onClose,cycleName }) {
       .catch((error) => {
         console.error("Error assigning:", error);
         showSnackbar("The question is already assigned to the selected employee", "error");
+      })
+      .finally(() => {
+        setSaving(false); // Hide loading backdrop
       });
+      
   };
 
   const handleClose = () => {
@@ -56,6 +65,7 @@ export default function Assignment({ cycleId, onClose,cycleName }) {
   };
 
   return (
+    <>
     <Box>
       <Card sx={{ mt: 2, width: "100%", height: 600}}>
         <Grid container alignItems="center" justifyContent="space-between" sx={{mt:1,ml:1,mb:1}}>
@@ -116,5 +126,12 @@ export default function Assignment({ cycleId, onClose,cycleName }) {
         </Alert>
       </Snackbar>
     </Box>
+    <Backdrop
+    sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+    open={saving}     //5
+  >
+    <CircularProgress color="inherit" />
+  </Backdrop>
+  </>
   );
 }

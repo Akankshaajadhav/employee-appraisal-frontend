@@ -24,6 +24,9 @@ import { IconButton } from "@mui/material";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
+import Backdrop from '@mui/material/Backdrop';   
+import CircularProgress from '@mui/material/CircularProgress';    
+
 
 const API_URL = process.env.REACT_APP_BASE_URL;
 
@@ -45,6 +48,7 @@ const DropdownPage = () => {
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success"); 
   const [loadingCycles, setLoadingCycles] = useState(true);
+  const [saving, setSaving] = useState(false); 
 
 
   
@@ -396,6 +400,7 @@ const DropdownPage = () => {
 
   const handleSubmit = async () => {
     try {
+      setSaving(true); // Show loading backdrop       //3
       const payload = assessmentData.map((question) => {
         const response = responses[question.question_id];
         const question_type = question.question_type.toLowerCase();
@@ -442,6 +447,9 @@ const DropdownPage = () => {
       setSnackbarSeverity("error");
       setSnackbarOpen(true);
     }
+    finally {
+      setSaving(false); // Hide loading backdrop           
+    }
   };
 
   const refreshAssessmentData = async () => {
@@ -480,6 +488,7 @@ const DropdownPage = () => {
   
 
   return (
+    <>
     <Card sx={{m:2,  justifyContent: "center" }}>
         <CardContent>
           <Box sx={{ display: "flex", gap: 4, alignItems: "center", flexWrap: "wrap", mt:2 }}>
@@ -631,6 +640,13 @@ const DropdownPage = () => {
       </Snackbar>
 
     </Card>
+    <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={saving}     
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
+      </> 
   );
 
 };
