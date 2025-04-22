@@ -13,12 +13,12 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await login_auth(parseInt(employeeId), password);
+      const response = await login_auth(employeeId, password);
       console.log(response);
-  
+
       if (response.message === "Login successful") {
         const userRole = response.role.toLowerCase(); // Ensure role is in lowercase
-        localStorage.setItem("employee_id", employeeId); // Store ID
+        localStorage.setItem("employee_id", response.employee_id); // Store ID
         localStorage.setItem("user_role", userRole); // Store role
   
         // Redirect based on role
