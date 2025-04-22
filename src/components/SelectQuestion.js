@@ -114,9 +114,20 @@ export default function CheckboxList({ onSelect }) {
     return (
     <Box sx={{ width: "100%", display: "flex", flexDirection: "column", height: "550px" }}> 
     {/* Dropdown , refresh and Search */}
-    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+    <Box
+        sx={{
+            display: "flex",
+            flexDirection: { xs: "column", sm: "row" },
+            justifyContent: { xs: "flex-start", sm: "space-between" },
+            alignItems: { xs: "stretch", sm: "center" },
+            gap: 2,
+            mb: 2,
+            flexWrap: "wrap",
+        }}
+    >
+
         {/* Dropdown */}
-        <FormControl>
+        <FormControl sx={{ minWidth: { xs: "100%", sm: 200 } }}>
             <Select
                 labelId="question-type-label"
                 id="question-type-select"
@@ -141,7 +152,7 @@ export default function CheckboxList({ onSelect }) {
             </IconButton>
 
             <TextField
-                sx={{ width: "250px" }}
+                sx={{ width: { xs: "100%", sm: "250px" }}}
                 placeholder="Search"
                 variant="standard"
                 value={searchTerm}
