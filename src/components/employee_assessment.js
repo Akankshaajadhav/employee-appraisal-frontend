@@ -45,6 +45,8 @@ const DropdownPage = () => {
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success"); 
   const [loadingCycles, setLoadingCycles] = useState(true);
+  const [isReadOnly, setReadOnly] = useState(true);
+  const [isLeadAssessmentDisabled, setIsLeadAssessmentDisabled] = useState(false);
 
 
   
@@ -170,6 +172,29 @@ const DropdownPage = () => {
       const isViewingOtherEmployee = userRole === "team lead" && selectedEmployee !== employeeId;
       
       try {
+        let readOnly = false;
+        // STEP 1:check if selected cycle is active, Check if Self Assessment stage is active
+        if(isCycleActive ){
+      const stageRes = await axios.get(`${API_URL}/stages/self-assessment/${selectedCycle}`);
+      const { is_active } = stageRes.data;
+      const {is_completed} = stageRes.data;
+      if (!is_active && !is_completed) {
+        console.log("Self Assessment stage is not active.");
+        setAssessmentData([]);
+        setResponses({});
+        return;
+      }
+      // If stage is completed, show as read-only
+      if (is_completed) {
+        readOnly = true;
+        setReadOnly(true);
+      }else{
+        readOnly = true;
+        setReadOnly(false);
+      }
+
+    }
+      // STEP 2: Fetch assessment questions
         const questionsRes = await axios.get(`${API_URL}/assessment/questions/${questionOwnerId}/${selectedCycle}`);
         const questions = questionsRes.data || [];
         setAssessmentData(questions);
@@ -204,6 +229,31 @@ const DropdownPage = () => {
     fetchAssessmentDataAndResponses();
   }, [selectedCycle, selectedEmployee, userRole, employeeId]);
 
+
+
+  useEffect(() => {
+    const checkLeadAssessmentStage = async () => {
+      if (!selectedCycle || !selectedEmployee) return;
+      if (isCycleActive) {
+        try {
+          const res = await axios.get(`${API_URL}/stages/lead-assessment/${selectedCycle}`);
+          const { is_active } = res.data;
+  
+          if (!is_active) {
+            setIsLeadAssessmentDisabled(true); // Disable the link
+          } else {
+            setIsLeadAssessmentDisabled(false); // Enable if stage is active
+          }
+        } catch (err) {
+          console.error("Failed to fetch Lead Assessment stage info:", err);
+          setIsLeadAssessmentDisabled(true); // Safe fallback
+        }
+      }
+    };
+  
+    checkLeadAssessmentStage();
+  }, [selectedCycle]);
+  
   const openModal = () => {
     setCachedEmployee(selectedEmployee);
     setCachedManager(teamLeadName);
@@ -305,6 +355,12 @@ const DropdownPage = () => {
     if ((userRole === "team lead" || userRole === "admin") && String(selectedEmployee) === String(employeeId)) {
       return isCycleActive;
     }
+
+    //if Team lead is selecting the active cycle and and self assessment stage is completed 
+
+    if(isReadOnly === "true"){
+      return true;
+    }
     
     return false;
   };
@@ -322,7 +378,7 @@ const DropdownPage = () => {
     // Determine if fields should be read-only
     const isViewingOtherEmployee = (userRole === "team lead" || userRole === "admin")&& String(selectedEmployee) !== String(employeeId);
 
-    const isDisabled = !isCycleActive || isViewingOtherEmployee;
+    const isDisabled = !isCycleActive || isViewingOtherEmployee || isReadOnly;
   
     switch (question_type.toLowerCase()) {
       case "mcq":
@@ -444,6 +500,9 @@ const DropdownPage = () => {
     }
   };
 
+
+  
+
   const refreshAssessmentData = async () => {
     if (!selectedCycle || !selectedEmployee) return;
   
@@ -540,7 +599,8 @@ const DropdownPage = () => {
                   <Skeleton variant="rectangular" width={150} height={25} sx={{ borderRadius: 1 }} />
                 ) : (
                   <a
-                    onClick={openModal}
+                    onClick={openModal} disabled={isLeadAssessmentDisabled}
+
                     style={{ cursor: "pointer", color: "blue", textDecoration: "underline", fontSize: "16px" }}
                   >
                     Lead Assessment
@@ -586,7 +646,7 @@ const DropdownPage = () => {
               {/* FIXED SUBMIT BUTTON LOGIC - Now using the canUserSubmit helper function */}
               {canUserSubmit() && (
                 <Box mt={3} display="flex" justifyContent="flex-end">
-                  <Button variant="contained" color="primary" onClick={handleSubmit}>
+                  <Button variant="contained" color="primary" onClick={handleSubmit}  disabled={isReadOnly}>
                     Submit
                   </Button>
                 </Box>
