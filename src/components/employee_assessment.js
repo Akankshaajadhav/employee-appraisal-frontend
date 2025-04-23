@@ -54,6 +54,8 @@ const DropdownPage = () => {
 
   const [saving, setSaving] = useState(false); 
 
+  const [leadAssessmentActive, setLeadAssessmentActive] = useState(false);
+  const [leadAssessmentCompleted, setLeadAssessmentCompleted] = useState(false);
 
 
   
@@ -244,9 +246,12 @@ const DropdownPage = () => {
       if (isCycleActive) {
         try {
           const res = await axios.get(`${API_URL}/stages/lead-assessment/${selectedCycle}`);
-          const { is_active } = res.data;
-  
-          if (!is_active) {
+          const { is_active, is_completed } = res.data;
+          setLeadAssessmentActive(is_active);
+          setLeadAssessmentCompleted(is_completed);
+          if (!is_active && !is_completed) 
+             {
+            console.log("Self Assessment stage is not active.");
             setIsLeadAssessmentDisabled(true); // Disable the link
           } else {
             setIsLeadAssessmentDisabled(false); // Enable if stage is active
@@ -255,6 +260,8 @@ const DropdownPage = () => {
           console.error("Failed to fetch Lead Assessment stage info:", err);
           setIsLeadAssessmentDisabled(true); // Safe fallback
         }
+      } else {
+        setIsLeadAssessmentDisabled(false);
       }
     };
   
@@ -309,6 +316,15 @@ const DropdownPage = () => {
       const cycleResponse = await axios.get(`${API_URL}/appraisal_cycle/${cycleId}`);
       setIsCycleActive(cycleResponse.data.status === "active");
   
+
+      // Fetch the Lead Assessment Stage status
+    const stageResponse = await axios.get(`${API_URL}/stages/lead-assessment/${cycleId}`);
+    const { is_active: leadAssessmentActive, is_completed: leadAssessmentCompleted } = stageResponse.data;
+
+    setLeadAssessmentActive(leadAssessmentActive);
+    setLeadAssessmentCompleted(leadAssessmentCompleted);
+
+
       const employeesResponse = await axios.get(`${API_URL}/employees/${cycleId}/${employeeId}`);
       setEmployees(employeesResponse.data);
   
@@ -611,9 +627,16 @@ const DropdownPage = () => {
                   <Skeleton variant="rectangular" width={150} height={25} sx={{ borderRadius: 1 }} />
                 ) : (
                   <a
-                    onClick={openModal} disabled={isLeadAssessmentDisabled}
+                    onClick={isLeadAssessmentDisabled? null : openModal} 
 
-                    style={{ cursor: "pointer", color: "blue", textDecoration: "underline", fontSize: "16px" }}
+                    // style={{ cursor: "pointer", color: "blue", textDecoration: "underline", fontSize: "16px" }}
+                    style={{
+                      cursor: isLeadAssessmentDisabled ? "not-allowed" : "pointer",
+                      color: isLeadAssessmentDisabled ? "gray" : "blue",
+                      textDecoration:"underline",
+                      fontSize: "16px",
+                      pointerEvents: isLeadAssessmentDisabled ? "none" : "auto"
+                    }}
                   >
                     Lead Assessment
                   </a>
@@ -686,6 +709,8 @@ const DropdownPage = () => {
             setSelectedEmployee={setSelectedEmployee}
             employeeId={employeeId}
             isCycleActive={isCycleActive}
+            leadAssessmentActive={leadAssessmentActive}       
+            leadAssessmentCompleted={leadAssessmentCompleted}  
             prefilledData={null}
           />
         </CardContent>
