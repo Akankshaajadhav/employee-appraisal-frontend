@@ -10,10 +10,15 @@ import {
   IconButton,
   Snackbar,
   Alert,
- Menu, MenuItem
+ Menu, 
+ MenuItem,
+ Skeleton,
+ Box,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import CustomToolbar from "./CustomeToolbar";
+import Backdrop from '@mui/material/Backdrop';    
+import CircularProgress from '@mui/material/CircularProgress';    
 import { Edit, Delete, Visibility } from "@mui/icons-material";
 import {
   fetchAppraisalCycles,
@@ -25,8 +30,13 @@ const HRLandingPage = () => {
   const navigate = useNavigate();
 
   const [appraisalCycles, setAppraisalCycles] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [detailsVisible, setDetailsVisible] = useState(false);
+  const [selectedCycleId, setSelectedCycleId] = useState(null);
+  const [selectedCycleName, setSelectedCycleName] = useState(null);
+  const [loadingAppraisalCycles, setLoadingAppraisalCycles] = React.useState(true); 
+  const [deleting, setDeleting] = useState(false); 
+  
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -61,20 +71,24 @@ const HRLandingPage = () => {
   // Fetch appraisal cycle list
   const loadAppraisalCycles = async () => {
     try {
+      setLoadingAppraisalCycles(true)
       const data = await fetchAppraisalCycles();
       setAppraisalCycles(data);
       console.log(data);
-      setLoading(false);
     } catch (err) {
       setError("Failed to load appraisal cycles");
       console.log("Error while fetching cycles: " + err);
-      setLoading(false);
     }
+    finally{
+      setLoadingAppraisalCycles(false);
+    }
+
   };
 
   // Delete appraisal cycle
   const handleDelete = async (cycle_id) => {
     try {
+      setDeleting(true); // Show loading backdrop 
       let cycle = appraisalCycles.filter(
         (cycle) => cycle.cycle_id === cycle_id
       );
@@ -97,11 +111,10 @@ const HRLandingPage = () => {
     } catch (err) {
       console.log("Error while deleting the cycle: " + err);
     }
+    finally {
+      setDeleting(false); // Hide loading backdrop             
+    }
   };
-
-  const [detailsVisible, setDetailsVisible] = useState(false);
-  const [selectedCycleId, setSelectedCycleId] = useState(null);
-  const [selectedCycleName, setSelectedCycleName] = useState(null);
 
   const toggleDetailsView = (cycleId) => {
     const selectedCycle = appraisalCycles.find(
@@ -356,15 +369,19 @@ const HRLandingPage = () => {
                 </Grid>
               </Grid>
 
-              <Grid container spacing={2} style={{ height: "100%" }}>
-                {loading ? (
-                  <Grid item xs={12}>
-                    <p>Loading appraisal cycles...</p>
-                  </Grid>
-                ) : error ? (
-                  <Grid item xs={12}>
-                    <p>{error}</p>
-                  </Grid>
+
+
+              {(loadingAppraisalCycles) ?  (
+                <Box sx={{ width: '100%', mt: 2 }}>
+                  {[...Array(20)].map((_, index) => (
+                    <Skeleton key={index} variant="rectangular" height={30} sx={{
+                      mb: 1,
+                      bgcolor: '#e6e9ed',
+                      opacity: 0.3
+                    }}/>
+                  ))}
+                </Box> 
+
                 ) : (
                   <Grid item xs={12} style={{ height: "100%", width: "100%" }}>
                     <DataGrid
@@ -386,8 +403,9 @@ const HRLandingPage = () => {
                       hideFooter
                     />
                   </Grid>
-                )}
-              </Grid>
+                )
+              }
+             
             </CardContent>
           </Card>
 
@@ -409,6 +427,12 @@ const HRLandingPage = () => {
           </Snackbar>
         </CardContent>
       </Card>
+      <Backdrop
+    sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+    open={deleting}     
+  >
+    <CircularProgress color="inherit" />
+  </Backdrop>
     </>
   );
 };

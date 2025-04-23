@@ -20,6 +20,8 @@ import AddIcon from "@mui/icons-material/Add";
 import TextField from "@mui/material/TextField";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
+import Backdrop from '@mui/material/Backdrop';    
+import CircularProgress from '@mui/material/CircularProgress';    
 import RefreshOutlinedIcon from '@mui/icons-material/RefreshOutlined';
 import { useNavigate } from "react-router-dom";
 import { cycleById, editAppraisalCycle } from "../services/EditAppraisalCycle";
@@ -46,6 +48,9 @@ const EditAppraisalCycle = ({ onClose }) => {
     message: "",
     severity: "success",
   });
+
+  //Save state
+  const [saving, setSaving] = useState(false); 
 
   // Stages State
   const [stages, setStages] = useState([
@@ -250,6 +255,7 @@ const EditAppraisalCycle = ({ onClose }) => {
   const handleSave = async () => {
     try {
       console.log("Saving Appraisal Cycle...");
+      setSaving(true); // Show loading backdrop       
       // Step 1: Save Appraisal Cycle
       const cycleData = {
         cycle_id: cycle.cycle_id,
@@ -276,6 +282,9 @@ const EditAppraisalCycle = ({ onClose }) => {
         severity: "error",
       });
     }
+    finally {
+      setSaving(false); // Hide loading backdrop             //4
+    }
   };
 
   const addParameter = () => {
@@ -299,6 +308,7 @@ const EditAppraisalCycle = ({ onClose }) => {
   const navigate = useNavigate();
 
   return (
+    <>
     <Card sx={{ p: 3, width: "90%", margin: "auto", mt: 5, mb: 3 }}>
       <Grid container alignItems="center">
         <Grid size={11}>
@@ -619,6 +629,13 @@ const EditAppraisalCycle = ({ onClose }) => {
         </Snackbar>
       </CardContent>
     </Card>
+    <Backdrop
+    sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+    open={saving}     //5
+  >
+    <CircularProgress color="inherit" />
+  </Backdrop>
+  </>
   );
 };
 

@@ -25,8 +25,8 @@ import {
   createParameter,
 } from "../services/AddAppraisalCycle";
 import { useNavigate } from "react-router-dom";
-import Backdrop from '@mui/material/Backdrop';
-import CircularProgress from '@mui/material/CircularProgress';
+import Backdrop from '@mui/material/Backdrop';    //1
+import CircularProgress from '@mui/material/CircularProgress';    //2
 
 
 const AddAppraisalCycle = ({ onClose }) => {
@@ -61,7 +61,7 @@ const AddAppraisalCycle = ({ onClose }) => {
   //new
   const [parameterErrors, setParameterErrors] = useState({});
 
-  const [saving, setSaving] = useState(false);
+  const [saving, setSaving] = useState(false); //3
 
   // Parameters State
   const [parameters, setParameters] = useState([
@@ -206,7 +206,7 @@ const AddAppraisalCycle = ({ onClose }) => {
   const handleSave = async () => {
     try {
       console.log("Saving Appraisal Cycle...");
-      setSaving(true); // Show loading backdrop
+      setSaving(true); // Show loading backdrop       //3
       // Step 1: Save Appraisal Cycle
       const cycleData = await createAppraisalCycle({
         cycle_name: cycleName,
@@ -257,7 +257,7 @@ const AddAppraisalCycle = ({ onClose }) => {
         severity: "error",
       });
     }finally {
-      setSaving(false); // Hide loading backdrop
+      setSaving(false); // Hide loading backdrop             //4
     }
   };
 
@@ -610,7 +610,7 @@ const AddAppraisalCycle = ({ onClose }) => {
     </Card>
     <Backdrop
     sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-    open={saving}
+    open={saving}     //5
   >
     <CircularProgress color="inherit" />
   </Backdrop>
