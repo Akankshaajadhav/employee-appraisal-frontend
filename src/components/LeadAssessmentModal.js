@@ -20,14 +20,16 @@ const API_URL = process.env.REACT_APP_BASE_URL; // from .env file
 
 
 
-const LeadAssessmentModal = ({ open, onClose, selectedCycle, employees, selectedEmployee, setSelectedEmployee, employeeId }) => {
+const LeadAssessmentModal = ({ open, onClose, selectedCycle, employees, selectedEmployee, setSelectedEmployee, employeeId ,leadAssessmentActive, leadAssessmentCompleted}) => {
   const [parameters, setParameters] = useState([]);
   const [employeeData, setEmployeeData] = useState({});
   const [cycleStatus, setCycleStatus] = useState("active"); // Assume active by default
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "error" });
   const [readOnly, setReadOnly] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
-    const [saving, setSaving] = useState(false);
+  const [saving, setSaving] = useState(false);
+    
+
   useEffect(() => {
     if (!selectedCycle || !selectedEmployee) return;
 
@@ -36,7 +38,13 @@ const LeadAssessmentModal = ({ open, onClose, selectedCycle, employees, selected
       .then(response => { 
         console.log("Cycle Status from API:", response.data.status);
         setCycleStatus(response.data.status);
-        setReadOnly(response.data.status !== "active"); // Set readOnly for non-active cycles
+        const isCompleted = response.data.status === "completed";
+        setReadOnly(isCompleted); // Set readOnly for completed cycles
+        // setReadOnly(response.data.status !== "active"); // Set readOnly for non-active cycles
+        // Only allow editing if leadAssessmentActive is true and leadAssessmentCompleted is false
+        const shouldBeReadOnly = !leadAssessmentActive || leadAssessmentCompleted;
+        setReadOnly(shouldBeReadOnly);
+
         console.log("ReadOnly set to:", response.data.status !== "active");
       })
       .catch(error => {
