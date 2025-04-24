@@ -7,6 +7,7 @@ import {
   IconButton,
   FormControl,
   Box,
+  Skeleton
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import Grid from "@mui/material/Grid";
@@ -74,6 +75,7 @@ const generateColumns = (data,columns) => {
   const questionSet = new Set();
   data.forEach((item) => {
     questionSet.add(item.question_text);
+    // resizable: true;
   });
 
   const questionColumns = Array.from(questionSet).map((q) => ({
@@ -97,17 +99,22 @@ const SelfAssessmentRepo = () => {
   const [response, setResponseData] = useState(null);
   const [employees, setEmployee] = useState(null);
   const [baseColumns] = useState([
-    { field: "employee_id", headerName: "Employee ID", width: 200 },
-    { field: "employee_name", headerName: "Name", width: 200 },
-    { field: "role", headerName: "Role", width: 200 },
-    { field: "reporting_manager", headerName: "Reporting Manager", width: 200 },
-    { field: "previous_reporting_manager", headerName: "Previous Manager", width: 200 },
+    { field: "employee_id", headerName: "Employee ID", flex:5, minWidth:100 },
+    { field: "employee_name", headerName: "Name", flex:5,minWidth:130 },
+    { field: "role", headerName: "Role", flex:5,minWidth:100 },
+    { field: "reporting_manager", headerName: "Reporting Manager", flex:5,minWidth:130 },
+    { field: "previous_reporting_manager", headerName: "Previous Manager", flex:5,minWidth:130 },
   ]);
+
+  //  const navigate = useNavigate();         // 1
+    const [loadingEmployees, setLoadingEmployees] = React.useState(true);  //2
+  const [loadingCycles, setLoadingCycles] = React.useState(true);  //3
 
 
   useEffect(() => {
     const getEmployees = async () => {
       try {
+        setLoadingEmployees(true);   //4
         const response = await getEmpList();
         const empMap = {};
         response.forEach(emp => {
@@ -129,6 +136,9 @@ const SelfAssessmentRepo = () => {
         
       } catch (error) {
         console.log("Error while fetching employees: " + error);
+      }
+      finally{
+        setLoadingEmployees(false);
       }
     };
     getEmployees();
@@ -154,6 +164,7 @@ const SelfAssessmentRepo = () => {
   useEffect(() => {
     const getActiveCycles = async () => {
       try {
+        setLoadingCycles(true);    //5
         const response = await activeCycles();
         const filteredCycles = response.filter(
           (cycle) => cycle.status === "completed" || cycle.status === "active"
@@ -161,6 +172,9 @@ const SelfAssessmentRepo = () => {
         setActiveCycles(filteredCycles);
       } catch (error) {
         console.log("Error while fetching cycle: " + error);
+      }
+      finally{
+        setLoadingCycles(false);
       }
     };
     getActiveCycles();
@@ -180,7 +194,10 @@ const MenuProps = {
   return (
     <>
       <Box sx={{ width: "100%" }}>
-        <Grid container alignItems="center" sx={{ m: 2, mb:0}}>
+        
+        <Card sx={{ m: 3, mt: 1 }}>
+        <Grid container alignItems="center" sx={{ ml: 1 }}>
+
           <Grid size={11}>
             <Typography variant="h6" color="primary">
               Self Assessment Report
@@ -192,9 +209,8 @@ const MenuProps = {
             </IconButton>
           </Grid>
         </Grid>
-        <Card sx={{ m: 2,mt:0 }}>
-          <CardContent>
-            <FormControl sx={{ mt:2,mb:1,width: 'auto' , minWidth:'20%'}}>
+        <CardContent>
+            <FormControl sx={{width: 'auto' , minWidth:'20%', mb:1}}>
               <InputLabel
                 sx={{ backgroundColor: "white", px: 1, top: "-4px", pr: "2px" }}
               >
@@ -224,6 +240,18 @@ const MenuProps = {
               </Select>
             </FormControl>
 
+            {(loadingEmployees || loadingCycles) ?  (
+                    <Box sx={{ width: '100%', mt: 2 }}>
+                      {[...Array(20)].map((_, index) => (
+                        <Skeleton key={index} variant="rectangular" height={30} sx={{
+                          mb: 1,
+                          bgcolor: '#e6e9ed',
+                          opacity: 0.3
+                        }}/>
+                      ))}
+                    </Box> 
+            
+                    ) : (
               <DataGrid
               rows={cycle_id ? pivotData(response, rows) : rows}
               columns={cycle_id ? generateColumns(response, baseColumns) : baseColumns}
@@ -240,7 +268,7 @@ const MenuProps = {
               slots={{ toolbar: CustomToolbar }}
               rowHeight={38}
               hideFooter
-            />
+            />)}
 
           </CardContent>
         </Card>

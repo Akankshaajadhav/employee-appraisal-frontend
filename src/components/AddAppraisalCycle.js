@@ -25,6 +25,9 @@ import {
   createParameter,
 } from "../services/AddAppraisalCycle";
 import { useNavigate } from "react-router-dom";
+import Backdrop from '@mui/material/Backdrop';    //1
+import CircularProgress from '@mui/material/CircularProgress';    //2
+
 
 const AddAppraisalCycle = ({ onClose }) => {
   // Appraisal Cycle State
@@ -57,6 +60,8 @@ const AddAppraisalCycle = ({ onClose }) => {
 
   //new
   const [parameterErrors, setParameterErrors] = useState({});
+
+  const [saving, setSaving] = useState(false); //3
 
   // Parameters State
   const [parameters, setParameters] = useState([
@@ -201,7 +206,7 @@ const AddAppraisalCycle = ({ onClose }) => {
   const handleSave = async () => {
     try {
       console.log("Saving Appraisal Cycle...");
-
+      setSaving(true); // Show loading backdrop       //3
       // Step 1: Save Appraisal Cycle
       const cycleData = await createAppraisalCycle({
         cycle_name: cycleName,
@@ -251,6 +256,8 @@ const AddAppraisalCycle = ({ onClose }) => {
         message: `Error: ${error.message}`,
         severity: "error",
       });
+    }finally {
+      setSaving(false); // Hide loading backdrop             //4
     }
   };
 
@@ -275,7 +282,8 @@ const AddAppraisalCycle = ({ onClose }) => {
   const navigate = useNavigate();
 
   return (
-    <Card sx={{ p: 3, width: "90%", margin: "auto", mt: 5, mb: 3 }}>
+    <>
+    <Card sx={{ p: 3, width: "95%", margin: "auto", mt: 2, mb: 3 }}>
       <Grid container alignItems="center">
         <Grid size={11}>
           <Typography variant="h6" color="primary">
@@ -324,6 +332,9 @@ const AddAppraisalCycle = ({ onClose }) => {
                   InputLabelProps={{ shrink: true }}
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
+                  inputProps={{
+                    min: new Date().toISOString().split('T')[0], // sets today as the minimum
+                  }}
                 />
               </Grid>
               <Grid size={6}>
@@ -597,6 +608,13 @@ const AddAppraisalCycle = ({ onClose }) => {
         </Snackbar>
       </CardContent>
     </Card>
+    <Backdrop
+    sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+    open={saving}     //5
+  >
+    <CircularProgress color="inherit" />
+  </Backdrop>
+  </>
   );
 };
 

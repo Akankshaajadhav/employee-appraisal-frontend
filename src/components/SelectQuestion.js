@@ -22,13 +22,14 @@ import {
     Button,
     Grid,
     IconButton,
+    Skeleton,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import DeleteIcon from '@mui/icons-material/Delete';
 const API_URL = process.env.REACT_APP_BASE_URL; 
 export default function CheckboxList({ onSelect }) {
-// export default function CheckboxList() {
     const [questions, setQuestions] = useState([]);
     const [checked, setChecked] = useState([]);
     const [type, setType] = React.useState("");
@@ -36,20 +37,30 @@ export default function CheckboxList({ onSelect }) {
     const [expandedQuestion, setExpandedQuestion] = useState(null);
     const [isPreviewMode, setIsPreviewMode] = useState(false); 
     const [previousChecked, setPreviousChecked] = useState([]);
+    const [hasPreviewFilters, setHasPreviewFilters] = useState(false);
+    const navigate = useNavigate();     
+    const [loadingQuestions, setLoadingquestions] = React.useState(true);  
 
-
-    const fetchQuestions = () => {
+    const fetchQuestions = () => {             //3
+        setLoadingquestions(true); // start loading
         setQuestions([]); 
         setChecked([]);  
         setSearchTerm("");
         setType("");
         setIsPreviewMode(false);
+    
         fetch(`${API_URL}/question`)
             .then((response) => response.json())
-            .then((data) => setQuestions(data))
-            .catch((error) => console.error("Error fetching questions:", error));
+            .then((data) => {
+                setQuestions(data);
+                setLoadingquestions(false); // done loading
+            })
+            .catch((error) => {
+                console.error("Error fetching questions:", error);
+                setLoadingquestions(false); // stop loading on error too
+            });
     };
-    console.log("questions :",questions);
+    
     
     useEffect(() => {
         fetchQuestions();
@@ -67,7 +78,6 @@ export default function CheckboxList({ onSelect }) {
             
             // Ensure `onSelect` is called with selected questions
             if (onSelect) {
-                console.log("Passing Selected Questions:", selectedQuestions);
                 onSelect(selectedQuestions);
             }
 
@@ -81,37 +91,61 @@ export default function CheckboxList({ onSelect }) {
 
     // Toggle between preview and selection mode
     const handlePreviewToggle = () => {
-        setIsPreviewMode((prev) => !prev); 
+        setIsPreviewMode((prev) => !prev);
+        setHasPreviewFilters(false); // Reset filters
+        setType(""); // Reset the dropdown to "Select Question Type"
+        setSearchTerm(""); // Optional: clear search too for a clean view
+    };
+
+    const handleTypeChange = (e) => {
+        setType(e.target.value);
+        if (isPreviewMode) setHasPreviewFilters(true);
+    };
+      
+    const handleSearchChange = (e) => {
+        setSearchTerm(e.target.value);
+        if (isPreviewMode) setHasPreviewFilters(true);
     };
 
      // Filter questions based on selected type & search key word
-     const filteredQuestions = questions.filter((question) =>
+    const filteredQuestions = questions.filter((question) =>
         (type === "" || question.question_type === type) &&  // Filter by type
         question.question_text.toLowerCase().includes(searchTerm.toLowerCase())  // Filter by search term
     );
 
     const selectedQuestions = questions.filter((q) => checked.includes(q.question_id));
 
-    // Filtering of questions in preview mode as per type and search keyword
     const visibleQuestions = isPreviewMode
-    ? selectedQuestions.filter((question) =>
-        (type === "" || question.question_type === type) &&
-        question.question_text.toLowerCase().includes(searchTerm.toLowerCase())
-      )
+    ? hasPreviewFilters
+        ? selectedQuestions.filter((question) =>
+            (type === "" || question.question_type === type) &&
+            question.question_text.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+        : selectedQuestions
     : filteredQuestions;
-
 
     return (
     <Box sx={{ width: "100%", display: "flex", flexDirection: "column", height: "550px" }}> 
     {/* Dropdown , refresh and Search */}
-    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+    <Box
+        sx={{
+            display: "flex",
+            flexDirection: { xs: "column", sm: "row" },
+            justifyContent: { xs: "flex-start", sm: "space-between" },
+            alignItems: { xs: "stretch", sm: "center" },
+            gap: 2,
+            mb: 2,
+            flexWrap: "wrap",
+        }}
+    >
+
         {/* Dropdown */}
-        <FormControl>
+        <FormControl sx={{ minWidth: { xs: "100%", sm: 200 } }}>
             <Select
                 labelId="question-type-label"
                 id="question-type-select"
                 value={type}
-                onChange={(e) => setType(e.target.value)}
+                onChange={handleTypeChange}
                 displayEmpty
                 sx={{height:40}}
             >
@@ -131,11 +165,11 @@ export default function CheckboxList({ onSelect }) {
             </IconButton>
 
             <TextField
-                sx={{ width: "250px" }}
+                sx={{ width: { xs: "100%", sm: "250px" }}}
                 placeholder="Search"
                 variant="standard"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={handleSearchChange}
                 InputProps={{
                     startAdornment: (
                         <InputAdornment position="start">
@@ -148,6 +182,19 @@ export default function CheckboxList({ onSelect }) {
     </Box>
 
     {/* Questions List - Fixed Height to Keep Button at Bottom */}
+
+    {(loadingQuestions) ?  (
+        <Box sx={{ width: '100%', mt: 2 }}>
+          {[...Array(20)].map((_, index) => (
+            <Skeleton key={index} variant="rectangular" height={30} sx={{
+              mb: 1,
+              bgcolor: '#e6e9ed',
+              opacity: 0.3
+            }}/>
+          ))}
+        </Box> 
+
+        ) : (
     <Box sx={{ flex: 1, overflowY: "auto", maxHeight: "600px" }}>  
         <List sx={{ width: "100%", bgcolor: "background.paper" }}>
 
@@ -157,8 +204,14 @@ export default function CheckboxList({ onSelect }) {
                     <ListItemIcon>
                         <Checkbox
                             edge="start"
-                            checked={false}
-                            indeterminate={false}
+                            checked={
+                                visibleQuestions.length > 0 &&
+                                visibleQuestions.every(q => checked.includes(q.question_id))
+                            }
+                            indeterminate={
+                                visibleQuestions.some(q => checked.includes(q.question_id)) &&
+                                !visibleQuestions.every(q => checked.includes(q.question_id))
+                            }
                             onChange={() => {
                                 if (checked.length === 0 && previousChecked.length > 0 || 
                                     (previousChecked.length > 0 && 
@@ -354,7 +407,7 @@ export default function CheckboxList({ onSelect }) {
                 );
             })}
         </List>
-    </Box>
+    </Box>)}
 
     <Box sx={{ mt: "auto", pt: 2, display: "flex", justifyContent: "flex-end" , mb:3,mr:1}}>
         <Button

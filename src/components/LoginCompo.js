@@ -13,18 +13,20 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await login_auth(parseInt(employeeId), password);
+      const response = await login_auth(employeeId, password);
       console.log(response);
-  
+
       if (response.message === "Login successful") {
         const userRole = response.role.toLowerCase(); // Ensure role is in lowercase
-        localStorage.setItem("employee_id", employeeId); // Store ID
+        localStorage.setItem("employee_id", response.employee_id); // Store ID
         localStorage.setItem("user_role", userRole); // Store role
   
         // Redirect based on role
         if (userRole === "hr") {
           navigate("/hr-home"); // HR landing page
-        } else {
+        } else if (userRole === "admin") {
+          navigate("/admin-home"); // admin landing page (Can see both appraisal cycle steup and assessment)
+        }else{
           navigate("/employee-home"); // Employee landing page
         }
       } else {
