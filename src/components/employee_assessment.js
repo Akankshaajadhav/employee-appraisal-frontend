@@ -57,6 +57,7 @@ const DropdownPage = () => {
   const [leadAssessmentActive, setLeadAssessmentActive] = useState(false);
   const [leadAssessmentCompleted, setLeadAssessmentCompleted] = useState(false);
 
+  const [modalSelectedEmployee, setModalSelectedEmployee] = useState("");  
 
   
   useEffect(() => {
@@ -269,15 +270,13 @@ const DropdownPage = () => {
   }, [selectedCycle]);
   
   const openModal = () => {
-    setCachedEmployee(selectedEmployee);
-    setCachedManager(teamLeadName);
+    setModalSelectedEmployee(selectedEmployee); // Initialize modal with current selection
     setModalOpen(true);
   };
-  
+
   const closeModal = () => {
-    setSelectedEmployee(cachedEmployee);
-    setTeamLeadName(cachedManager);
     setModalOpen(false);
+    // Don't update selectedEmployee here
   };
 
   const handleEmployeeChange = async (e) => {
@@ -567,7 +566,7 @@ const DropdownPage = () => {
 
   return (
     <>
-    <Card sx={{m:0,  justifyContent: "center" }}>
+    <Card sx={{ml:2,mr:2,  justifyContent: "center" }}>
         <CardContent>
           {/* Title */}
           {loadingCycles ? (
@@ -578,9 +577,7 @@ const DropdownPage = () => {
               color="primary" 
               fontWeight={"bold"}
             >
-              {(userRole === "team lead" || userRole === "admin") && selectedEmployee !== employeeId
-                ? `Employee Self Assessment (${employees.find(emp => emp.employee_id === selectedEmployee)?.employee_name || 'Unknown'})`
-                : `Self Assessment`}
+                Self Assessment
             </Typography>
           )}
 
@@ -706,7 +703,7 @@ const DropdownPage = () => {
               )}
             </Box>
           ) : (
-            <Box mt={4}>
+            <Box mt={0}>
               {loadingCycles ? (
               // Skeleton placeholder when loading
               <Skeleton variant="rectangular" width={200} height={25} sx={{ borderRadius: 1 }} />
@@ -717,20 +714,21 @@ const DropdownPage = () => {
               )}
             </Box>
           )}
-        
+
           <LeadAssessmentModal
             open={isModalOpen}
             onClose={closeModal}
             selectedCycle={selectedCycle}
             employees={employees}
-            selectedEmployee={selectedEmployee}
-            setSelectedEmployee={setSelectedEmployee}
+            selectedEmployee={modalSelectedEmployee}  // Use modal-specific state
+            setSelectedEmployee={setModalSelectedEmployee}  // Use modal-specific setter
             employeeId={employeeId}
             isCycleActive={isCycleActive}
             leadAssessmentActive={leadAssessmentActive}       
-            leadAssessmentCompleted={leadAssessmentCompleted}  
+            leadAssessmentCompleted={leadAssessmentCompleted} 
             prefilledData={null}
           />
+
         </CardContent>
       </Card>
 
