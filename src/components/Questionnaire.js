@@ -216,10 +216,10 @@ export default function Questionnaire({ onClose }) {
   ];
 
   return (
-    <Card sx={{ p: 3, width: "90%", margin: "auto", mt: 5, mb: 3 }}>
+    <Card sx={{  width: "100%", margin: "auto", mb: 3 }}>
       <Grid container alignItems="center">
         <Grid size={11}>
-          <Typography variant="h6" color="primary">
+          <Typography variant="h6" color="primary" fontWeight={"bold"} pl="14px" pt="10px">
             Questionnaire
           </Typography>
         </Grid>
@@ -265,6 +265,7 @@ export default function Questionnaire({ onClose }) {
                         fontWeight: "bold",
                       },
                     }}
+                    hideFooter
                   />
                         )}
             </Box>

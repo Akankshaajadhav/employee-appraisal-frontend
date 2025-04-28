@@ -106,11 +106,11 @@ const SelfAssessmentRepo = () => {
   const [response, setResponseData] = useState(null);
   const [employees, setEmployee] = useState(null);
   const [baseColumns] = useState([
-    { field: "employee_id", headerName: "Employee ID", flex:5, minWidth:100 },
-    { field: "employee_name", headerName: "Name", flex:5,minWidth:130 },
-    { field: "role", headerName: "Role", flex:5,minWidth:100 },
-    { field: "reporting_manager", headerName: "Reporting Manager", flex:5,minWidth:130 },
-    { field: "previous_reporting_manager", headerName: "Previous Manager", flex:5,minWidth:130 },
+    { field: "employee_id", headerName: "Employee ID", width:105 },
+    { field: "employee_name", headerName: "Name", flex:1,minWidth:130 },
+    { field: "role", headerName: "Role", flex:1,minWidth:100 },
+    { field: "reporting_manager", headerName: "Reporting Manager", flex:1,minWidth:130 },
+    { field: "previous_reporting_manager", headerName: "Previous Manager", flex:1,minWidth:130 },
   ]);
 
   //  const navigate = useNavigate();         // 1
@@ -204,7 +204,7 @@ const MenuProps = {
         <Card sx={{ m: 3, mt: 1 }}>
         <Grid container alignItems="center" sx={{ ml: 1 }}>
           <Grid size={11}>
-            <Typography variant="h6" color="primary">
+            <Typography variant="h6" color="primary" fontWeight={"bold"} pl="10px">
               Self Assessment Report
             </Typography>
           </Grid>
@@ -273,6 +273,7 @@ const MenuProps = {
               slots={{ toolbar: CustomToolbar }}
               rowHeight={38}
               hideFooter
+              checkboxSelection
             />)}
 
           </CardContent>

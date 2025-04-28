@@ -489,8 +489,24 @@ const DropdownPage = () => {
 
   return (
     <>
-    <Card sx={{m:2,  justifyContent: "center" }}>
+    <Card sx={{m:0,  justifyContent: "center" }}>
         <CardContent>
+          {/* Title */}
+          {loadingCycles ? (
+            <Skeleton variant="rectangular" width={500} height={25} sx={{ borderRadius: 1, mb: 2 }} />
+          ) : (
+            <Typography 
+              variant="h5" 
+              color="primary" 
+              fontWeight={"bold"}
+            >
+              {(userRole === "team lead" || userRole === "admin") && selectedEmployee !== employeeId
+                ? `Employee Self Assessment (${employees.find(emp => emp.employee_id === selectedEmployee)?.employee_name || 'Unknown'})`
+                : `Self Assessment`}
+            </Typography>
+          )}
+
+          {/* Cycle dropdown */}
           <Box sx={{ display: "flex", gap: 4, alignItems: "center", flexWrap: "wrap", mt:2 }}>
             {loadingCycles ? (
               // Skeleton placeholder when loading
@@ -512,6 +528,7 @@ const DropdownPage = () => {
                         </FormControl>
             )}
             
+            {/* Employee dropdown */}
             {loadingCycles ? (
               // Skeleton placeholder when loading
               <Skeleton variant="rectangular" width={200} height={40} sx={{ borderRadius: 1 }} />
@@ -532,6 +549,7 @@ const DropdownPage = () => {
                         </FormControl>
             )}
 
+            {/* Reporting manager name */}
             {selectedEmployee && (
               <TextField
                 value={teamLeadName || "N/A"}
@@ -543,6 +561,7 @@ const DropdownPage = () => {
               />
             )}
    
+            {/* Lead assessment link */}
             {(userRole === "team lead" || userRole === "Team Lead" || userRole === "admin") && (
               <Box sx={{ display: "flex", justifyContent: "flex-end", alignItems: "center", flex: 1 }}>
                 {loadingCycles ? (
@@ -561,33 +580,32 @@ const DropdownPage = () => {
           </Box> 
         </CardContent>
 
-      <Card sx={{ width: "100%",mt:2 }}>
+      <Card sx={{ width: "100%" }}>
         <CardContent>
-          {loadingCycles ? (
-            // Skeleton placeholder when loading
-            <Skeleton variant="rectangular" width={500} height={25} sx={{ borderRadius: 1 }} />
-            ) : (<Typography variant="h5" sx={{ mb: 4, display: "flex", alignItems: "center", justifyContent: "space-between" }} color="primary" fontWeight={"bold"}>
-                      <span>
-                        {(userRole === "team lead" || userRole === "admin")&& selectedEmployee !== employeeId 
-                          ? `Employee Self Assessment (${employees.find(emp => emp.employee_id === selectedEmployee)?.employee_name || 'Unknown'})` 
-                          : `Self Assessment`}
-                        {selectedCycle && `: ${appraisalCycles.find(cycle => cycle.cycle_id === selectedCycle)?.cycle_name || ''}`}
-                      </span>
+          {/* Question list */}
+          {assessmentData.length > 0 ? (
+            <Box mt={0}>
+              {assessmentData.map((question, index) => (
+                <Box key={question.question_id} mb={3}>
+                  {/* For the first question, show question + refresh button in same line */}
+                  {index === 0 ? (
+                    <Box display="flex" alignItems="center" justifyContent="space-between">
+                      <Typography variant="subtitle1" fontWeight={"bold"}>
+                        {index + 1}. {question.question_text}
+                      </Typography>
                       <Tooltip title="Refresh responses" arrow>
                         <IconButton onClick={refreshAssessmentData} size="small" color="primary">
                           <RefreshIcon />
                         </IconButton>
                       </Tooltip>
-                    </Typography>
-          )}
+                    </Box>
+                    ) : (
 
-          {assessmentData.length > 0 ? (
-            <Box mt={4}>
-              {assessmentData.map((question, index) => (
-                <Box key={question.question_id} mb={3}>
-                  <Typography variant="subtitle1" fontWeight={"bold"}>
-                    {index + 1}. {question.question_text}
-                  </Typography>
+                    // For other questions, just show question text normally
+                    <Typography variant="subtitle1" fontWeight={"bold"}>
+                      {index + 1}. {question.question_text}
+                    </Typography>
+                  )}
                   {renderInputField(question)}
                 </Box>
               ))}

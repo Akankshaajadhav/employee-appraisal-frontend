@@ -83,11 +83,11 @@ export default function HistoricalReportTable({ onSelect }) {
   const [cycles, setCycles] = React.useState([]);
   const [selectedCycles, setSelectedCycles] = React.useState([]);
   const [baseColumns] = React.useState([
-    { field: "employee_id", headerName: "Employee ID", flex:5,minWidth:100},
-    { field: "employee_name", headerName: "Name", flex:5,minWidth:130 },
-    { field: "role", headerName: "Role", flex:5,minWidth:100 },
-    { field: "reporting_manager", headerName: "Reporting Manager", flex:5,minWidth:130 },
-    { field: "previous_reporting_manager", headerName: "Previous Manager", flex:5,minWidth:130 },
+    { field: "employee_id", headerName: "Employee ID",width:105},
+    { field: "employee_name", headerName: "Name", flex:1,minWidth:130 },
+    { field: "role", headerName: "Role", flex:1,minWidth:100 },
+    { field: "reporting_manager", headerName: "Reporting Manager", flex:1,minWidth:130 },
+    { field: "previous_reporting_manager", headerName: "Previous Manager", flex:1,minWidth:130 },
   ]);
   const [columns, setColumns] = React.useState(baseColumns);
   const navigate = useNavigate();         // 1
@@ -328,7 +328,6 @@ const [loadingCycles, setLoadingCycles] = React.useState(true);  //3
         ) : (
           <DataGrid
             sx={{ 
-            //   height: 600, 
               overflow: "auto",
               "& .MuiDataGrid-columnHeaderTitle": {
                 fontWeight: "bold",
