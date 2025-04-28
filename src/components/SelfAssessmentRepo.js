@@ -1,18 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Button,
   Typography,
   Card,
   CardContent,
-  Checkbox,
-  FormControlLabel,
   IconButton,
-  Snackbar,
-  Alert,
   FormControl,
-  Radio,
-  RadioGroup,
   Box,
   Skeleton
 } from "@mui/material";
@@ -117,6 +110,7 @@ const SelfAssessmentRepo = () => {
     const [loadingEmployees, setLoadingEmployees] = React.useState(true);  //2
   const [loadingCycles, setLoadingCycles] = React.useState(true);  //3
 
+
   useEffect(() => {
     const getEmployees = async () => {
       try {
@@ -203,6 +197,7 @@ const MenuProps = {
         
         <Card sx={{ m: 3, mt: 1 }}>
         <Grid container alignItems="center" sx={{ ml: 1 }}>
+
           <Grid size={11}>
             <Typography variant="h6" color="primary" fontWeight={"bold"} pl="10px">
               Self Assessment Report
@@ -214,7 +209,7 @@ const MenuProps = {
             </IconButton>
           </Grid>
         </Grid>
-          <CardContent>
+        <CardContent>
             <FormControl sx={{width: 'auto' , minWidth:'20%', mb:1}}>
               <InputLabel
                 sx={{ backgroundColor: "white", px: 1, top: "-4px", pr: "2px" }}
