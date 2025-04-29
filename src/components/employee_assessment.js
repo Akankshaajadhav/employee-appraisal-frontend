@@ -59,6 +59,7 @@ const DropdownPage = () => {
 
   const [modalSelectedEmployee, setModalSelectedEmployee] = useState("");  
 
+
   
   useEffect(() => {
     if (!employeeId) return;
@@ -100,48 +101,44 @@ const DropdownPage = () => {
         }
 
         else if (role === "team lead" || role === "admin") {
-            const allCyclesRes = await axios.get(`${API_URL}/appraisal_cycle/`);
-            const cycles = allCyclesRes.data;
-          
-            const tlAssignedCycles = [];
-          
-            for (const cycle of cycles) {
-              const empRes = await axios.get(`${API_URL}/employees/${cycle.cycle_id}/${employeeId}`);
-              if (empRes.data && empRes.data.length > 0) {
-                tlAssignedCycles.push({ ...cycle, employees: empRes.data });
+          const allCyclesRes = await axios.get(`${API_URL}/assessment/teamlead/cycles/${employeeId}`);
+          const cycles = allCyclesRes.data;
+          setAppraisalCycles(cycles);
+        
+          const activeCycle = cycles.find((cycle) => cycle.status === "active");
+          if (activeCycle) {
+            setSelectedCycle(activeCycle.cycle_id);
+            setIsCycleActive(true);
+
+            // Fetch employees under the team lead
+            try {
+              const employeesRes = await axios.get(`${API_URL}/reporting/${employeeId}`);
+              const employees = employeesRes.data;
+
+              if (employees.length > 0) {
+                setEmployees(employees);
+                setSelectedEmployee(employeeId);  // Default to the team lead
+              } else {
+                // If no employees found under the team lead
+                setEmployees([]);
               }
+            } catch (error) {
+              console.error("Error fetching employees: ", error);
+              setEmployees([]);
             }
-          
-            const filteredCycles = tlAssignedCycles.filter(
-              (cycle) => cycle.status === "active" || cycle.status === "completed"
-            );
-          
-            setAppraisalCycles(filteredCycles);
-          
-            const activeCycle = filteredCycles.find((cycle) => cycle.status === "active");
-            if (activeCycle) {
-              setSelectedCycle(activeCycle.cycle_id);
-              setIsCycleActive(true);
-          
-              // Set default employee to team lead themselves
-              setEmployees(activeCycle.employees);
-              setSelectedEmployee(employeeId);
-          
-              const managerResponse = await axios.get(`${API_URL}/reporting_manager/${employeeId}`);
-              const { reporting_manager_id, reporting_manager_name } = managerResponse.data;
-              setTeamLeadName(`${reporting_manager_id} - ${reporting_manager_name}`);
-            }
+
+            const managerResponse = await axios.get(`${API_URL}/reporting_manager/${employeeId}`);
+            const { reporting_manager_id, reporting_manager_name } = managerResponse.data;
+            setTeamLeadName(`${reporting_manager_id} - ${reporting_manager_name}`);
           }
+        }
 
         else {
           // Regular employee
           const cyclesResponse = await axios.get(`${API_URL}/assessment/cycles/${employeeId}`);
-          const filteredCycles = cyclesResponse.data.filter(
-            (cycle) => cycle.status === "active" || cycle.status === "completed"
-          );
-          setAppraisalCycles(filteredCycles);
+          setAppraisalCycles(cyclesResponse.data);
         
-          const activeCycle = filteredCycles.find((cycle) => cycle.status === "active");
+          const activeCycle = cyclesResponse.data.find((cycle) => cycle.status === "active");
           if (activeCycle) {
             setSelectedCycle(activeCycle.cycle_id);
             setIsCycleActive(true);
@@ -612,6 +609,7 @@ const DropdownPage = () => {
                           <InputLabel sx={{background:"white", pl:1,pr:1}}>Employee</InputLabel>
                           <Select value={selectedEmployee} onChange={handleEmployeeChange}>
                             {employees.map((emp) => (
+                            // {employees?.map((emp) => (
                               <MenuItem key={emp.employee_id} value={emp.employee_id}>
                                 <Tooltip title={`${emp.employee_id} - ${emp.employee_name}`} placement="top" arrow>
                                   <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "inline-block", maxWidth: "200px" }}>
