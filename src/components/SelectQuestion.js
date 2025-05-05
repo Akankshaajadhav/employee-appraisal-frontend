@@ -147,7 +147,7 @@ export default function CheckboxList({ onSelect }) {
                 value={type}
                 onChange={handleTypeChange}
                 displayEmpty
-                sx={{height:40}}
+                sx={{height:40,mt:-2}}
             >
                 <MenuItem value="">Select Question Type</MenuItem>
                 <MenuItem value="MCQ">MCQ</MenuItem>
@@ -159,14 +159,16 @@ export default function CheckboxList({ onSelect }) {
         </FormControl>
 
         {/* Refresh and search */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 ,mt:-2}}>
             <IconButton onClick={fetchQuestions} disabled={isPreviewMode}>
                 <RefreshOutlinedIcon color={isPreviewMode ? "disabled" : "primary"} />
             </IconButton>
 
             <TextField
-                sx={{ width: { xs: "100%", sm: "250px" }}}
-                placeholder="Search"
+                sx={{ width: { xs: "100%", sm: "250px" }, "& .MuiInput-underline:before": {
+      borderBottomColor: "#d9d8d4", // default color before focus
+    },}}
+                placeholder="Search..."
                 variant="standard"
                 value={searchTerm}
                 onChange={handleSearchChange}
