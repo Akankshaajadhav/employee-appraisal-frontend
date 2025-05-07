@@ -7,14 +7,20 @@ import {
   IconButton,
   FormControl,
   Box,
-  Skeleton
+  Skeleton,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import Grid from "@mui/material/Grid";
 import CustomToolbar from "./CustomeToolbar";
 import CloseIcon from "@mui/icons-material/Close";
 import { InputLabel, Select, MenuItem } from "@mui/material";
-import { getCylceResponses, activeCycles, getEmpList } from "../services/SelfAssessReport";
+import {
+  getCylceResponses,
+  activeCycles,
+  getEmpList,
+} from "../services/SelfAssessReport";
+import Backdrop from '@mui/material/Backdrop';    
+import CircularProgress from '@mui/material/CircularProgress'; 
 
 const pivotData = (data, rows) => {
   if (!rows) return [];
@@ -67,8 +73,7 @@ const pivotData = (data, rows) => {
   return Object.values(employeeMap);
 };
 
-
-const generateColumns = (data,columns) => {
+const generateColumns = (data, columns) => {
   if (!data) return [];
 
   // Collect unique question_texts
@@ -87,37 +92,54 @@ const generateColumns = (data,columns) => {
   return [...columns, ...questionColumns];
 };
 
-const SelfAssessmentRepo = () => {
+const SelfAssessmentRepo = ({ onSelect }) => {
   const navigate = useNavigate();
 
-  const [rows, setRows] = React.useState([]);
-  const [employeeMap, setEmployeeMap] = React.useState({});
-  const [originalRows, setOriginalRows] = React.useState([]);
+  const [rows, setRows] = useState([]);
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [employeeMap, setEmployeeMap] = useState({});
+  const [originalRows, setOriginalRows] = useState([]);
 
   const [activeCycle, setActiveCycles] = useState([]);
   const [cycle_id, setCycleId] = useState(null);
   const [response, setResponseData] = useState(null);
   const [employees, setEmployee] = useState(null);
   const [baseColumns] = useState([
-    { field: "employee_id", headerName: "Employee ID", width:105 },
-    { field: "employee_name", headerName: "Name", flex:1,minWidth:130 },
-    { field: "role", headerName: "Role", flex:1,minWidth:100 },
-    { field: "reporting_manager", headerName: "Reporting Manager", flex:1,minWidth:130 },
-    { field: "previous_reporting_manager", headerName: "Previous Manager", flex:1,minWidth:130 },
+    {
+      field: "employee_id",
+      headerName: "Employee ID",
+      flex: 5,
+      minWidth: 100,
+      maxWidth: 120,
+    },
+    { field: "employee_name", headerName: "Name", flex: 5, minWidth: 130 },
+    { field: "role", headerName: "Role", flex: 5, minWidth: 100 },
+    {
+      field: "reporting_manager",
+      headerName: "Reporting Manager",
+      flex: 5,
+      minWidth: 130,
+    },
+    {
+      field: "previous_reporting_manager",
+      headerName: "Previous Manager",
+      flex: 5,
+      minWidth: 130,
+    },
   ]);
 
   //  const navigate = useNavigate();         // 1
-    const [loadingEmployees, setLoadingEmployees] = React.useState(true);  //2
-  const [loadingCycles, setLoadingCycles] = React.useState(true);  //3
-
+  const [loadingEmployees, setLoadingEmployees] = useState(true); //2
+  const [loadingCycles, setLoadingCycles] = useState(true); //3
+  const [loadingResponses, setLoadingResponses] = useState(false);
 
   useEffect(() => {
     const getEmployees = async () => {
       try {
-        setLoadingEmployees(true);   //4
+        setLoadingEmployees(true); //4
         const response = await getEmpList();
         const empMap = {};
-        response.forEach(emp => {
+        response.forEach((emp) => {
           empMap[emp.employee_id] = emp.employee_name;
         });
 
@@ -127,29 +149,29 @@ const SelfAssessmentRepo = () => {
           employee_name: emp.employee_name,
           role: emp.role,
           reporting_manager: emp.reporting_manager_name || "-",
-          previous_reporting_manager: emp.previous_reporting_manager_name || "-",
+          previous_reporting_manager:
+            emp.previous_reporting_manager_name || "-",
         }));
 
         setEmployeeMap(empMap);
         setRows(formattedData);
         setOriginalRows(formattedData);
-        
       } catch (error) {
         console.log("Error while fetching employees: " + error);
-      }
-      finally{
+      } finally {
         setLoadingEmployees(false);
       }
     };
     getEmployees();
   }, []);
 
-
   useEffect(() => {
     const getResponses = async (cycle_id) => {
       try {
+        setLoadingResponses(true);
         const data = await getCylceResponses(cycle_id);
         setResponseData(data);
+        setLoadingResponses(false);
       } catch (error) {
         console.log("Error while fetching cycle: " + error);
       }
@@ -160,11 +182,10 @@ const SelfAssessmentRepo = () => {
     }
   }, [cycle_id]);
 
-
   useEffect(() => {
     const getActiveCycles = async () => {
       try {
-        setLoadingCycles(true);    //5
+        setLoadingCycles(true); //5
         const response = await activeCycles();
         const filteredCycles = response.filter(
           (cycle) => cycle.status === "completed" || cycle.status === "active"
@@ -172,8 +193,7 @@ const SelfAssessmentRepo = () => {
         setActiveCycles(filteredCycles);
       } catch (error) {
         console.log("Error while fetching cycle: " + error);
-      }
-      finally{
+      } finally {
         setLoadingCycles(false);
       }
     };
@@ -181,25 +201,49 @@ const SelfAssessmentRepo = () => {
   }, []);
 
   const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
+  const ITEM_PADDING_TOP = 8;
+  const MenuProps = {
+    PaperProps: {
+      style: {
+        maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+        width: 250,
+      },
     },
-  },
-};
+  };
+
+  const handleRowSelection = (selectedRowIds) => {
+    setSelectedIds(selectedRowIds);
+
+    // Get selected and unselected employees, preserving all data including cycle ratings
+    const selectedEmployees = rows.filter((row) =>
+      selectedRowIds.includes(row.id)
+    );
+    const unselectedEmployees = rows.filter(
+      (row) => !selectedRowIds.includes(row.id)
+    );
+
+    const newOrderedRows = [...selectedEmployees, ...unselectedEmployees];
+    setRows(newOrderedRows);
+
+    if (onSelect) {
+      onSelect(selectedEmployees);
+    }
+  };
 
   return (
     <>
       <Box sx={{ width: "100%" }}>
-        
-        <Card sx={{ m: 3, mt: 1 }}>
-        <Grid container alignItems="center" sx={{ ml: 1 }}>
-
+        <Grid container alignItems="center">
           <Grid size={11}>
-            <Typography variant="h6" color="primary" fontWeight={"bold"} pl="10px">
+            <Typography
+              variant="h6"
+              color="primary"
+              fontWeight={"bold"}
+              sx={{
+                ml:"10px",
+                my:"10px",
+              }}
+            >
               Self Assessment Report
             </Typography>
           </Grid>
@@ -209,71 +253,83 @@ const MenuProps = {
             </IconButton>
           </Grid>
         </Grid>
-        <CardContent>
-            <FormControl sx={{width: 'auto' , minWidth:'20%', mb:1}}>
-              <InputLabel
-                sx={{ backgroundColor: "white", px: 1, top: "-4px", pr: "2px" }}
-              >
-                Select Appraisal Cycles
-              </InputLabel>
-              <Select
-                onChange={(e) => setCycleId(e.target.value)}
-               
-                MenuProps={MenuProps}
-                sx={{
-                  minHeight: '50px',
-                  // Allow the select to grow in height based on content
-                  // height: 'auto',
-                  width:"300px",
-                  // Add some padding for better appearance with multiple wrapped lines
-                  '& .MuiSelect-select': {
-                    paddingTop: '8px',
-                    paddingBottom: '8px',
-                  }
-                }}
-              >
-                {activeCycle.map((cycle) => (
-                  <MenuItem key={cycle.cycle_id} value={cycle.cycle_id} >
-                    {cycle.cycle_name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+        <Box sx={{ pr:"10px",pl:"10px",pb:"10px"}}>
+  <FormControl sx={{ mb:1,width: 'auto' , minWidth:'20%'}}>
+    <InputLabel id="checkbox-cycles-label" sx={{background:"white"}}>Select Appraisal Cycles</InputLabel>
+            <Select
+              onChange={(e) => setCycleId(e.target.value)}
+              MenuProps={MenuProps}
+          sx={{
+            minHeight: '50px',
+            // Allow the select to grow in height based on content
+            // height: 'auto',
+            width:'auto',
+            // Add some padding for better appearance with multiple wrapped lines
+            '& .MuiSelect-select': {
+              paddingTop: '8px',
+              paddingBottom: '8px',
+            }
+          }}
+            >
+              {activeCycle.map((cycle) => (
+                <MenuItem key={cycle.cycle_id} value={cycle.cycle_id}>
+                  {cycle.cycle_name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
 
-            {(loadingEmployees || loadingCycles) ?  (
-                    <Box sx={{ width: '100%', mt: 2 }}>
-                      {[...Array(20)].map((_, index) => (
-                        <Skeleton key={index} variant="rectangular" height={30} sx={{
-                          mb: 1,
-                          bgcolor: '#e6e9ed',
-                          opacity: 0.3
-                        }}/>
-                      ))}
-                    </Box> 
-            
-                    ) : (
-              <DataGrid
+          {loadingEmployees || loadingCycles ? (
+            <Box sx={{ width: "100%", mt: 2 }}>
+              {[...Array(20)].map((_, index) => (
+                <Skeleton
+                  key={index}
+                  variant="rectangular"
+                  height={30}
+                  sx={{
+                    mb: 1,
+                    bgcolor: "#e6e9ed",
+                    opacity: 0.3,
+                  }}
+                />
+              ))}
+            </Box>
+          ) : (
+            <DataGrid
+            sx={{
+              maxWidth: "100%",
+              maxHeight: "50%",
+              height: "200px",
+              overflow: "auto",
+              "& .MuiDataGrid-columnHeaderTitle": {
+                fontWeight: "bold",
+              },
+            }}
+
               rows={cycle_id ? pivotData(response, rows) : rows}
-              columns={cycle_id ? generateColumns(response, baseColumns) : baseColumns}
+              columns={
+                cycle_id ? generateColumns(response, baseColumns) : baseColumns
+              }
               autoHeight
-              sx={{
-                maxWidth: "100%",
-                maxHeight: "50%",
-                height: "200px",
-                overflow: "auto",
-                "& .MuiDataGrid-columnHeaderTitle": {
-                  fontWeight: "bold",
-                },
-              }}
+              pageSizeOptions={[5]}
               slots={{ toolbar: CustomToolbar }}
-              rowHeight={38}
-              hideFooter
-              checkboxSelection
-            />)}
+              rowHeight={35}
+              onRowSelectionModelChange={handleRowSelection}
 
-          </CardContent>
-        </Card>
+              selectionModel={selectedIds}
+              checkboxSelection
+              disableRowSelectionOnClick
+              hideFooter
+            />
+          )}
+        </Box>
       </Box>
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={loadingResponses}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
     </>
   );
 };
