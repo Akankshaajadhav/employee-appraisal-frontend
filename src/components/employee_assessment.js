@@ -301,6 +301,7 @@ const DropdownPage = () => {
       const empId = e.target.value;
       setSelectedEmployee(empId);
       setTeamLeadName("");
+      // setModalOpen(true); // Open modal when employee changes
     
       // Always clear existing data when changing employee
       setAssessmentData([]);
@@ -572,7 +573,8 @@ const DropdownPage = () => {
       setResponses({});
     }
   };
-  
+  const isCurrentUser = String(selectedEmployee) === String(employeeId);
+
   return (
     <>
     <Card sx={{ml:2,mr:2,  justifyContent: "center" }}>

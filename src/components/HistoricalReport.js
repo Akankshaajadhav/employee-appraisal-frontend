@@ -17,8 +17,6 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import Checkbox from '@mui/material/Checkbox';
 import ListItemText from '@mui/material/ListItemText';
 import {Grid,Typography, Card, IconButton,Skeleton} from '@mui/material';
-import HourglassBottomIcon from '@mui/icons-material/HourglassBottom';
-// import { motion } from 'framer-motion';
 import { useNavigate } from "react-router-dom";
 import CloseIcon from "@mui/icons-material/Close";
 const API_URL = process.env.REACT_APP_BASE_URL; 
@@ -88,6 +86,7 @@ export default function HistoricalReportTable({ onSelect }) {
     { field: "role", headerName: "Role", flex:1,minWidth:100 },
     { field: "reporting_manager", headerName: "Reporting Manager", flex:1,minWidth:130 },
     { field: "previous_reporting_manager", headerName: "Previous Manager", flex:1,minWidth:130 },
+
   ]);
   const [columns, setColumns] = React.useState(baseColumns);
   const navigate = useNavigate();         // 1
@@ -124,10 +123,10 @@ const [loadingCycles, setLoadingCycles] = React.useState(true);  //3
       .finally(() => setLoadingEmployees(false));
   }, []);
 
-  // Fetch completed cycles data
+  // Fetch completed and active cycles for which lead assessment is active or completed
   React.useEffect(() => {
     setLoadingCycles(true);    //5
-    fetch(`${API_URL}/appraisal_cycle/appraisal-cycles/completed`) // Replace with your actual API endpoint
+    fetch(`${API_URL}/appraisal_cycle/appraisal-cycles/historic-report`) 
       .then((response) => response.json())
       .then((data) => {
         setCycles(data);
@@ -252,11 +251,15 @@ const [loadingCycles, setLoadingCycles] = React.useState(true);  //3
   const getRowHeight = () => 35;
 
   return (
-    <Card sx={{ width: '100%', m:1 }}>
-    <Box sx={{ width: '98%' ,ml:1}}>
+    <>
+    <Box sx={{ width: '100%'}}>
       <Grid container alignItems="center" >
          <Grid item size={11}>
-            <Typography variant="h6" color="primary" fontWeight={"bold"} pl="10px">
+            <Typography variant="h6"
+            color="primary"
+            fontWeight={"bold"}
+            sx={{ padding: "10px" }}
+            >
               Historical Report
             </Typography>
         </Grid>
@@ -267,7 +270,8 @@ const [loadingCycles, setLoadingCycles] = React.useState(true);  //3
           </Grid>
           </Grid>
      
-       {/* Cycle Selection Dropdown with Checkboxes */}
+      <Box sx={{ pr:"10px",pl:"10px",pb:"10px"}}>
+        {/* Cycle Selection Dropdown with Checkboxes */}
        <FormControl sx={{ mb:1,width: 'auto' , minWidth:'20%'}}>
         <InputLabel id="checkbox-cycles-label" sx={{background:"white"}}>Select Appraisal Cycles</InputLabel>
         <Select
@@ -347,8 +351,9 @@ const [loadingCycles, setLoadingCycles] = React.useState(true);  //3
             hideFooter
           />)
       }
+      </Box>
     </Box>
-    </Card>
+    </>
   );
 }
 

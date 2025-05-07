@@ -4,7 +4,7 @@ const API_URL = process.env.REACT_APP_BASE_URL;
 
 export const activeCycles = async () => {
   try{
-    const response = await axios.get(`${API_URL}/appraisal_cycle`);
+    const response = await axios.get(`${API_URL}/appraisal_cycle/appraisal-cycles/self-assessment-report`);
     return response.data;
   }catch(error){
     console.error("Error in get appraisal cycle by id: "+error);

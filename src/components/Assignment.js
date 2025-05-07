@@ -67,7 +67,7 @@ export default function Assignment({ cycleId, onClose,cycleName }) {
   return (
     <>
     <Box>
-      <Card sx={{ mt: 2, width: "100%", height: 600}}>
+      <Card sx={{ mt: 2, width: "100%", height: 600, pr:2, pl:2}}>
         <Grid container alignItems="center" justifyContent="space-between" sx={{mt:1,ml:1,mb:1}}>
           <Grid item sx={{ display: "flex", alignItems: "center", gap: 4 }}>
               <Typography variant="h6" color="primary" fontWeight={"bold"}>
