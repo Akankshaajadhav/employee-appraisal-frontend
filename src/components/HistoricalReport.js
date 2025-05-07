@@ -273,7 +273,7 @@ const [loadingCycles, setLoadingCycles] = React.useState(true);  //3
       <Box sx={{ pr:"10px",pl:"10px",pb:"10px"}}>
         {/* Cycle Selection Dropdown with Checkboxes */}
        <FormControl sx={{ mb:1,width: 'auto' , minWidth:'20%'}}>
-        <InputLabel id="checkbox-cycles-label" sx={{background:"white"}}>Select Appraisal Cycles</InputLabel>
+        <InputLabel id="checkbox-cycles-label" sx={{background:"white", px:0.5}}>Select Appraisal Cycles</InputLabel>
         <Select
           labelId="checkbox-cycles-label"
           id="checkbox-cycles"
