@@ -603,6 +603,7 @@ const AddAppraisalCycle = ({ onClose }) => {
           open={snackbar.open}
           autoHideDuration={4000}
           onClose={() => setSnackbar({ ...snackbar, open: false })}
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
         >
           <Alert severity={snackbar.severity}>{snackbar.message}</Alert>
         </Snackbar>

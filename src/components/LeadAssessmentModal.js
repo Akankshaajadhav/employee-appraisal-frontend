@@ -4,23 +4,20 @@ import {
   Modal, Box, Typography, FormControl, InputLabel, Select, MenuItem,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
   TextField, Button, Tooltip, Snackbar, Alert, IconButton, Radio,
-  colors,  TextareaAutosize
+  colors,  TextareaAutosize, Grid
 
 } from "@mui/material";
 import axios from "axios";
 import Backdrop from '@mui/material/Backdrop';
 import CircularProgress from '@mui/material/CircularProgress';
-import { styled } from "@mui/material/styles";  
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import CloseIcon from "@mui/icons-material/Close";
 import dayjs from "dayjs"; 
 import InfoOutlineIcon from '@mui/icons-material/InfoOutline';
-const API_URL = process.env.REACT_APP_BASE_URL; // from .env file
+const API_URL = process.env.REACT_APP_BASE_URL; 
 
-
-
-const LeadAssessmentModal = ({ open, onClose, selectedCycle, employees, selectedEmployee, setSelectedEmployee, employeeId ,leadAssessmentActive, leadAssessmentCompleted}) => {
+const LeadAssessmentModal = ({ open, onClose, selectedCycle, employees, selectedEmployee, setSelectedEmployee, employeeId, leadAssessmentActive, leadAssessmentCompleted }) => {
   const [parameters, setParameters] = useState([]);
   const [employeeData, setEmployeeData] = useState({});
   const [cycleStatus, setCycleStatus] = useState("active"); // Assume active by default
@@ -29,6 +26,31 @@ const LeadAssessmentModal = ({ open, onClose, selectedCycle, employees, selected
   const [showTooltip, setShowTooltip] = useState(false);
   const [saving, setSaving] = useState(false);
     
+  // Check if the selected employee is the logged-in user
+  const isCurrentUser = String(selectedEmployee) === String(employeeId);
+
+  useEffect(() => {
+    if (open && selectedEmployee === employeeId) {
+      setSnackbar({ 
+        open: true, 
+        message: "You cannot assess yourself. Please select a different employee.", 
+        severity: "warning" 
+      });
+      onClose();
+    }
+  }, [open, selectedEmployee, employeeId, onClose]);
+
+  // If the modal is open and the selected employee is the current user, close it
+  useEffect(() => {
+    if (open && isCurrentUser) {
+      setSnackbar({ 
+        open: true, 
+        message: "You cannot assess yourself. Please select a different employee.", 
+        severity: "warning" 
+      });
+      onClose();
+    }
+  }, [open, isCurrentUser, onClose]);
 
   useEffect(() => {
     if (!selectedCycle || !selectedEmployee) return;
@@ -90,6 +112,15 @@ const LeadAssessmentModal = ({ open, onClose, selectedCycle, employees, selected
   }, [selectedCycle, selectedEmployee]);
 
   const handleEmployeeChange = (e) => {
+    // Check if the selected employee is the current user
+    if (e.target.value === employeeId) {
+      setSnackbar({ 
+        open: true, 
+        message: "You cannot assess yourself. Please select a different employee.", 
+        severity: "warning" 
+      });
+      return; // Don't update the selection
+    }
     setSelectedEmployee(e.target.value);
   };
 
@@ -135,6 +166,11 @@ const LeadAssessmentModal = ({ open, onClose, selectedCycle, employees, selected
 
     if (!selectedEmployee) {
       setSnackbar({ open: true, message: "Please select an employee.", severity: "error" });
+      return;
+    }
+
+    if (selectedEmployee === employeeId) {
+      setSnackbar({ open: true, message: "You cannot assess yourself.", severity: "error" });
       return;
     }
 
@@ -186,294 +222,425 @@ const LeadAssessmentModal = ({ open, onClose, selectedCycle, employees, selected
     setParameters([]);
     setSelectedEmployee("");
   };
-  const filteredEmployees = employees.filter(emp => emp.employee_id != employeeId);
-// height: "83%", 86vh
+  
+
+  useEffect(() => {
+    // console.log("Current logged in employeeId:", employeeId, "type:", typeof employeeId);
+    if (Array.isArray(employees)) {
+      employees.forEach(emp => {
+        // console.log("Employee in list:", emp.employee_id, "type:", typeof emp.employee_id);
+      });
+    }
+  }, [employees, employeeId]);
+
+  
   return (
     <>
-    <Box> 
-    <Modal open={open}  onClose={(event, reason) => reason !== "backdropClick" && onClose()} disableEscapeKeyDown>
-      <Box sx={{ width: "60%", height: "auto", p: 4, mx: "auto", mt: 2, bgcolor: "white", borderRadius: 2 }}>
-        <Typography variant="h6" gutterBottom align="center" color="primary" fontWeight= 'bold'>
-          Lead Assessment {readOnly}
-        </Typography>
-
-        <IconButton color="error" onClick={() => { resetFields(); onClose(); }} sx={{ position: "absolute", left: "76%", top: "4%" }}>
-          <CloseIcon />
-        </IconButton>
-
-        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-          <FormControl sx={{ width: "30%" }}>
-            <InputLabel sx={{ backgroundColor: "white", px: 1, top: "-4px" }}>Employee</InputLabel>
-            <Select value={selectedEmployee} onChange={handleEmployeeChange} 
-            sx={{
-              height: 40, 
-              display: "flex",
-              width:"190px",
-              alignItems: "center",
-            }}>
-              {filteredEmployees.map(emp => (
-                // <MenuItem key={emp.employee_id} value={emp.employee_id} >{emp.employee_name}
-                // </MenuItem><MenuItem key={emp.employee_id} value={emp.employee_id}>
-                <MenuItem key={emp.employee_id} value={emp.employee_id} >
-                                    <Tooltip title={`${emp.employee_id} - ${emp.employee_name}`} placement="top" arrow>
-                                      <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "inline-block", maxWidth: "200px" }}>
-                                        {emp.employee_id} - {emp.employee_name}
-                                      </span>
-                                    </Tooltip>
-                                  </MenuItem>
-
-
-
-              ))}
-            </Select>
-          </FormControl>
- 
-
-{/* date picker with tooltip, on hover shows the one-one discussion with emp completed on */}
-          
-          {/* <LocalizationProvider dateAdapter={AdapterDayjs}>
-  <Box
-    onMouseEnter={() => setShowTooltip(true)}
-    onMouseLeave={() => setShowTooltip(false)}
-    onClick={() => setShowTooltip(false)} // Hide on click
-  >
-    <Tooltip
-      title="One-on-one discussion with employee completed on"
-      placement="top"
-      open={showTooltip}
-      arrow
-      componentsProps={{
-        tooltip: {
-          sx: {
-            backgroundColor: '#1976d2',
-            color: 'white',
-            fontSize: '14px',
-            padding: '8px',
-            borderRadius: '4px',
-            width:'60%',
-            boxShadow: '0px 0px 3px rgba(0,0,0,0.2)', // optional for nice shadow
-          },
-        },
-        arrow: {
-          sx: {
-            color: '#1976d2',  // Arrow color should match tooltip background
-          },
-        },
-      }}
-    >
-      <div>
-        <DatePicker
-          label="One-on-one discussion with employee completed on"
-          value={currentDiscussionDate}
-          onChange={(newDate) => handleDiscussionDateChange(newDate)}
-          disabled={readOnly}
-          renderInput={(params) => <TextField {...params} fullWidth />}
-        />
-      </div>
-    </Tooltip>
-  </Box>
-</LocalizationProvider> */}
-
-
-{/* as per requirement */}
-
-<LocalizationProvider dateAdapter={AdapterDayjs} >
-  <Box sx={{ display: 'flex', alignItems: 'center'}}>
-    <Typography  sx={{ color: 'primary.main', fontWeight: 'bold' }}>
-      One-on-one discussion with employee completed on
-    </Typography>
-    <DatePicker
+      <Box sx={{ 
+    width: { xs: "95%", sm: "90%", md: "80%" }, 
+    maxHeight: { xs: "90vh", sm: "90vh", md: "85vh" },  // <-- added
+    overflowY: "auto",  // <-- always allow scroll if needed
+    p: { xs: 1.5, sm: 1.5, md: 1.5 }, 
+    mx: "auto", 
+    mt: { xs: 1, sm: 2 }, 
+    bgcolor: "white", 
+    borderRadius: 2,
+    position: "relative",
+    // Optional nice scrollbar styling
+    "&::-webkit-scrollbar": {
+      width: "8px",
+    },
+    "&::-webkit-scrollbar-thumb": {
+      backgroundColor: "#888",
+      borderRadius: "8px",
+    },
+    "&::-webkit-scrollbar-thumb:hover": {
+      backgroundColor: "#555",
+    },
+    "&::-webkit-scrollbar-track": {
+      backgroundColor: "#f1f1f1",
+      borderRadius: "8px",
+    },
+  }}> 
+        <Modal 
+          open={open && !isCurrentUser}  
+          onClose={(event, reason) => reason !== "backdropClick" && onClose()} 
+          disableEscapeKeyDown
+        >
       
-      value={currentDiscussionDate}
-      onChange={(newDate) => handleDiscussionDateChange(newDate)}
-      format="DD/MM/YYYY"
-      disabled={readOnly}
-      slotProps={{ textField: { size: 'small',sx: { width: '160px' }  },
-     
+<Box
+    sx={{
+      position: "relative",
+      top: "50%",
+      left: "50%",
+      height: "auto",
+      transform: "translate(-50%, -50%)",
+      width: { xs: "95%", sm: "90%", md: "80%" },
+      maxHeight: "90vh", // sets limit to screen height
+      bgcolor: "white",
+      borderRadius: 2,
+      p: { xs: 1.5, sm: 1.5, md: 1.5 },
+      overflowY: "auto", //enables scroll if content exceeds maxHeight
+      "&::-webkit-scrollbar": {
+        width: "8px",
+      },
+      "&::-webkit-scrollbar-thumb": {
+        backgroundColor: "#888",
+        borderRadius: "8px",
+      },
+      "&::-webkit-scrollbar-thumb:hover": {
+        backgroundColor: "#555",
+      },
+      "&::-webkit-scrollbar-track": {
+        backgroundColor: "#f1f1f1",
+        borderRadius: "8px",
+      },
     }}
-      
-    />
-  </Box>
-</LocalizationProvider>
-
-        </Box>
-       
-        <TableContainer component={Paper} sx={{ maxHeight: "50vh", mb: 2 }}>
-          <Table stickyHeader>
-            <TableHead>
-              <TableRow>
-                <TableCell sx={{ color: 'primary.main', fontWeight: 'bold' }}>Evaluation Parameter</TableCell>
-                {[1, 2, 3, 4].map(value => (
-                  <TableCell key={value} align="center" sx={{ color: 'primary.main', fontWeight: 'bold' }}>{["Needs Improvement", "Satisfactory", "Good", "Excellent"][value - 1]}</TableCell>
-                ))}
-              </TableRow>
-            </TableHead>
-          
-<TableBody sx={{ maxHeight: "50vh", overflowY: "auto" }}>
-  {parameters
-  .filter(param => !param.is_fixed_parameter)
-  .map(param => (
-    <TableRow
-    key={param.parameter_id}
-    
   >
-  
-      <TableCell sx={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-        {param.parameter_title}
+            <Typography 
+              variant="h6" 
+              gutterBottom 
+              align="center" 
+              color="primary" 
+              fontWeight="bold"
+              sx={{ 
+                fontSize: { xs: "1rem", sm: "1.25rem" }
+              }}
+            >
+              Lead Assessment
+            </Typography>
 
-        <Tooltip
-          title={param.helptext || "No help text available"}
-          placement="top"
-          arrow
-          componentsProps={{
-            tooltip: {
-              sx: {
-                backgroundColor: '#1976d2',
-                color: 'white',
-                fontSize: '13px',
-                padding: '6px',
-                borderRadius: '4px',
-                boxShadow: '0px 0px 8px rgba(0,0,0,0.2)',
-                maxWidth: '200px', 
-              },
-            },
-            arrow: {
-              sx: {
-                color: '#1976d2',
-              },
-            },
-          }}
-        >
-          <IconButton size="small" sx={{ p: 0.5 }}>
-            <InfoOutlineIcon sx={{ color: '#1976d2', fontSize: '18px' }} />
-          </IconButton>
-        </Tooltip>
-      </TableCell>
+            <IconButton 
+              color="error" 
+              onClick={() => { resetFields(); onClose(); }} 
+              sx={{ 
+                position: "absolute", 
+                right: { xs: 8, sm: 16 }, 
+                top: { xs: 8, sm: 16 }
+              }}
+            >
+              <CloseIcon />
+            </IconButton>
 
-        {[1, 2, 3, 4].map(value => (
-          <TableCell align="center" key={value}>
-            <Radio
-              name={`rating-${param.parameter_id}`}
-              value={value}
-              checked={currentRatings[param.parameter_id] === value}
-              onChange={() => handleRatingChange(param.parameter_id, value)}
-              disabled={readOnly}
-              sx={{ padding: 0 }}
-            />
-          </TableCell>
-        ))}
-  
+            <Grid container spacing={2} alignItems="center">
+              {/* Employee Dropdown */}
+              <Grid item xs={12} md={4}>
+                <FormControl fullWidth>
+                  <InputLabel 
+                    sx={{ 
+                      backgroundColor: "white", 
+                      px: 1, 
+                      top: "-4px" 
+                    }}
+                  >
+                    Employee
+                  </InputLabel>
+                  <Select
+                    value={selectedEmployee}
+                    onChange={handleEmployeeChange}
+                    sx={{
+                      height: 40,
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    {/* Filter employees here directly to ensure it's always applied */}
+                    {Array.isArray(employees) && employees
+                      .filter(emp => String(emp.employee_id) !== String(employeeId)) // Convert to string to ensure matching
+                      .map((emp) => (
+                      <MenuItem key={emp.employee_id} value={emp.employee_id}>
+                        <Tooltip
+                          title={`${emp.employee_id} - ${emp.employee_name}`}
+                          placement="top"
+                          arrow
+                        >
+                          <span
+                            style={{
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                              display: "inline-block",
+                              maxWidth: "100%",
+                            }}
+                          >
+                            {emp.employee_id} - {emp.employee_name}
+                          </span>
+                        </Tooltip>
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              
+              {/* One-on-one Discussion Date - Force right alignment */}
+              <Grid 
+                item 
+                xs={12} 
+                md={8} 
+                sx={{ 
+                  display: "flex", 
+                  justifyContent: "flex-end",
+                  textAlign: "right",
+                  ml: "auto" 
+                }}
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: { xs: "column", sm: "row" },
+                    alignItems: { xs: "flex-end", sm: "center" },
+                    justifyContent: "flex-end",
+                    gap: { xs: 1, sm: 2 },
+                    width: { xs: "100%", sm: "auto" }
+                  }}
+                >
+                  <Typography
+                    align="right"
+                    sx={{
+                      color: "primary.main",
+                      fontWeight: "bold",
+                      fontSize: { xs: "0.875rem", sm: "1rem" },
+                      width: { xs: "100%", sm: "auto" }
+                    }}
+                  >
+                    One-on-one discussion with employee completed on
+                  </Typography>
+                  <Box sx={{ display: "flex", justifyContent: "flex-end", width: { xs: "100%", sm: "auto" } }}>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <DatePicker
+                        value={currentDiscussionDate}
+                        onChange={(newDate) => handleDiscussionDateChange(newDate)}
+                        format="DD/MM/YYYY"
+                        disabled={readOnly}
+                        slotProps={{
+                          textField: {
+                            size: "small",
+                            sx: { 
+                              width: { xs: "160px", sm: "160px" },
+                              minWidth: "140px",
+                              ml: { xs: "auto", sm: 0 }
+                            },
+                          },
+                        }}
+                      />
+                    </LocalizationProvider>
+                  </Box>
+                </Box>
+              </Grid>
+            </Grid>
+         
+            {/* Table Container */}
+            <TableContainer component={Paper} sx={{ maxHeight: "50vh", mb: 2, mt: 2, boxShadow: "none",border: "1px solid #c1c9c4", "& ::-webkit-scrollbar": {
+          width: "8px",
+        },
+        "& ::-webkit-scrollbar-thumb": {
+          backgroundColor: "#888",
+          borderRadius: "8px",
+        },
+        "& ::-webkit-scrollbar-thumb:hover": {
+          backgroundColor: "#555",
+        },
+        "& ::-webkit-scrollbar-track": {
+          borderRadius: "8px",
+        },  }}>
+              <Table stickyHeader>
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ color: 'primary.main', fontWeight: 'bold' }}>Evaluation Parameter</TableCell>
+                    {[1, 2, 3, 4].map(value => (
+                      <TableCell key={value} align="center" sx={{ color: 'primary.main', fontWeight: 'bold' }}>
+                        {["Needs Improvement", "Satisfactory", "Good", "Excellent"][value - 1]}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                </TableHead>
+              
+                <TableBody sx={{ maxHeight: "50vh", overflowY: "auto" }}>
+                  {parameters
+                    .filter(param => !param.is_fixed_parameter)
+                    .map(param => (
+                      <TableRow key={param.parameter_id}>
+                        <TableCell sx={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          {param.parameter_title}
+                          <Tooltip
+                            title={param.helptext || "No help text available"}
+                            placement="top"
+                            arrow
+                            componentsProps={{
+                              tooltip: {
+                                sx: {
+                                  backgroundColor: '#1976d2',
+                                  color: 'white',
+                                  fontSize: '13px',
+                                  padding: '6px',
+                                  borderRadius: '4px',
+                                  boxShadow: '0px 0px 8px rgba(0,0,0,0.2)',
+                                  maxWidth: '200px', 
+                                },
+                              },
+                              arrow: {
+                                sx: {
+                                  color: '#1976d2',
+                                },
+                              },
+                            }}
+                          >
+                            <IconButton size="small" sx={{ p: 0.5 }}>
+                              <InfoOutlineIcon sx={{ color: '#1976d2', fontSize: '18px' }} />
+                            </IconButton>
+                          </Tooltip>
+                        </TableCell>
 
+                        {[1, 2, 3, 4].map(value => (
+                          <TableCell align="center" key={value}>
+                            <Radio
+                              name={`rating-${param.parameter_id}`}
+                              value={value}
+                              checked={currentRatings[param.parameter_id] === value}
+                              onChange={() => handleRatingChange(param.parameter_id, value)}
+                              disabled={readOnly}
+                              sx={{ padding: 0 }}
+                            />
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
 
-    </TableRow>
-  ))}
+                  {parameters
+                    .filter(param => param.is_fixed_parameter)
+                    .map(param => (
+                      <TableRow key={param.parameter_id}>
+                        <TableCell sx={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          {param.parameter_title}
+                          <Tooltip
+                            title={param.helptext || "No help text available"}
+                            placement="top"
+                            arrow
+                            componentsProps={{
+                              tooltip: {
+                                sx: {
+                                  backgroundColor: '#1976d2',
+                                  color: 'white',
+                                  fontSize: '13px',
+                                  padding: '6px',
+                                  borderRadius: '4px',
+                                  boxShadow: '0px 0px 8px rgba(0,0,0,0.2)',
+                                  maxWidth: '200px', 
+                                },
+                              },
+                              arrow: {
+                                sx: {
+                                  color: '#1976d2',
+                                },
+                              },
+                            }}
+                          >
+                            <IconButton size="small" sx={{ p: 0.5 }}>
+                              <InfoOutlineIcon sx={{ color: '#1976d2', fontSize: '18px' }} />
+                            </IconButton>
+                          </Tooltip>
+                        </TableCell>
 
-  {parameters
-  .filter(param => param.is_fixed_parameter)
-  .map(param => (
-    <TableRow
-    key={param.parameter_id}
-    
-  >
-  
-      <TableCell sx={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-        {param.parameter_title}
+                        {[1, 2, 3, 4].map(value => (
+                          <TableCell align="center" key={value}>
+                            <Radio
+                              name={`rating-${param.parameter_id}`}
+                              value={value}
+                              checked={currentRatings[param.parameter_id] === value}
+                              onChange={() => handleRatingChange(param.parameter_id, value)}
+                              disabled={readOnly}
+                              sx={{ padding: 0 }}
+                            />
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+        
+            {/* Comments Section */}
+            <div style={{ position: 'relative', marginTop: '20px' }}>
+              <label
+                style={{
+                  position: 'absolute',
+                  top: '-12px',
+                  left: '10px',
+                  backgroundColor: 'white',
+                  padding: '0 5px',
+                  fontSize: '0.85rem',
+                  color: '#666',
+                  zIndex: 1,
+                  pb: '1px',
+                }}
+              >
+                Any specific inputs
+              </label>
+              <TextareaAutosize
+                minRows={2}
+                fullWidth
+                sx={{ p: 1 }}
+                value={currentComments}
+                disabled={readOnly}
+                InputProps={{ readOnly: readOnly }}
+                onChange={handleCommentsChange}
+                style={{ 
+                  maxWidth: "100%",
+                  minWidth: "100%",
+                  fontFamily: "Roboto, Helvetica, Arial, sans-serif",
+                  fontSize: "1rem",
+                  borderRadius: "4px",
+                  border: "1px solid #ccc",
+                  padding: '12px',
+                }}
+              />
+            </div>
 
-        <Tooltip
-          title={param.helptext || "No help text available"}
-          placement="top"
-          arrow
-          componentsProps={{
-            tooltip: {
-              sx: {
-                backgroundColor: '#1976d2',
-                color: 'white',
-                fontSize: '13px',
-                padding: '6px',
-                borderRadius: '4px',
-                boxShadow: '0px 0px 8px rgba(0,0,0,0.2)',
-                maxWidth: '200px', 
-              },
-            },
-            arrow: {
-              sx: {
-                color: '#1976d2',
-              },
-            },
-          }}
-        >
-          <IconButton size="small" sx={{ p: 0.5 }}>
-            <InfoOutlineIcon sx={{ color: '#1976d2', fontSize: '18px' }} />
-          </IconButton>
-        </Tooltip>
-      </TableCell>
-
-        {[1, 2, 3, 4].map(value => (
-          <TableCell align="center" key={value}>
-            <Radio
-              name={`rating-${param.parameter_id}`}
-              value={value}
-              checked={currentRatings[param.parameter_id] === value}
-              onChange={() => handleRatingChange(param.parameter_id, value)}
-              disabled={readOnly}
-              sx={{ padding: 0 }}
-            />
-          </TableCell>
-        ))}
-  
-
-
-    </TableRow>
-  ))}
-</TableBody>
-
-          </Table>
-        </TableContainer>
-    
-
-        <TextareaAutosize
-          label="Any specific inputs"
-          minRows={3}
-          fullWidth
-          sx={{ mb: 2, p:1 }}
-          value={currentComments}
-          disabled={readOnly}
-          InputProps={{ readOnly: readOnly }}
-          onChange={handleCommentsChange}
-          placeholder="Any specific inputs"
-          style={{ 
-            maxWidth: "100%",
-            minWidth: "100%",
-            fontFamily: "Roboto, Helvetica, Arial, sans-serif",
-            fontSize: "1rem",
-            borderRadius: "4px",
-            border: "1px solid #ccc",
-          }}
-          />
-
-        <Box sx={{ display: "flex", justifyContent: "flex-end", position: "sticky",p:1}}>
-        <Button variant="contained" color="primary" onClick={handleSubmit} disabled={readOnly} align="right">Submit</Button>
-
-        </Box>
-               <Snackbar open={snackbar.open} autoHideDuration={5000} onClose={() => setSnackbar({ ...snackbar, open: false })}>
-                        <Alert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity}>
-                          {snackbar.message}
-                        </Alert>
-                </Snackbar>
+            {/* Submit Button */}
+            <Box sx={{ 
+              display: "flex", 
+              justifyContent: "flex-end", 
+              position: "sticky",
+              p: 1,
+              mb: 0 
+            }}>
+              <Button 
+                variant="contained" 
+                color="primary" 
+                onClick={handleSubmit} 
+                disabled={readOnly} 
+              >
+                Submit
+              </Button>
+            </Box>
+          </Box>
+        </Modal>
       </Box>
-
-    </Modal>
-    </Box>
-    <Backdrop
-          sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.modal + 10 }}
-          open={saving}
+      
+      {/* Notification */}
+      <Snackbar 
+        open={snackbar.open} 
+        autoHideDuration={5000} 
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert 
+          onClose={() => setSnackbar({ ...snackbar, open: false })} 
+          severity={snackbar.severity}
         >
-          <CircularProgress color="inherit" />
-        </Backdrop>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+      
+      {/* Loading Backdrop */}
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.modal + 10 }}
+        open={saving}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
     </>
   );
 };
 
 export default LeadAssessmentModal;
-
-

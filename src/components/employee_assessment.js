@@ -278,12 +278,14 @@ const DropdownPage = () => {
     setSelectedEmployee(cachedEmployee);
     setTeamLeadName(cachedManager);
     setModalOpen(false);
+
   };
 
   const handleEmployeeChange = async (e) => {
       const empId = e.target.value;
       setSelectedEmployee(empId);
       setTeamLeadName("");
+      // setModalOpen(true); // Open modal when employee changes
     
       // Always clear existing data when changing employee
       setAssessmentData([]);
@@ -563,7 +565,7 @@ const DropdownPage = () => {
       setResponses({});
     }
   };
-  
+  const isCurrentUser = String(selectedEmployee) === String(employeeId);
 
   return (
     <>
@@ -628,7 +630,7 @@ const DropdownPage = () => {
                 ) : (
                   <a
                     onClick={isLeadAssessmentDisabled? null : openModal} 
-
+                    disabled={isCurrentUser}
                     // style={{ cursor: "pointer", color: "blue", textDecoration: "underline", fontSize: "16px" }}
                     style={{
                       cursor: isLeadAssessmentDisabled ? "not-allowed" : "pointer",
