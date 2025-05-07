@@ -28,39 +28,3 @@ export default function App() {
     </Router>
   );
 }
-
-// import React, { useState } from 'react';
-// import SideNavigation from './components/AppLayout';
-// import DropdownPage from './components/DropdownPage';
-// import HRLandingPage from './components/HRLandingPage'; // Your existing HR landing page
-
-// function App() {
-//   const [currentPage, setCurrentPage] = useState('hr-dashboard');
-
-//   const handleNavigation = (pageId) => {
-//     setCurrentPage(pageId);
-//   };
-
-//   // Render the appropriate component based on currentPage
-//   const renderPage = () => {
-//     switch(currentPage) {
-//       case 'hr-dashboard':
-//         return <HRLandingPage />;
-//       case 'assessment':
-//         return <DropdownPage />;
-//       default:
-//         return <HRLandingPage />;
-//     }
-//   };
-
-//   return (
-//     <SideNavigation 
-//       currentPage={currentPage} 
-//       onNavigate={handleNavigation}
-//     >
-//       {renderPage()}
-//     </SideNavigation>
-//   );
-// }
-
-// export default App;

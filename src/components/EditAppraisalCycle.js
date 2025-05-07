@@ -630,6 +630,7 @@ const EditAppraisalCycle = ({ onClose }) => {
           open={snackbar.open}
           autoHideDuration={3000}
           onClose={() => setSnackbar({ ...snackbar, open: false })}
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
         >
           <Alert severity={snackbar.severity}>{snackbar.message}</Alert>
         </Snackbar>

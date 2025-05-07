@@ -17,8 +17,6 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import Checkbox from '@mui/material/Checkbox';
 import ListItemText from '@mui/material/ListItemText';
 import {Grid,Typography, Card, IconButton,Skeleton} from '@mui/material';
-import HourglassBottomIcon from '@mui/icons-material/HourglassBottom';
-// import { motion } from 'framer-motion';
 import { useNavigate } from "react-router-dom";
 import CloseIcon from "@mui/icons-material/Close";
 const API_URL = process.env.REACT_APP_BASE_URL; 
@@ -125,10 +123,10 @@ const [loadingCycles, setLoadingCycles] = React.useState(true);  //3
       .finally(() => setLoadingEmployees(false));
   }, []);
 
-  // Fetch completed cycles data
+  // Fetch completed and active cycles for which lead assessment is active or completed
   React.useEffect(() => {
     setLoadingCycles(true);    //5
-    fetch(`${API_URL}/appraisal_cycle/appraisal-cycles/completed`) // Replace with your actual API endpoint
+    fetch(`${API_URL}/appraisal_cycle/appraisal-cycles/historic-report`) 
       .then((response) => response.json())
       .then((data) => {
         setCycles(data);
