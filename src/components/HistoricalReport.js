@@ -81,7 +81,8 @@ export default function HistoricalReportTable({ onSelect }) {
   const [cycles, setCycles] = React.useState([]);
   const [selectedCycles, setSelectedCycles] = React.useState([]);
   const [baseColumns] = React.useState([
-    { field: "employee_id", headerName: "Employee ID", flex:5,minWidth:100},
+    { field: "employee_id", headerName: "Employee ID", flex:5,minWidth: 100,
+      maxWidth: 120},
     { field: "employee_name", headerName: "Name", flex:5,minWidth:130 },
     { field: "role", headerName: "Role", flex:5,minWidth:100 },
     { field: "reporting_manager", headerName: "Reporting Manager", flex:5,minWidth:130 },
@@ -250,11 +251,15 @@ const [loadingCycles, setLoadingCycles] = React.useState(true);  //3
   const getRowHeight = () => 35;
 
   return (
-    <Card sx={{ width: '100%', m:1 }}>
-    <Box sx={{ width: '98%' ,ml:1}}>
+    <>
+    <Box sx={{ width: '100%'}}>
       <Grid container alignItems="center" >
          <Grid item size={11}>
-            <Typography variant="h6" color="primary" fontWeight={"bold"} pl="10px">
+            <Typography variant="h6"
+            color="primary"
+            fontWeight={"bold"}
+            sx={{ padding: "10px" }}
+            >
               Historical Report
             </Typography>
         </Grid>
@@ -265,7 +270,8 @@ const [loadingCycles, setLoadingCycles] = React.useState(true);  //3
           </Grid>
           </Grid>
      
-       {/* Cycle Selection Dropdown with Checkboxes */}
+      <Box sx={{ pr:"10px",pl:"10px",pb:"10px"}}>
+        {/* Cycle Selection Dropdown with Checkboxes */}
        <FormControl sx={{ mb:1,width: 'auto' , minWidth:'20%'}}>
         <InputLabel id="checkbox-cycles-label" sx={{background:"white"}}>Select Appraisal Cycles</InputLabel>
         <Select
@@ -346,8 +352,9 @@ const [loadingCycles, setLoadingCycles] = React.useState(true);  //3
             hideFooter
           />)
       }
+      </Box>
     </Box>
-    </Card>
+    </>
   );
 }
 
