@@ -242,7 +242,7 @@ const AppLayout = ({ children, onNavigate, activePage }) => {
       <CssBaseline />
       
       {/* Toggle button for the drawer */}
-      <Box sx={{ position: 'fixed', top: 16, left: 16, zIndex: 1200 }}>
+      <Box sx={{ position: 'fixed', top: 0, left: 16, zIndex: 1200 }}>
         <IconButton
           color="primary"
           aria-label="open drawer"

@@ -50,20 +50,21 @@ const DropdownPage = () => {
   const [loadingCycles, setLoadingCycles] = useState(true);
 
   const [isReadOnly, setReadOnly] = useState(true);
-  const [isLeadAssessmentDisabled, setIsLeadAssessmentDisabled] = useState(false);
+  const [isLeadAssessmentDisabled, setIsLeadAssessmentDisabled] = useState(true); // Start with disabled by default
 
   const [saving, setSaving] = useState(false); 
 
   const [leadAssessmentActive, setLeadAssessmentActive] = useState(false);
   const [leadAssessmentCompleted, setLeadAssessmentCompleted] = useState(false);
 
+  const [modalSelectedEmployee, setModalSelectedEmployee] = useState("");  
+  const [initialLoadCompleted, setInitialLoadCompleted] = useState(false);
 
-  
+
   useEffect(() => {
     if (!employeeId) return;
     const fetchUserRoleAndCycles = async () => {
       try {
-       
         const userResponse = await axios.get(`${API_URL}/employee_details/${employeeId}`);
         const role = userResponse.data.role.toLowerCase();
         setUserRole(role);
@@ -90,57 +91,60 @@ const DropdownPage = () => {
             setSelectedEmployee(defaultEmployeeId);
     
             if (defaultEmployeeId) {
-              
               const managerResponse = await axios.get(`${API_URL}/reporting_manager/${defaultEmployeeId}`);
               const { reporting_manager_id, reporting_manager_name } = managerResponse.data;
               setTeamLeadName(`${reporting_manager_id} - ${reporting_manager_name}`);
+            }
+            
+            // Check Lead Assessment stage here for the active cycle
+            if (role === "team lead" || role === "admin") {
+              await checkLeadAssessmentStage(activeCycle.cycle_id);
             }
           }
         }
 
         else if (role === "team lead" || role === "admin") {
-            const allCyclesRes = await axios.get(`${API_URL}/appraisal_cycle/`);
-            const cycles = allCyclesRes.data;
-          
-            const tlAssignedCycles = [];
-          
-            for (const cycle of cycles) {
-              const empRes = await axios.get(`${API_URL}/employees/${cycle.cycle_id}/${employeeId}`);
-              if (empRes.data && empRes.data.length > 0) {
-                tlAssignedCycles.push({ ...cycle, employees: empRes.data });
+          const allCyclesRes = await axios.get(`${API_URL}/assessment/teamlead/cycles/${employeeId}`);
+          const cycles = allCyclesRes.data;
+          setAppraisalCycles(cycles);
+        
+          const activeCycle = cycles.find((cycle) => cycle.status === "active");
+          if (activeCycle) {
+            setSelectedCycle(activeCycle.cycle_id);
+            setIsCycleActive(true);
+
+            // Fetch employees under the team lead
+            try {
+              const employeesRes = await axios.get(`${API_URL}/reporting/${employeeId}`);
+              const employees = employeesRes.data;
+
+              if (employees.length > 0) {
+                setEmployees(employees);
+                setSelectedEmployee(employeeId);  // Default to the team lead
+              } else {
+                // If no employees found under the team lead
+                setEmployees([]);
               }
+            } catch (error) {
+              console.error("Error fetching employees: ", error);
+              setEmployees([]);
             }
-          
-            const filteredCycles = tlAssignedCycles.filter(
-              (cycle) => cycle.status === "active" || cycle.status === "completed"
-            );
-          
-            setAppraisalCycles(filteredCycles);
-          
-            const activeCycle = filteredCycles.find((cycle) => cycle.status === "active");
-            if (activeCycle) {
-              setSelectedCycle(activeCycle.cycle_id);
-              setIsCycleActive(true);
-          
-              // Set default employee to team lead themselves
-              setEmployees(activeCycle.employees);
-              setSelectedEmployee(employeeId);
-          
-              const managerResponse = await axios.get(`${API_URL}/reporting_manager/${employeeId}`);
-              const { reporting_manager_id, reporting_manager_name } = managerResponse.data;
-              setTeamLeadName(`${reporting_manager_id} - ${reporting_manager_name}`);
-            }
+
+            const managerResponse = await axios.get(`${API_URL}/reporting_manager/${employeeId}`);
+            const { reporting_manager_id, reporting_manager_name } = managerResponse.data;
+            setTeamLeadName(`${reporting_manager_id} - ${reporting_manager_name}`);
+            
+            // Check Lead Assessment stage here for the active cycle
+            await checkLeadAssessmentStage(activeCycle.cycle_id);
           }
+        }
 
         else {
           // Regular employee
           const cyclesResponse = await axios.get(`${API_URL}/assessment/cycles/${employeeId}`);
-          const filteredCycles = cyclesResponse.data.filter(
-            (cycle) => cycle.status === "active" || cycle.status === "completed"
-          );
-          setAppraisalCycles(filteredCycles);
+          setAppraisalCycles(cyclesResponse.data);
         
-          const activeCycle = filteredCycles.find((cycle) => cycle.status === "active");
+          const activeCycle = cyclesResponse.data.find((cycle) => cycle.status === "active");
           if (activeCycle) {
             setSelectedCycle(activeCycle.cycle_id);
             setIsCycleActive(true);
@@ -161,13 +165,50 @@ const DropdownPage = () => {
         console.error("Error fetching user role or cycles:", error)
       } finally {
         setLoadingCycles(false);
+        setInitialLoadCompleted(true);
       }
-
     };
 
-    
     fetchUserRoleAndCycles();
   }, [employeeId]);
+
+  // Function to check lead assessment stage status
+  const checkLeadAssessmentStage = async (cycleId) => {
+    if (!cycleId) return;
+    
+    try {
+      // First check self-assessment stage
+      const selfAssessmentRes = await axios.get(`${API_URL}/stages/self-assessment/${cycleId}`);
+      const { is_active: selfAssessmentActive, is_completed: selfAssessmentCompleted } = selfAssessmentRes.data;
+      
+      // Then check lead-assessment stage
+      const leadAssessmentRes = await axios.get(`${API_URL}/stages/lead-assessment/${cycleId}`);
+      const { is_active, is_completed } = leadAssessmentRes.data;
+      
+      setLeadAssessmentActive(is_active);
+      setLeadAssessmentCompleted(is_completed);
+      
+      // Logic to determine if Lead Assessment should be disabled:
+      // 1. If self-assessment is active and not completed, disable lead assessment
+      // 2. If lead-assessment is neither active nor completed, disable
+      // 3. Otherwise, enable it
+      
+      if ((selfAssessmentActive && !selfAssessmentCompleted) || (!is_active && !is_completed)) {
+        console.log("Lead Assessment should be disabled", { 
+          selfAssessmentActive, 
+          selfAssessmentCompleted, 
+          leadActive: is_active, 
+          leadCompleted: is_completed 
+        });
+        setIsLeadAssessmentDisabled(true);
+      } else {
+        setIsLeadAssessmentDisabled(false);
+      }
+    } catch (err) {
+      console.error("Failed to fetch stage info:", err);
+      setIsLeadAssessmentDisabled(true); // Safe fallback
+    }
+  };
 
   useEffect(() => {
     const fetchAssessmentDataAndResponses = async () => {
@@ -184,26 +225,26 @@ const DropdownPage = () => {
         let readOnly = false;
         // STEP 1:check if selected cycle is active, Check if Self Assessment stage is active
         if(isCycleActive ){
-      const stageRes = await axios.get(`${API_URL}/stages/self-assessment/${selectedCycle}`);
-      const { is_active } = stageRes.data;
-      const {is_completed} = stageRes.data;
-      if (!is_active && !is_completed) {
-        console.log("Self Assessment stage is not active.");
-        setAssessmentData([]);
-        setResponses({});
-        return;
-      }
-      // If stage is completed, show as read-only
-      if (is_completed) {
-        readOnly = true;
-        setReadOnly(true);
-      }else{
-        readOnly = true;
-        setReadOnly(false);
-      }
-
-    }
-      // STEP 2: Fetch assessment questions
+          const stageRes = await axios.get(`${API_URL}/stages/self-assessment/${selectedCycle}`);
+          const { is_active } = stageRes.data;
+          const {is_completed} = stageRes.data;
+          if (!is_active && !is_completed) {
+            console.log("Self Assessment stage is not active.");
+            setAssessmentData([]);
+            setResponses({});
+            return;
+          }
+          // If stage is completed, show as read-only
+          if (is_completed) {
+            readOnly = true;
+            setReadOnly(true);
+          } else{
+            readOnly = true;
+            setReadOnly(false);
+          }
+        }
+        
+        // STEP 2: Fetch assessment questions
         const questionsRes = await axios.get(`${API_URL}/assessment/questions/${questionOwnerId}/${selectedCycle}`);
         const questions = questionsRes.data || [];
         setAssessmentData(questions);
@@ -217,7 +258,6 @@ const DropdownPage = () => {
               ? res.option_ids
               : res.response_text?.[0] || "";
           });
-          
           
           setResponses(previous);
         } catch (err) {
@@ -238,47 +278,23 @@ const DropdownPage = () => {
     fetchAssessmentDataAndResponses();
   }, [selectedCycle, selectedEmployee, userRole, employeeId]);
 
-
-
+  // This effect checks Lead Assessment stage when cycle changes
   useEffect(() => {
-    const checkLeadAssessmentStage = async () => {
-      if (!selectedCycle || !selectedEmployee) return;
-      if (isCycleActive) {
-        try {
-          const res = await axios.get(`${API_URL}/stages/lead-assessment/${selectedCycle}`);
-          const { is_active, is_completed } = res.data;
-          setLeadAssessmentActive(is_active);
-          setLeadAssessmentCompleted(is_completed);
-          if (!is_active && !is_completed) 
-             {
-            console.log("Self Assessment stage is not active.");
-            setIsLeadAssessmentDisabled(true); // Disable the link
-          } else {
-            setIsLeadAssessmentDisabled(false); // Enable if stage is active
-          }
-        } catch (err) {
-          console.error("Failed to fetch Lead Assessment stage info:", err);
-          setIsLeadAssessmentDisabled(true); // Safe fallback
-        }
-      } else {
-        setIsLeadAssessmentDisabled(false);
-      }
-    };
-  
-    checkLeadAssessmentStage();
-  }, [selectedCycle]);
+    if (!selectedCycle || !initialLoadCompleted) return;
+    
+    if ((userRole === "team lead" || userRole === "admin") && isCycleActive) {
+      checkLeadAssessmentStage(selectedCycle);
+    }
+  }, [selectedCycle, initialLoadCompleted, userRole, isCycleActive]);
   
   const openModal = () => {
-    setCachedEmployee(selectedEmployee);
-    setCachedManager(teamLeadName);
+    setModalSelectedEmployee(selectedEmployee); // Initialize modal with current selection
     setModalOpen(true);
   };
-  
-  const closeModal = () => {
-    setSelectedEmployee(cachedEmployee);
-    setTeamLeadName(cachedManager);
-    setModalOpen(false);
 
+  const closeModal = () => {
+    setModalOpen(false);
+    // Don't update selectedEmployee here
   };
 
   const handleEmployeeChange = async (e) => {
@@ -318,14 +334,10 @@ const DropdownPage = () => {
       const cycleResponse = await axios.get(`${API_URL}/appraisal_cycle/${cycleId}`);
       setIsCycleActive(cycleResponse.data.status === "active");
   
-
-      // Fetch the Lead Assessment Stage status
-    const stageResponse = await axios.get(`${API_URL}/stages/lead-assessment/${cycleId}`);
-    const { is_active: leadAssessmentActive, is_completed: leadAssessmentCompleted } = stageResponse.data;
-
-    setLeadAssessmentActive(leadAssessmentActive);
-    setLeadAssessmentCompleted(leadAssessmentCompleted);
-
+      // For team leads and admins, check the Lead Assessment stage
+      if (userRole === "team lead" || userRole === "admin") {
+        await checkLeadAssessmentStage(cycleId);
+      }
 
       const employeesResponse = await axios.get(`${API_URL}/employees/${cycleId}/${employeeId}`);
       setEmployees(employeesResponse.data);
@@ -382,7 +394,6 @@ const DropdownPage = () => {
     }
 
     //if Team lead is selecting the active cycle and and self assessment stage is completed 
-
     if(isReadOnly === "true"){
       return true;
     }
@@ -477,7 +488,7 @@ const DropdownPage = () => {
 
   const handleSubmit = async () => {
     try {
-      setSaving(true); // Show loading backdrop       //3
+      setSaving(true); // Show loading backdrop
       const payload = assessmentData.map((question) => {
         const response = responses[question.question_id];
         const question_type = question.question_type.toLowerCase();
@@ -529,9 +540,6 @@ const DropdownPage = () => {
     }
   };
 
-
-  
-
   const refreshAssessmentData = async () => {
     if (!selectedCycle || !selectedEmployee) return;
   
@@ -569,8 +577,22 @@ const DropdownPage = () => {
 
   return (
     <>
-    <Card sx={{m:2,  justifyContent: "center" }}>
+    <Card sx={{ml:2,mr:2,  justifyContent: "center" }}>
         <CardContent>
+          {/* Title */}
+          {loadingCycles ? (
+            <Skeleton variant="rectangular" width={500} height={25} sx={{ borderRadius: 1, mb: 2 }} />
+          ) : (
+            <Typography 
+              variant="h5" 
+              color="primary" 
+              fontWeight={"bold"}
+            >
+                Self Assessment
+            </Typography>
+          )}
+
+          {/* Cycle dropdown */}
           <Box sx={{ display: "flex", gap: 4, alignItems: "center", flexWrap: "wrap", mt:2 }}>
             {loadingCycles ? (
               // Skeleton placeholder when loading
@@ -592,6 +614,7 @@ const DropdownPage = () => {
                         </FormControl>
             )}
             
+            {/* Employee dropdown */}
             {loadingCycles ? (
               // Skeleton placeholder when loading
               <Skeleton variant="rectangular" width={200} height={40} sx={{ borderRadius: 1 }} />
@@ -612,6 +635,7 @@ const DropdownPage = () => {
                         </FormControl>
             )}
 
+            {/* Reporting manager name */}
             {selectedEmployee && (
               <TextField
                 value={teamLeadName || "N/A"}
@@ -623,15 +647,14 @@ const DropdownPage = () => {
               />
             )}
    
+            {/* Lead assessment link */}
             {(userRole === "team lead" || userRole === "Team Lead" || userRole === "admin") && (
               <Box sx={{ display: "flex", justifyContent: "flex-end", alignItems: "center", flex: 1 }}>
                 {loadingCycles ? (
                   <Skeleton variant="rectangular" width={150} height={25} sx={{ borderRadius: 1 }} />
                 ) : (
                   <a
-                    onClick={isLeadAssessmentDisabled? null : openModal} 
-                    disabled={isCurrentUser}
-                    // style={{ cursor: "pointer", color: "blue", textDecoration: "underline", fontSize: "16px" }}
+                    onClick={isLeadAssessmentDisabled ? null : openModal} 
                     style={{
                       cursor: isLeadAssessmentDisabled ? "not-allowed" : "pointer",
                       color: isLeadAssessmentDisabled ? "gray" : "blue",
@@ -641,41 +664,44 @@ const DropdownPage = () => {
                     }}
                   >
                     Lead Assessment
+                    {/* {isLeadAssessmentDisabled && <span> (Not Available)</span>} */}
                   </a>
                 )}
               </Box>
             )}
+
+
+            
               
           </Box> 
         </CardContent>
 
-      <Card sx={{ width: "100%",mt:2 }}>
+      <Card sx={{ width: "100%" }}>
         <CardContent>
-          {loadingCycles ? (
-            // Skeleton placeholder when loading
-            <Skeleton variant="rectangular" width={500} height={25} sx={{ borderRadius: 1 }} />
-            ) : (<Typography variant="h5" sx={{ mb: 4, display: "flex", alignItems: "center", justifyContent: "space-between" }} color="primary" fontWeight={"bold"}>
-                      <span>
-                        {(userRole === "team lead" || userRole === "admin")&& selectedEmployee !== employeeId 
-                          ? `Employee Self Assessment (${employees.find(emp => emp.employee_id === selectedEmployee)?.employee_name || 'Unknown'})` 
-                          : `Self Assessment`}
-                        {selectedCycle && `: ${appraisalCycles.find(cycle => cycle.cycle_id === selectedCycle)?.cycle_name || ''}`}
-                      </span>
+          {/* Question list */}
+          {assessmentData.length > 0 ? (
+            <Box mt={0}>
+              {assessmentData.map((question, index) => (
+                <Box key={question.question_id} mb={3}>
+                  {/* For the first question, show question + refresh button in same line */}
+                  {index === 0 ? (
+                    <Box display="flex" alignItems="center" justifyContent="space-between">
+                      <Typography variant="subtitle1" fontWeight={"bold"}>
+                        {index + 1}. {question.question_text}
+                      </Typography>
                       <Tooltip title="Refresh responses" arrow>
                         <IconButton onClick={refreshAssessmentData} size="small" color="primary">
                           <RefreshIcon />
                         </IconButton>
                       </Tooltip>
-                    </Typography>
-          )}
+                    </Box>
+                    ) : (
 
-          {assessmentData.length > 0 ? (
-            <Box mt={4}>
-              {assessmentData.map((question, index) => (
-                <Box key={question.question_id} mb={3}>
-                  <Typography variant="subtitle1" fontWeight={"bold"}>
-                    {index + 1}. {question.question_text}
-                  </Typography>
+                    // For other questions, just show question text normally
+                    <Typography variant="subtitle1" fontWeight={"bold"}>
+                      {index + 1}. {question.question_text}
+                    </Typography>
+                  )}
                   {renderInputField(question)}
                 </Box>
               ))}
@@ -690,7 +716,7 @@ const DropdownPage = () => {
               )}
             </Box>
           ) : (
-            <Box mt={4}>
+            <Box mt={0}>
               {loadingCycles ? (
               // Skeleton placeholder when loading
               <Skeleton variant="rectangular" width={200} height={25} sx={{ borderRadius: 1 }} />
@@ -701,20 +727,21 @@ const DropdownPage = () => {
               )}
             </Box>
           )}
-        
+
           <LeadAssessmentModal
             open={isModalOpen}
             onClose={closeModal}
             selectedCycle={selectedCycle}
             employees={employees}
-            selectedEmployee={selectedEmployee}
-            setSelectedEmployee={setSelectedEmployee}
+            selectedEmployee={modalSelectedEmployee}  // Use modal-specific state
+            setSelectedEmployee={setModalSelectedEmployee}  // Use modal-specific setter
             employeeId={employeeId}
             isCycleActive={isCycleActive}
             leadAssessmentActive={leadAssessmentActive}       
-            leadAssessmentCompleted={leadAssessmentCompleted}  
+            leadAssessmentCompleted={leadAssessmentCompleted} 
             prefilledData={null}
           />
+
         </CardContent>
       </Card>
 
@@ -742,13 +769,3 @@ const DropdownPage = () => {
 };
 
 export default DropdownPage;
-
-
-
-
-
-
-
-
-
-
