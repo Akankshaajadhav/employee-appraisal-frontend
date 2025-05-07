@@ -281,11 +281,9 @@ const HRLandingPage = () => {
 
   return (
     <>
-      <Card>
-        <CardContent>
           <Card sx={{ width: "100%" }}>
             <CardContent
-              sx={{ height: detailsVisible ? 300 : 600, maxHeight: 600 }}
+              sx={{ height: detailsVisible ? 300 : "100vh"}}
             >
               <Grid
                 container
@@ -383,7 +381,7 @@ const HRLandingPage = () => {
                 </Box> 
 
                 ) : (
-                  <Grid item xs={12} style={{ height: "100%", width: "100%" }}>
+                  <Grid item xs={12} style={{ height: "100%", width: "100%", }}>
                     <DataGrid
                       rows={rowsWithStage}
                       columns={columnsWithStage}
@@ -391,8 +389,9 @@ const HRLandingPage = () => {
                       slots={{ toolbar: CustomToolbar }}
                       pageSizeOptions={[5]}
                       sx={{
-                        height: detailsVisible ? 250 : 550,
-                        maxHeight: 550,
+                        height: detailsVisible ? 250 : "93vh",
+                        padding:"2px",
+                        minHeight:"auto",
                         overflow: "auto",
                         "& .MuiDataGrid-columnHeaderTitle": {
                           fontWeight: "bold", 
@@ -409,6 +408,7 @@ const HRLandingPage = () => {
             </CardContent>
           </Card>
 
+          <Box sx={{mb:2}}>
           {detailsVisible && selectedCycleId && (
             <Assignment
               cycleId={selectedCycleId}
@@ -416,6 +416,7 @@ const HRLandingPage = () => {
               cycleName={selectedCycleName}
             />
           )}
+          </Box>
 
           <Snackbar
             open={snackbar.open}
@@ -425,8 +426,7 @@ const HRLandingPage = () => {
           >
             <Alert severity={snackbar.severity}>{snackbar.message}</Alert>
           </Snackbar>
-        </CardContent>
-      </Card>
+        
       <Backdrop
     sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
     open={deleting}     

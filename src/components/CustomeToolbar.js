@@ -10,8 +10,8 @@ import {
 
 function CustomToolbar() {
   return (
-    <GridToolbarContainer sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-      <Box>
+    <GridToolbarContainer sx={{ display: "flex", justifyContent: "space-between", alignItems: "center",p: 1 }}>
+      <Box sx={{ display: "flex", gap: 1 }}>
         <GridToolbarColumnsButton />
         <GridToolbarFilterButton />  
         <GridToolbarExport />
