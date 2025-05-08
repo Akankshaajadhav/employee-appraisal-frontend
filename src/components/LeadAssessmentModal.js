@@ -466,14 +466,6 @@ const LeadAssessmentModal = ({ open, onClose, selectedCycle, employees, selected
         },  }}>
               <Table stickyHeader>
               <TableHead>
-                {/* Conditional rendering based on loading state */}
-                {/* {loading ? (
-                    <TableRow>
-                      <TableCell >
-                        <LoadingContent />
-                      </TableCell>
-                    </TableRow>
-                ) : ( */}
               <TableRow>
                     <TableCell sx={{ color: 'primary.main', fontWeight: 'bold' }}>Evaluation Parameter</TableCell>
                     {[1, 2, 3, 4].map(value => (
