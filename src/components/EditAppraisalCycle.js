@@ -80,7 +80,7 @@ const EditAppraisalCycle = ({ onClose }) => {
     try {
       const data = await cycleById(Number(cycle_id));
       setCycle(data);
-
+      console.log(data);
       setCycleName(data.cycle_name);
       setDescription(data.description);
       setStatus(data.status);
