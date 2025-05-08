@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 
 // External libraries (MUI)
@@ -36,7 +36,6 @@ export default function Questionnaire({ onClose }) {
   const navigate = useNavigate();
   // To display question list.
   const [questions, setQuestions] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // Add question hooks.
@@ -209,11 +208,13 @@ export default function Questionnaire({ onClose }) {
     loadQuestions();
   }, []);
 
-  // MUI column names and their size.
-  const columns = [
+ 
+
+  const columns = useMemo(() => [
     { field: "question_id", headerName: "Q. No.", width: 90 },
-    { field: "question_text", headerName: "Questions", width: 500 },
-  ];
+    { field: "question_text", headerName: "Questions", width: 500 },], [handleSave]);
+  const rows = useMemo(() => questions, [loadQuestions]);
+
 
   return (
     <>
@@ -242,15 +243,17 @@ export default function Questionnaire({ onClose }) {
           mb: 2,
         }}
       >
-        <Card sx={{ flex: 1, pl: 1.5, height: "93vh", mr: 2 }}>
+        <Card sx={{ flex: 1, ml: 1.5, height: "93vh", mr: 2, border: '1px solid', 
+            borderColor: '#e1e1e3',
+            borderRadius: 1  }}>
           {/* Left Panel */}
           {loadingQuestions ? (
-            <Box sx={{ width: "90%", mt: 2, ml: 2 }}>
+            <Box sx={{ width: "90%", p:2 }}>
               {[...Array(20)].map((_, index) => (
                 <Skeleton
                   key={index}
                   variant="rectangular"
-                  height={30}
+                  height={28}
                   sx={{
                     mb: 1,
                     bgcolor: "#e6e9ed",
@@ -261,7 +264,7 @@ export default function Questionnaire({ onClose }) {
             </Box>
           ) : (
             <DataGrid
-              rows={questions}
+              rows={rows}
               columns={columns}
               getRowId={(row) => row.question_id}
               slots={{ toolbar: CustomToolbar }}
@@ -270,6 +273,7 @@ export default function Questionnaire({ onClose }) {
                   fontWeight: "bold",
                 },
                 maxWidth: "100%",
+                border: "none",
               }}
               hideFooter
             />
@@ -281,8 +285,11 @@ export default function Questionnaire({ onClose }) {
             flex: 1,
             pr: "5px",
             pl: "10px",
-            mr: 1,
+            mr: 1.5,
             height: "93vh",
+            border: '1px solid', 
+            borderColor: '#e1e1e3',
+            borderRadius: 1 
           }}
         >
           <CardContent
