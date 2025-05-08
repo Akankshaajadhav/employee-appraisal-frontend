@@ -255,7 +255,7 @@ const SelfAssessmentRepo = ({ onSelect }) => {
         </Grid>
         <Box sx={{ pr:"10px",pl:"10px",pb:"10px"}}>
   <FormControl sx={{ mb:1,width: 'auto' , minWidth:'20%'}}>
-    <InputLabel id="checkbox-cycles-label" sx={{background:"white"}}>Select Appraisal Cycles</InputLabel>
+    <InputLabel id="checkbox-cycles-label" sx={{background:"white", px:0.5}}>Select Appraisal Cycles</InputLabel>
             <Select
               onChange={(e) => setCycleId(e.target.value)}
               MenuProps={MenuProps}
