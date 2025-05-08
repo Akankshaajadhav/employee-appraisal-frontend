@@ -42,8 +42,6 @@ const DropdownPage = () => {
   const [isCycleActive, setIsCycleActive] = useState(false);
   const [assessmentData, setAssessmentData] = useState([]);
   const [responses, setResponses] = useState({});
-  const [cachedEmployee, setCachedEmployee] = useState("");
-  const [cachedManager, setCachedManager] = useState("");
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success"); 

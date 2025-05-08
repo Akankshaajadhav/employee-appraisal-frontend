@@ -49,7 +49,8 @@ export default function CheckboxList({ onSelect }) {
         setType("");
         setIsPreviewMode(false);
     
-        fetch(`${API_URL}/question`)
+        // fetch(`${API_URL}/question`)
+        fetch(`${API_URL}/questions-with-options`)
             .then((response) => response.json())
             .then((data) => {
                 setQuestions(data);
