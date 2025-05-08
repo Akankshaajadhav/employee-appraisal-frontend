@@ -63,46 +63,20 @@ const DropdownPage = () => {
     if (!employeeId) return;
     const fetchUserRoleAndCycles = async () => {
       try {
+        // To get the details(including reporting manager) of user 
         const userResponse = await axios.get(`${API_URL}/employee_details/${employeeId}`);
         const role = userResponse.data.role.toLowerCase();
         setUserRole(role);
         setLoadingCycles(true);
-        if (role === "hr") {
-          const cyclesResponse = await axios.get(`${API_URL}/appraisal_cycle/`);
-          const filteredCycles = cyclesResponse.data.filter(
-            (cycle) => cycle.status === "active" || cycle.status === "completed"
-          );
-          setAppraisalCycles(filteredCycles);
-    
-          const activeCycle = filteredCycles.find((cycle) => cycle.status === "active");
-          if (activeCycle) {
-            setSelectedCycle(activeCycle.cycle_id);
-            setIsCycleActive(true);
-    
-            const empRes = await axios.get(`${API_URL}/employees/${activeCycle.cycle_id}/${employeeId}`);
-            setEmployees(empRes.data);
-    
-            const defaultEmployeeId = empRes.data.some((emp) => emp.employee_id === employeeId)
-              ? employeeId
-              : empRes.data[0]?.employee_id || "";
-    
-            setSelectedEmployee(defaultEmployeeId);
-    
-            if (defaultEmployeeId) {
-              const managerResponse = await axios.get(`${API_URL}/reporting_manager/${defaultEmployeeId}`);
-              const { reporting_manager_id, reporting_manager_name } = managerResponse.data;
-              setTeamLeadName(`${reporting_manager_id} - ${reporting_manager_name}`);
-            }
-            
-            // Check Lead Assessment stage here for the active cycle
-            if (role === "team lead" || role === "admin") {
-              await checkLeadAssessmentStage(activeCycle.cycle_id);
-            }
-          }
-        }
+       
+         if (role === "team lead" || role === "admin") {
 
-        else if (role === "team lead" || role === "admin") {
-          const allCyclesRes = await axios.get(`${API_URL}/assessment/teamlead/cycles/${employeeId}`);
+          const [allCyclesRes, employeesRes, managerResponse] = await Promise.all([
+            axios.get(`${API_URL}/assessment/teamlead/cycles/${employeeId}`),
+            axios.get(`${API_URL}/reporting/${employeeId}`),
+            axios.get(`${API_URL}/reporting_manager/${employeeId}`)
+          ]);
+
           const cycles = allCyclesRes.data;
           setAppraisalCycles(cycles);
         
@@ -113,7 +87,6 @@ const DropdownPage = () => {
 
             // Fetch employees under the team lead
             try {
-              const employeesRes = await axios.get(`${API_URL}/reporting/${employeeId}`);
               const employees = employeesRes.data;
 
               if (employees.length > 0) {
@@ -128,7 +101,6 @@ const DropdownPage = () => {
               setEmployees([]);
             }
 
-            const managerResponse = await axios.get(`${API_URL}/reporting_manager/${employeeId}`);
             const { reporting_manager_id, reporting_manager_name } = managerResponse.data;
             setTeamLeadName(`${reporting_manager_id} - ${reporting_manager_name}`);
             
@@ -169,6 +141,7 @@ const DropdownPage = () => {
 
     fetchUserRoleAndCycles();
   }, [employeeId]);
+
 
   // Function to check lead assessment stage status
   const checkLeadAssessmentStage = async (cycleId) => {
@@ -227,7 +200,7 @@ const DropdownPage = () => {
           const { is_active } = stageRes.data;
           const {is_completed} = stageRes.data;
           if (!is_active && !is_completed) {
-            console.log("Self Assessment stage is not active.");
+            // console.log("Self Assessment stage is not active.");
             setAssessmentData([]);
             setResponses({});
             return;
@@ -243,12 +216,20 @@ const DropdownPage = () => {
         }
         
         // STEP 2: Fetch assessment questions
-        const questionsRes = await axios.get(`${API_URL}/assessment/questions/${questionOwnerId}/${selectedCycle}`);
+        const [questionsRes, responseRes] = await Promise.all([
+          axios.get(`${API_URL}/assessment/questions/${questionOwnerId}/${selectedCycle}`),
+          axios.get(`${API_URL}/assessment/responses/${responseOwnerId}/${selectedCycle}`).catch(err => {
+            if (err.response?.status === 404) {
+              return { data: [] };
+            }
+            throw err;
+          }),
+        ]);
+  
         const questions = questionsRes.data || [];
         setAssessmentData(questions);
         
         try {
-          const responseRes = await axios.get(`${API_URL}/assessment/responses/${responseOwnerId}/${selectedCycle}`);
           
           const previous = {};
           responseRes.data?.forEach((res) => {
@@ -328,8 +309,13 @@ const DropdownPage = () => {
         setIsCycleActive(selectedCycleObj.status === "active");
       }
       
+      const [cycleResponse, employeesResponse, managerRes] = await Promise.all([
+        axios.get(`${API_URL}/appraisal_cycle/${cycleId}`),
+        axios.get(`${API_URL}/employees/${cycleId}/${employeeId}`),
+        axios.get(`${API_URL}/reporting_manager/${employeeId}`),
+      ]);
+
       // Then also verify with the API (as a backup)
-      const cycleResponse = await axios.get(`${API_URL}/appraisal_cycle/${cycleId}`);
       setIsCycleActive(cycleResponse.data.status === "active");
   
       // For team leads and admins, check the Lead Assessment stage
@@ -337,13 +323,11 @@ const DropdownPage = () => {
         await checkLeadAssessmentStage(cycleId);
       }
 
-      const employeesResponse = await axios.get(`${API_URL}/employees/${cycleId}/${employeeId}`);
       setEmployees(employeesResponse.data);
   
       if (userRole === "team lead" || userRole === "admin") {
         // For Team Leads, always default to themselves
         setSelectedEmployee(employeeId);
-        const managerRes = await axios.get(`${API_URL}/reporting_manager/${employeeId}`);
         const { reporting_manager_id, reporting_manager_name } = managerRes.data;
         setTeamLeadName(`${reporting_manager_id} - ${reporting_manager_name}`);
       } else {
@@ -355,11 +339,15 @@ const DropdownPage = () => {
   
         setSelectedEmployee(defaultEmpId);
   
-        if (defaultEmpId) {
-          const managerRes = await axios.get(`${API_URL}/reporting_manager/${defaultEmpId}`);
+        if (defaultEmpId === employeeId) {
           const { reporting_manager_id, reporting_manager_name } = managerRes.data;
           setTeamLeadName(`${reporting_manager_id} - ${reporting_manager_name}`);
+        } else if (defaultEmpId) {
+          const altManagerRes = await axios.get(`${API_URL}/reporting_manager/${defaultEmpId}`);
+          const { reporting_manager_id, reporting_manager_name } = altManagerRes.data;
+          setTeamLeadName(`${reporting_manager_id} - ${reporting_manager_name}`);
         }
+        
       }
     } catch (error) {
       console.error("Error handling cycle change:", error);
