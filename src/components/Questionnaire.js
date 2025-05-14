@@ -19,6 +19,7 @@ import {
   FormControl,
   Select,
   Skeleton,
+  Tooltip,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 
@@ -208,13 +209,14 @@ export default function Questionnaire({ onClose }) {
     loadQuestions();
   }, []);
 
- 
-
-  const columns = useMemo(() => [
-    { field: "question_id", headerName: "Q. No.", width: 90 },
-    { field: "question_text", headerName: "Questions", width: 500 },], [handleSave]);
+  const columns = useMemo(
+    () => [
+      { field: "question_id", headerName: "Q. No.", width: 90 },
+      { field: "question_text", headerName: "Questions", width: 500 },
+    ],
+    [handleSave]
+  );
   const rows = useMemo(() => questions, [loadQuestions]);
-
 
   return (
     <>
@@ -243,12 +245,20 @@ export default function Questionnaire({ onClose }) {
           mb: 2,
         }}
       >
-        <Card sx={{ flex: 1, ml: 1.5, height: "93vh", mr: 2, border: '1px solid', 
-            borderColor: '#e1e1e3',
-            borderRadius: 1  }}>
+        <Card
+          sx={{
+            flex: 1,
+            ml: 1.5,
+            height: "93vh",
+            mr: 2,
+            border: "1px solid",
+            borderColor: "#e1e1e3",
+            borderRadius: 1,
+          }}
+        >
           {/* Left Panel */}
           {loadingQuestions ? (
-            <Box sx={{ width: "90%", p:2 }}>
+            <Box sx={{ width: "90%", p: 2 }}>
               {[...Array(20)].map((_, index) => (
                 <Skeleton
                   key={index}
@@ -287,9 +297,9 @@ export default function Questionnaire({ onClose }) {
             pl: "10px",
             mr: 1.5,
             height: "93vh",
-            border: '1px solid', 
-            borderColor: '#e1e1e3',
-            borderRadius: 1 
+            border: "1px solid",
+            borderColor: "#e1e1e3",
+            borderRadius: 1,
           }}
         >
           <CardContent
@@ -322,30 +332,56 @@ export default function Questionnaire({ onClose }) {
                   mt: 2,
                 }}
               >
-                <TextField
-                  value={question_text}
-                  onChange={(e) => setQuestionText(e.target.value)}
-                  placeholder="Type your question here"
-                  variant="standard"
-                  sx={{ flex: 1, mr: 20 }}
-                  InputProps={{
-                    sx: {
-                      "&::placeholder": {
-                        fontSize: "14px", // Adjust placeholder size here
-                        color: "#888",     // Optional: change color
-                        opacity: 1,        // Ensure placeholder is visible
+                {question_text ? (
+                  <Tooltip
+                    title={
+                      <span style={{ maxWidth: 500 }}>{question_text}</span>
+                    }
+                    arrow
+                  >
+                    <TextField
+                      value={question_text}
+                      onChange={(e) => setQuestionText(e.target.value)}
+                      placeholder="Type your question here"
+                      variant="standard"
+                      sx={{ flex: 1, mr: 10 }}
+                      InputProps={{
+                        sx: {
+                          "&::placeholder": {
+                            fontSize: "14px",
+                            color: "#888",
+                            opacity: 1,
+                          },
+                          fontSize: "14px",
+                        },
+                      }}
+                    />
+                  </Tooltip>
+                ) : (
+                  <TextField
+                    value={question_text}
+                    onChange={(e) => setQuestionText(e.target.value)}
+                    placeholder="Type your question here"
+                    variant="standard"
+                    sx={{ flex: 1, mr: 10 }}
+                    InputProps={{
+                      sx: {
+                        "&::placeholder": {
+                          fontSize: "14px",
+                          color: "#888",
+                          opacity: 1,
+                        },
+                        fontSize: "14px",
                       },
-                      fontSize: "14px",     // Controls input text size
-                    },
-                  }}
-                />
-
+                    }}
+                  />
+                )}
                 <FormControl sx={{ minWidth: 160 }}>
                   <InputLabel
                     sx={{
                       backgroundColor: "white",
                       top: "-5px",
-                      fontSize:"16px",
+                      fontSize: "16px",
                     }}
                   >
                     Question Type
