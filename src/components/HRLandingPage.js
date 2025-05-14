@@ -511,6 +511,12 @@ const HRLandingPage = ({ onNavigateToMain }) => {
     return "Closure";
   };
 
+  const findYear = (cycle) => {
+    let date = cycle.end_date_of_cycle;
+    let year = parseInt(date.slice(0,4));
+    return year;
+  }
+
   // Fetch appraisal cycle list
   const loadAppraisalCycles = async () => {
     try {
@@ -589,6 +595,7 @@ const HRLandingPage = ({ onNavigateToMain }) => {
   ? appraisalCycles.map((cycle) => ({
       ...cycle,
       currentStage: findCurrentStage(cycle),
+      years: findYear(cycle),
     }))
   : [];
 
@@ -611,6 +618,7 @@ const HRLandingPage = ({ onNavigateToMain }) => {
         return statusStr.charAt(0).toUpperCase() + statusStr.slice(1);
       },
     },
+    { field: "years", headerName: "Year", flex:1},
     { field: "currentStage", headerName: "Current Stage", flex: 1 },
     {
       field: "start_date_of_cycle",
