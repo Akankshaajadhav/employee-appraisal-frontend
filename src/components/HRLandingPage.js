@@ -467,6 +467,10 @@ import {
   deleteAppraisalCycle,
 } from "../services/AddAppraisalCycle";
 import Assignment from "./Assignment";
+import {
+  getGridNumericOperators,
+  GridFilterInputValue,
+} from '@mui/x-data-grid';
 
 const HRLandingPage = ({ onNavigateToMain }) => {
   const navigate = useNavigate();
@@ -510,6 +514,26 @@ const HRLandingPage = ({ onNavigateToMain }) => {
     }
     return "Closure";
   };
+
+  const findYear = (cycle) => {
+    let date = cycle.end_date_of_cycle;
+    let year = parseInt(date.slice(0,4));
+    return year;
+  }
+
+    const labeledNumericOperators = getGridNumericOperators().map((op) => {
+    const labelMap = {
+      '>': 'Greater than',
+      '<': 'Less than',
+      '=': 'Equals',
+    };
+
+    return {
+      ...op,
+      label: labelMap[op.value] || op.label, // Custom label for selected ops
+      InputComponent: op.InputComponent || GridFilterInputValue,
+    };
+  });
 
   // Fetch appraisal cycle list
   const loadAppraisalCycles = async () => {
@@ -589,6 +613,7 @@ const HRLandingPage = ({ onNavigateToMain }) => {
   ? appraisalCycles.map((cycle) => ({
       ...cycle,
       currentStage: findCurrentStage(cycle),
+      years: findYear(cycle),
     }))
   : [];
 
@@ -610,6 +635,12 @@ const HRLandingPage = ({ onNavigateToMain }) => {
         const statusStr = params.value;
         return statusStr.charAt(0).toUpperCase() + statusStr.slice(1);
       },
+    },
+    {
+      field: "years",
+      headerName: "Year",
+      flex: 1,
+      filterOperators: labeledNumericOperators,
     },
     { field: "currentStage", headerName: "Current Stage", flex: 1 },
     {
