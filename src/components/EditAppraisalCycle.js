@@ -173,6 +173,14 @@ const EditAppraisalCycle = ({ onClose }) => {
 
   const validateForm = () => {
     let valid = true;
+    // Check basic cycle details
+  if (!cycleName.trim()) {
+    valid = false;
+  }
+  
+  if (!description.trim()) {
+    valid = false;
+  }
     if (!status) {
       valid = false;
     }

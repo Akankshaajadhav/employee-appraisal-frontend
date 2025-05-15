@@ -42,6 +42,9 @@ const AddAppraisalCycle = ({ onClose }) => {
   const [endDateError, setEndDateError] = useState("");
   const [stageErrors, setStageErrors] = useState({});
 
+  const [errorMessage, setErrorMessage] = useState('');
+  const [error, setError] = useState(false);
+
   // Snackbar State
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -117,6 +120,14 @@ const AddAppraisalCycle = ({ onClose }) => {
 
   const validateForm = () => {
     let valid = true;
+    // Check basic cycle details
+  if (!cycleName.trim()) {
+    valid = false;
+  }
+  
+  if (!description.trim()) {
+    valid = false;
+  }
     if (!status) {
       valid = false;
     }
@@ -281,6 +292,24 @@ const AddAppraisalCycle = ({ onClose }) => {
 
   const navigate = useNavigate();
 
+   // Format today's date as YYYY-MM-DD for comparison
+  const today = new Date().toISOString().split('T')[0];
+  const handleDateChange = (e) => {
+    const selectedDate = e.target.value;
+    
+    // Always update the state to show what the user is typing
+    setStartDate(selectedDate);
+    
+    // Validate: check if the date is earlier than today
+    if (selectedDate && selectedDate < today) {
+      setError(true);
+      setErrorMessage('Please select today or a future date');
+    } else {
+      setError(false);
+      setErrorMessage('');
+    }
+  };
+
   return (
     <>
     <Card sx={{ p: 3, width: "95%", margin: "auto", mt: 2, mb: 3 }}>
@@ -325,17 +354,19 @@ const AddAppraisalCycle = ({ onClose }) => {
                 />
               </Grid>
               <Grid size={6}>
-                <TextField
-                  fullWidth
-                  label="Start Date"
-                  type="date"
-                  InputLabelProps={{ shrink: true }}
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  inputProps={{
-                    min: new Date().toISOString().split('T')[0], // sets today as the minimum
-                  }}
-                />
+                 <TextField
+                    fullWidth
+                    label="Start Date"
+                    type="date"
+                    InputLabelProps={{ shrink: true }}
+                    value={startDate}
+                    onChange={handleDateChange}
+                    error={error}
+                    helperText={errorMessage}
+                    inputProps={{
+                      min: today, // sets today as the minimum for the date picker
+                    }}
+                  />
               </Grid>
               <Grid size={6}>
                 <TextField
@@ -376,8 +407,6 @@ const AddAppraisalCycle = ({ onClose }) => {
         {/* Stages Section */}
         <Card sx={{ p: 1, width: "100%", mt: 1 }}>
           <CardContent>
-            {/* <Typography variant="h6" sx={{ mt: 3, color: "primary.main" }}>Stages</Typography> */}
-            {/* <Typography variant="h6" sx={{ mt: 3, color: "primary.main" }}>Parameters</Typography> */}
             <Grid container spacing={2} sx={{ mt: 1 }}>
               <Grid size={4}>
                 <Typography fontWeight="bold" sx={{ color: "primary.main" }}>
@@ -580,10 +609,6 @@ const AddAppraisalCycle = ({ onClose }) => {
             variant="contained"
             color="primary"
             onClick={handleSave}
-            // onClick={async () => {
-            //   await handleSave();  // Wait for save to complete
-            //   handleCancel();      // Then clear / reset the form
-            // }}
             disabled={!formValid}
             sx={{ mt: 3 }}
           >
@@ -611,7 +636,7 @@ const AddAppraisalCycle = ({ onClose }) => {
     </Card>
     <Backdrop
     sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-    open={saving}     //5
+    open={saving}     
   >
     <CircularProgress color="inherit" />
   </Backdrop>
