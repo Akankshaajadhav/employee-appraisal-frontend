@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -79,14 +80,11 @@ const HRLandingPage = ({ onNavigateToMain }) => {
     return year;
   }
 
-  const labeledNumericOperators = getGridNumericOperators().map((op) => {
+    const labeledNumericOperators = getGridNumericOperators().map((op) => {
     const labelMap = {
       '>': 'Greater than',
       '<': 'Less than',
       '=': 'Equals',
-      '!=': 'Not Equals',
-      '>=': 'Greater or Equals',
-      '<=': 'Less or Equals'
     };
 
     return {
@@ -182,7 +180,7 @@ const HRLandingPage = ({ onNavigateToMain }) => {
     {
       field: "cycle_name",
       headerName: "Name",
-      minWidth: 280,
+      flex: 1,
       renderCell: (params) => {
         const cycleStr = params.value;
         return cycleStr.charAt(0).toUpperCase() + cycleStr.slice(1);
@@ -191,8 +189,7 @@ const HRLandingPage = ({ onNavigateToMain }) => {
     {
       field: "status",
       headerName: "Status",
-      minWidth: 150,
-      maxWidth: 200,
+      flex: 1,
       renderCell: (params) => {
         const statusStr = params.value;
         return statusStr.charAt(0).toUpperCase() + statusStr.slice(1);
@@ -201,15 +198,14 @@ const HRLandingPage = ({ onNavigateToMain }) => {
     {
       field: "years",
       headerName: "Year",
-      minWidth: 150,
-      maxWidth: 200,
+      flex: 1,
       filterOperators: labeledNumericOperators,
     },
-    { field: "currentStage", headerName: "Current Stage", minWidth:160 },
+    { field: "currentStage", headerName: "Current Stage", flex: 1 },
     {
       field: "start_date_of_cycle",
       headerName: "Start Date",
-      minWidth: 180,
+      flex: 1,
       renderCell: (params) => {
         const dateStr = params.value;
         if (!dateStr) return "";
@@ -228,7 +224,7 @@ const HRLandingPage = ({ onNavigateToMain }) => {
     {
       field: "end_date_of_cycle",
       headerName: "End Date",
-      minWidth: 180,
+      flex: 1,
       renderCell: (params) => {
         const dateStr = params.value;
         if (!dateStr) return "";
@@ -320,7 +316,7 @@ const HRLandingPage = ({ onNavigateToMain }) => {
     <>
           <Card sx={{ width: "100%" }}>
             <CardContent
-              sx={{ height: detailsVisible ? 300 : "100%"}}
+              sx={{ height: detailsVisible ? 300 : "100vh"}}
             >
               <Grid
                 container
