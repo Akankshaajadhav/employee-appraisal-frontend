@@ -85,6 +85,9 @@ const HRLandingPage = ({ onNavigateToMain }) => {
       '>': 'Greater than',
       '<': 'Less than',
       '=': 'Equals',
+       '!=': 'Not Equals',
+      '>=': 'Greater or Equals',
+      '<=': 'Less or Equals'
     };
 
     return {
