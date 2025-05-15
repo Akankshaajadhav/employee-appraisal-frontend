@@ -333,7 +333,7 @@ const AddAppraisalCycle = ({ onClose }) => {
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
                   inputProps={{
-                    min: new .Date().toISOString().split('T')[0], // sets today as the minimum
+                    min: new Date().toISOString().split('T')[0], // sets today as the minimum
                   }}
                 />
               </Grid>
