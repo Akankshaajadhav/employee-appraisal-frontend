@@ -8,8 +8,9 @@ import {
   GridToolbarExport,
   GridToolbarQuickFilter,
 } from "@mui/x-data-grid";
+
 const API_URL = process.env.REACT_APP_BASE_URL;
-// Custom Toolbar Component
+
 function CustomToolbar() {
   return (
     <GridToolbarContainer sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -27,34 +28,33 @@ function CustomToolbar() {
 
 export default function DataGridDemo() {
   const [rows, setRows] = React.useState([]);
-  const [employeeMap, setEmployeeMap] = React.useState({}); // To map employee_id -> employee_name
-  const [originalRows, setOriginalRows] = React.useState([]); // Store original order
-  const [selectedIds, setSelectedIds] = React.useState([]); // Track selected rows
+  const [employeeMap, setEmployeeMap] = React.useState({}); 
+  const [originalRows, setOriginalRows] = React.useState([]); 
+  const [selectedIds, setSelectedIds] = React.useState([]); 
 
   React.useEffect(() => {
-    fetch(`${API_URL}/`) // API call to FastAPI
+    fetch(`${API_URL}/`)
       .then((response) => response.json())
       .then((data) => {
 
-         // Create a mapping of employee_id to employee_name
+         // Mapping of employee_id to employee_name
          const empMap = {};
          data.forEach(emp => {
            empMap[emp.employee_id] = emp.employee_name;
          });
 
-        // Convert API data to DataGrid format
         const formattedData = data.map((emp, index) => ({
           id: index + 1,
           employee_id: emp.employee_id,
           employee_name: emp.employee_name,
           role: emp.role,
-          reporting_manager: empMap[emp.reporting_manager] || "", // Convert ID to Name
-          previous_reporting_manager: empMap[emp.previous_reporting_manager] || "", // Convert ID to Name
+          reporting_manager: empMap[emp.reporting_manager] || "", 
+          previous_reporting_manager: empMap[emp.previous_reporting_manager] || "", 
         }));
 
-        setEmployeeMap(empMap); // Store mapping for future use
+        setEmployeeMap(empMap);
         setRows(formattedData);
-        setOriginalRows(formattedData); // Store original order
+        setOriginalRows(formattedData); 
       })
       .catch((error) => console.error("Error fetching data:", error));
   }, []);
@@ -64,7 +64,7 @@ export default function DataGridDemo() {
     setSelectedIds(selectedRowIds);
 
     if (selectedRowIds.length === 0) {
-      setRows(originalRows); // If nothing is selected, reset to original order
+      setRows(originalRows); // If nothing is selected, reseting to original order
       return;
     }
 
@@ -74,7 +74,6 @@ export default function DataGridDemo() {
     setRows([...selectedRows, ...unselectedRows]);
   };
 
-  // Define Columns
   const columns = [
     { field: "employee_id", headerName: "Employee ID", width: 120 },
     { field: "employee_name", headerName: "Name", width: 150 },
@@ -94,9 +93,9 @@ export default function DataGridDemo() {
         pageSizeOptions={[5]} 
         checkboxSelection
         disableRowSelectionOnClick
-        slots={{ toolbar: CustomToolbar }} // Toolbar added here
-        onRowSelectionModelChange={handleRowSelection} // Handle row selection change
-        selectionModel={selectedIds} // Maintain selection state
+        slots={{ toolbar: CustomToolbar }} 
+        onRowSelectionModelChange={handleRowSelection} 
+        selectionModel={selectedIds}
         rowHeight={getRowHeight()}
       />
     </Box>

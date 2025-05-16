@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Button, Box, Card, Snackbar, Alert,Typography,Grid } from "@mui/material";
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
-import DataGridDemo from "./SelectEmployee"; // Employee Selection Component
-import CheckboxList from "./SelectQuestion"; // Question Selection Component
-import Backdrop from '@mui/material/Backdrop';    //1
-import CircularProgress from '@mui/material/CircularProgress';    //2
+import DataGridDemo from "./SelectEmployee"; 
+import CheckboxList from "./SelectQuestion"; 
+import Backdrop from '@mui/material/Backdrop';   
+import CircularProgress from '@mui/material/CircularProgress';    
 
 const API_URL = process.env.REACT_APP_BASE_URL; 
 
@@ -38,7 +38,7 @@ export default function Assignment({ cycleId, onClose,cycleName }) {
       employee_ids: selectedEmployees.map((emp) => emp.employee_id),
       question_ids: selectedQuestions.map((q) => q.question_id),
     };
-    setSaving(true); // Show loading backdrop  
+    setSaving(true); 
     fetch(`${API_URL}/assignments/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -53,7 +53,7 @@ export default function Assignment({ cycleId, onClose,cycleName }) {
         showSnackbar("The question is already assigned to the selected employee", "error");
       })
       .finally(() => {
-        setSaving(false); // Hide loading backdrop
+        setSaving(false); 
       });
       
   };
@@ -82,12 +82,11 @@ export default function Assignment({ cycleId, onClose,cycleName }) {
           {/* Left Panel - Employee Selection */}
           <Panel defaultSize={50} minSize={30} maxSize={70} >
             <Box >
-            {/* sx={{ padding: 2, height: "100%", display: "flex", flexDirection: "column" }} */}
               <DataGridDemo onSelect={handleEmployeeSelection} selectedEmployees={selectedEmployees} />
             </Box>
           </Panel>
 
-          {/* Resize Handle */}
+          {/* Resize feature */}
           <PanelResizeHandle style={{ width: "5px", background: "#ccc", cursor: "ew-resize" }} />
 
           {/* Right Panel - Question Selection */}
@@ -128,7 +127,7 @@ export default function Assignment({ cycleId, onClose,cycleName }) {
     </Box>
     <Backdrop
     sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-    open={saving}     //5
+    open={saving}     
   >
     <CircularProgress color="inherit" />
   </Backdrop>
