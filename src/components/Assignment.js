@@ -43,11 +43,12 @@ export default function Assignment({ cycleId, onClose,cycleName }) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(assignmentData),
-    }).then(async (response) => {
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.detail || "Assignment failed.");
-  }
+    })
+      .then(async (response) => {
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || "Assignment failed.");
+    }
   return response.json();
 })
 .then((data) => {
@@ -55,9 +56,8 @@ export default function Assignment({ cycleId, onClose,cycleName }) {
 })
 .catch((error) => {
   console.error("Error assigning:", error);
-  showSnackbar("The question is already assigned to the selected employee", "error");
+  showSnackbar( "The question is already assigned to the selected employee", "error");
 })
-
       .finally(() => {
         setSaving(false); // Hide loading backdrop
       });
