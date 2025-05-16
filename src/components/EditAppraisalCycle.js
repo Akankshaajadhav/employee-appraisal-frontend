@@ -80,7 +80,7 @@ const EditAppraisalCycle = ({ onClose }) => {
     try {
       const data = await cycleById(Number(cycle_id));
       setCycle(data);
-
+      console.log(data);
       setCycleName(data.cycle_name);
       setDescription(data.description);
       setStatus(data.status);
@@ -173,6 +173,14 @@ const EditAppraisalCycle = ({ onClose }) => {
 
   const validateForm = () => {
     let valid = true;
+    // Check basic cycle details
+  if (!cycleName.trim()) {
+    valid = false;
+  }
+  
+  if (!description.trim()) {
+    valid = false;
+  }
     if (!status) {
       valid = false;
     }
