@@ -92,7 +92,7 @@ const HRLandingPage = ({ onNavigateToMain }) => {
 
     return {
       ...op,
-      label: labelMap[op.value] || op.label, // Custom label for selected ops
+      label: labelMap[op.value] || op.label, 
       InputComponent: op.InputComponent || GridFilterInputValue,
     };
   });
