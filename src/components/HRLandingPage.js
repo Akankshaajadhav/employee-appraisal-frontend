@@ -319,7 +319,7 @@ const HRLandingPage = ({ onNavigateToMain }) => {
     <>
           <Card sx={{ width: "100%" }}>
             <CardContent
-              sx={{ height: detailsVisible ? 300 : "100vh"}}
+              sx={{ height: detailsVisible ? 300 : "100%"}}
             >
               <Grid
                 container
