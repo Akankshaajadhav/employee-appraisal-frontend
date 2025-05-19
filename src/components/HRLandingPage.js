@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Card,
@@ -33,7 +32,6 @@ import {
 
 const HRLandingPage = ({ onNavigateToMain }) => {
   const navigate = useNavigate();
-  // const [anchorEl, setAnchorEl] = React.captureOwnerStackuseState(null);
 
   const [appraisalCycles, setAppraisalCycles] = useState([]);
   const [error, setError] = useState(null);
@@ -85,7 +83,7 @@ const HRLandingPage = ({ onNavigateToMain }) => {
       '>': 'Greater than',
       '<': 'Less than',
       '=': 'Equals',
-       '!=': 'Not Equals',
+      '!=': 'Not Equals',
       '>=': 'Greater or Equals',
       '<=': 'Less or Equals'
     };
@@ -167,7 +165,7 @@ const HRLandingPage = ({ onNavigateToMain }) => {
     setSelectedCycleId(null);
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     loadAppraisalCycles();
   }, []);
 
@@ -212,15 +210,12 @@ const HRLandingPage = ({ onNavigateToMain }) => {
       renderCell: (params) => {
         const dateStr = params.value;
         if (!dateStr) return "";
-
-        // const [year, month, day] = dateStr.split("T")[0].split("-");
-        // return `${day}-${month}-${year}`;
         const date = new Date(dateStr);
     return date.toLocaleDateString("en-GB", {
       day: "2-digit",
       month: "short",
       year: "numeric",
-    }).replace(/ /g, " "); // Format the date as "dd-MMM-yyyy"
+    }).replace(/ /g, " ");
        
       },
     },
@@ -231,16 +226,12 @@ const HRLandingPage = ({ onNavigateToMain }) => {
       renderCell: (params) => {
         const dateStr = params.value;
         if (!dateStr) return "";
-
-        // const [year, month, day] = dateStr.split("T")[0].split("-");
-        // return `${day}-${month}-${year}`;
-
         const date = new Date(dateStr);
       return date.toLocaleDateString("en-GB", {
       day: "2-digit",
       month: "short",
       year: "numeric",
-    }).replace(/ /g, " "); // Format the date as "dd-MMM-yyyy"
+    }).replace(/ /g, " ");
        
       },
     },

@@ -166,8 +166,6 @@ export default function Questionnaire({ onClose }) {
 
     try {
       const response = await addQuestion(questionData);
-      console.log(questionData);
-      console.log(response);
       loadQuestions();
       handleCancel();
       setSnackbar({
@@ -200,7 +198,6 @@ export default function Questionnaire({ onClose }) {
     } catch (err) {
       setError("Failed to load questions");
     } finally {
-      // setLoading(false);
       setLoadingquestions(false);
     }
   };
@@ -327,7 +324,7 @@ export default function Questionnaire({ onClose }) {
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  gap: 2, // adds spacing between elements
+                  gap: 2,
                   width: "100%",
                   mt: 2,
                 }}

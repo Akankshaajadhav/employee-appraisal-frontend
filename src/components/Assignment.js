@@ -45,10 +45,10 @@ export default function Assignment({ cycleId, onClose,cycleName }) {
       body: JSON.stringify(assignmentData),
     })
       .then(async (response) => {
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.detail || "Assignment failed.");
-  }
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || "Assignment failed.");
+    }
   return response.json();
 })
 .then((data) => {

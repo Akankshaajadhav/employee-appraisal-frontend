@@ -2,8 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Typography,
-  Card,
-  CardContent,
   IconButton,
   FormControl,
   Box,
@@ -97,13 +95,12 @@ const SelfAssessmentRepo = ({ onSelect }) => {
 
   const [rows, setRows] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
-  const [employeeMap, setEmployeeMap] = useState({});
-  const [originalRows, setOriginalRows] = useState([]);
+  // const [employeeMap, setEmployeeMap] = useState({});
+  // const [originalRows, setOriginalRows] = useState([]);
 
   const [activeCycle, setActiveCycles] = useState([]);
   const [cycle_id, setCycleId] = useState(null);
   const [response, setResponseData] = useState(null);
-  const [employees, setEmployee] = useState(null);
   const [baseColumns] = useState([
     {
       field: "employee_id",
@@ -128,7 +125,6 @@ const SelfAssessmentRepo = ({ onSelect }) => {
     },
   ]);
 
-  //  const navigate = useNavigate();         // 1
   const [loadingEmployees, setLoadingEmployees] = useState(true); //2
   const [loadingCycles, setLoadingCycles] = useState(true); //3
   const [loadingResponses, setLoadingResponses] = useState(false);
@@ -153,9 +149,9 @@ const SelfAssessmentRepo = ({ onSelect }) => {
             emp.previous_reporting_manager_name || "-",
         }));
 
-        setEmployeeMap(empMap);
+        // setEmployeeMap(empMap);
         setRows(formattedData);
-        setOriginalRows(formattedData);
+        // setOriginalRows(formattedData);
       } catch (error) {
         console.log("Error while fetching employees: " + error);
       } finally {
@@ -214,7 +210,6 @@ const SelfAssessmentRepo = ({ onSelect }) => {
   const handleRowSelection = (selectedRowIds) => {
     setSelectedIds(selectedRowIds);
 
-    // Get selected and unselected employees, preserving all data including cycle ratings
     const selectedEmployees = rows.filter((row) =>
       selectedRowIds.includes(row.id)
     );
@@ -261,10 +256,7 @@ const SelfAssessmentRepo = ({ onSelect }) => {
               MenuProps={MenuProps}
           sx={{
             minHeight: '50px',
-            // Allow the select to grow in height based on content
-            // height: 'auto',
             width:'auto',
-            // Add some padding for better appearance with multiple wrapped lines
             '& .MuiSelect-select': {
               paddingTop: '8px',
               paddingBottom: '8px',
