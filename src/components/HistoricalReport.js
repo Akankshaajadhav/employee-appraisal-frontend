@@ -21,7 +21,6 @@ import { useNavigate } from "react-router-dom";
 import CloseIcon from "@mui/icons-material/Close";
 const API_URL = process.env.REACT_APP_BASE_URL; 
 
-// Custom Toolbar Component with Better Alignment
 function CustomToolbar() {
   return (
     <GridToolbarContainer sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", p: 1 }}>
@@ -89,13 +88,13 @@ export default function HistoricalReportTable({ onSelect }) {
 
   ]);
   const [columns, setColumns] = React.useState(baseColumns);
-  const navigate = useNavigate();         // 1
-  const [loadingEmployees, setLoadingEmployees] = React.useState(true);  //2
-const [loadingCycles, setLoadingCycles] = React.useState(true);  //3
+  const navigate = useNavigate();         
+  const [loadingEmployees, setLoadingEmployees] = React.useState(true);  
+const [loadingCycles, setLoadingCycles] = React.useState(true);  
 
   // Fetch employee data
   React.useEffect(() => {
-    setLoadingEmployees(true);   //4
+    setLoadingEmployees(true);   
     fetch(`${API_URL}/employees`)
       .then((response) => response.json())
       .then((data) => {
@@ -125,7 +124,7 @@ const [loadingCycles, setLoadingCycles] = React.useState(true);  //3
 
   // Fetch completed and active cycles for which lead assessment is active or completed
   React.useEffect(() => {
-    setLoadingCycles(true);    //5
+    setLoadingCycles(true);    
     fetch(`${API_URL}/appraisal_cycle/appraisal-cycles/historic-report`) 
       .then((response) => response.json())
       .then((data) => {
@@ -156,7 +155,7 @@ const [loadingCycles, setLoadingCycles] = React.useState(true);  //3
       return {
         field: `cycle_${cycleId}`,
         headerName: cycleTitle,
-        width: 200, // Increased width to accommodate longer rating text
+        width: 200, 
         renderCell: (params) => {
           return formatRating(params.value);
         }
@@ -166,9 +165,6 @@ const [loadingCycles, setLoadingCycles] = React.useState(true);  //3
     // Combine base columns with cycle columns
     const newColumns = [...baseColumns, ...cycleColumns];
     setColumns(newColumns);
-    console.log("Updated Columns:", newColumns);
-
-    // Start with a fresh copy of rows to update
     const rowsCopy = [...originalRows].map(row => ({...row}));
 
     // Fetch ratings data for all selected cycles
@@ -189,15 +185,14 @@ const [loadingCycles, setLoadingCycles] = React.useState(true);  //3
             const employeeRating = ratingsData.find(r => Number(r.employee_id) === empId);
             
             if (employeeRating) {
-              // Store the raw numeric value - formatting happens in renderCell
               row[`cycle_${cycleId}`] = employeeRating.parameter_rating;
-              console.log(`Set rating for employee ${empId} in cycle ${cycleId}:`, employeeRating.parameter_rating);
+              // console.log(`Set rating for employee ${empId} in cycle ${cycleId}:`, employeeRating.parameter_rating);
             } else {
               row[`cycle_${cycleId}`] = "-";
             }
           });
         } catch (error) {
-          console.error(`Error fetching ratings for cycle ${cycleId}:`, error);
+          // console.error(`Error fetching ratings for cycle ${cycleId}:`, error);
         }
       }
       
@@ -215,7 +210,6 @@ const [loadingCycles, setLoadingCycles] = React.useState(true);  //3
       
       // Update state with the new rows
       setRows(rowsCopy);
-      console.log("Final updated rows:", rowsCopy);
     } else {
       // If no cycles selected, remove all cycle data
       const cleanedRows = rowsCopy.map(row => {
@@ -277,7 +271,6 @@ const [loadingCycles, setLoadingCycles] = React.useState(true);  //3
         <Select
           labelId="checkbox-cycles-label"
           id="checkbox-cycles"
-        //   sx={{height:'50px'}}
           multiple
           value={selectedCycles}
           onChange={handleCycleChange}
@@ -297,10 +290,7 @@ const [loadingCycles, setLoadingCycles] = React.useState(true);  //3
           MenuProps={MenuProps}
           sx={{
             minHeight: '50px',
-            // Allow the select to grow in height based on content
-            // height: 'auto',
             width:'auto',
-            // Add some padding for better appearance with multiple wrapped lines
             '& .MuiSelect-select': {
               paddingTop: '8px',
               paddingBottom: '8px',

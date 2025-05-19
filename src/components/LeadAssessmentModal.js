@@ -22,7 +22,7 @@ const LeadAssessmentModal = ({ open, onClose, selectedCycle, employees, selected
   const [readOnly, setReadOnly] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [loading, setLoading] = useState(true); // New loading state
+  const [loading, setLoading] = useState(true); 
     
   // Check if the selected employee is the logged-in user
   const isCurrentUser = String(selectedEmployee) === String(employeeId);
@@ -69,11 +69,8 @@ const LeadAssessmentModal = ({ open, onClose, selectedCycle, employees, selected
         // Only allow editing if leadAssessmentActive is true and leadAssessmentCompleted is false
         const shouldBeReadOnly = !leadAssessmentActive || leadAssessmentCompleted;
         setReadOnly(shouldBeReadOnly);
-
-        console.log("ReadOnly set to:", response.data.status !== "active");
       })
       .catch(error => {
-        console.error("Error fetching cycle status:", error);
         setCycleStatus("inactive"); // Default to inactive if API fails
         setReadOnly(true);
       });
@@ -90,7 +87,6 @@ const LeadAssessmentModal = ({ open, onClose, selectedCycle, employees, selected
     const fetchRatings = axios.get(`${API_URL}/lead_assessment/lead_assessment/previous_data/${selectedCycle}/${selectedEmployee}`)
       .then(response => {
         if (response.data && response.data.ratings) {
-          // Remove duplicate parameter entries based on parameter_id
           const uniqueRatings = Array.from(
             new Map(response.data.ratings.map(item => [item.parameter_id, item])).values()
           );
@@ -107,7 +103,6 @@ const LeadAssessmentModal = ({ open, onClose, selectedCycle, employees, selected
             }
           }));
         }
-        console.log("ReadOnly State Current:", readOnly);
       })
       .catch(error => console.error("Error fetching previous ratings:", error));
 
@@ -214,7 +209,6 @@ const LeadAssessmentModal = ({ open, onClose, selectedCycle, employees, selected
       })
       .catch(error => {
         if (error.response && error.response.status === 400) {
-          // Show backend validation message
           setSnackbar({ open: true, message: error.response.data.detail, severity: "error" });
         } else {
           setSnackbar({ open: true, message: "Failed to submit assessment. Try again.", severity: "error" });
@@ -232,10 +226,8 @@ const LeadAssessmentModal = ({ open, onClose, selectedCycle, employees, selected
   };
   
   useEffect(() => {
-    // console.log("Current logged in employeeId:", employeeId, "type:", typeof employeeId);
     if (Array.isArray(employees)) {
       employees.forEach(emp => {
-        // console.log("Employee in list:", emp.employee_id, "type:", typeof emp.employee_id);
       });
     }
   }, [employees, employeeId]);
@@ -365,9 +357,8 @@ const LeadAssessmentModal = ({ open, onClose, selectedCycle, employees, selected
                       alignItems: "center",
                     }}
                   >
-                    {/* Filter employees here directly to ensure it's always applied */}
                     {Array.isArray(employees) && employees
-                      .filter(emp => String(emp.employee_id) !== String(employeeId)) // Convert to string to ensure matching
+                      .filter(emp => String(emp.employee_id) !== String(employeeId)) 
                       .map((emp) => (
                       <MenuItem key={emp.employee_id} value={emp.employee_id}>
                         <Tooltip
@@ -393,7 +384,7 @@ const LeadAssessmentModal = ({ open, onClose, selectedCycle, employees, selected
                 </FormControl>
               </Grid>
               
-              {/* One-on-one Discussion Date - Force right alignment */}
+              {/* One-on-one Discussion Date - right alignment */}
               <Grid 
                 item 
                 xs={12} 

@@ -34,7 +34,6 @@ const AppLayout = ({ children, onNavigate, activePage }) => {
     setOpen(!open);
   };
 
-  // Define Toolbar to avoid error
   const Toolbar = props => <div style={{ padding: '16px'}} {...props} />;
   const menuItems = [
     { 
@@ -103,14 +102,12 @@ const AppLayout = ({ children, onNavigate, activePage }) => {
         </IconButton>
       </Box>
       
-      {/* Drawer - uses temporary variant for both mobile and desktop */}
       <Drawer
         variant="temporary"
         open={open}
-        // sx={{color:'primary'}}
         onClose={handleDrawerToggle}
         ModalProps={{
-          keepMounted: true, // Better open performance
+          keepMounted: true, 
         }}
         sx={{ 
           '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
