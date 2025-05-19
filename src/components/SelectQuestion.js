@@ -1,10 +1,7 @@
-// Screen for the asignment -RHS (Questions)
-
 import React, {useState, useEffect} from 'react'; 
 import SearchIcon from "@mui/icons-material/Search";
 import RefreshOutlinedIcon from '@mui/icons-material/RefreshOutlined';
-import {
-    Card, 
+import { 
     Box, 
     List, 
     ListItem, 
@@ -20,14 +17,12 @@ import {
     Collapse,
     Divider,
     Button,
-    Grid,
     IconButton,
     Skeleton,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
-import DeleteIcon from '@mui/icons-material/Delete';
 const API_URL = process.env.REACT_APP_BASE_URL; 
 export default function CheckboxList({ onSelect }) {
     const [questions, setQuestions] = useState([]);
@@ -41,24 +36,23 @@ export default function CheckboxList({ onSelect }) {
     const navigate = useNavigate();     
     const [loadingQuestions, setLoadingquestions] = React.useState(true);  
 
-    const fetchQuestions = () => {             //3
-        setLoadingquestions(true); // start loading
+    const fetchQuestions = () => {             
+        setLoadingquestions(true); 
         setQuestions([]); 
         setChecked([]);  
         setSearchTerm("");
         setType("");
         setIsPreviewMode(false);
-    
-        // fetch(`${API_URL}/question`)
+
         fetch(`${API_URL}/questions-with-options`)
             .then((response) => response.json())
             .then((data) => {
                 setQuestions(data);
-                setLoadingquestions(false); // done loading
+                setLoadingquestions(false); 
             })
             .catch((error) => {
                 console.error("Error fetching questions:", error);
-                setLoadingquestions(false); // stop loading on error too
+                setLoadingquestions(false);
             });
     };
     
@@ -67,7 +61,7 @@ export default function CheckboxList({ onSelect }) {
         fetchQuestions();
     }, []);
 
-    // Handle checkbox toggle
+    // Handling checkbox toggle
     const handleToggle = (questionId) => () => {
         setChecked((prev) => {
             const updatedChecked = prev.includes(questionId)
@@ -76,8 +70,7 @@ export default function CheckboxList({ onSelect }) {
     
             // Get selected questions
             const selectedQuestions = questions.filter((q) => updatedChecked.includes(q.question_id));
-            
-            // Ensure `onSelect` is called with selected questions
+
             if (onSelect) {
                 onSelect(selectedQuestions);
             }
@@ -93,9 +86,9 @@ export default function CheckboxList({ onSelect }) {
     // Toggle between preview and selection mode
     const handlePreviewToggle = () => {
         setIsPreviewMode((prev) => !prev);
-        setHasPreviewFilters(false); // Reset filters
-        setType(""); // Reset the dropdown to "Select Question Type"
-        setSearchTerm(""); // Optional: clear search too for a clean view
+        setHasPreviewFilters(false); 
+        setType(""); 
+        setSearchTerm(""); 
     };
 
     const handleTypeChange = (e) => {
@@ -110,8 +103,8 @@ export default function CheckboxList({ onSelect }) {
 
      // Filter questions based on selected type & search key word
     const filteredQuestions = questions.filter((question) =>
-        (type === "" || question.question_type === type) &&  // Filter by type
-        question.question_text.toLowerCase().includes(searchTerm.toLowerCase())  // Filter by search term
+        (type === "" || question.question_type === type) && 
+        question.question_text.toLowerCase().includes(searchTerm.toLowerCase()) 
     );
 
     const selectedQuestions = questions.filter((q) => checked.includes(q.question_id));
@@ -155,7 +148,6 @@ export default function CheckboxList({ onSelect }) {
                 <MenuItem value="Yes/No">Yes/No</MenuItem>
                 <MenuItem value="Descriptive">Descriptive</MenuItem>
                 <MenuItem value="Single Choice">Single choice</MenuItem>
-                {/* <MenuItem value="Rating scale">Rating scale</MenuItem> */}
             </Select>
         </FormControl>
 
@@ -167,7 +159,7 @@ export default function CheckboxList({ onSelect }) {
 
             <TextField
                 sx={{ width: { xs: "100%", sm: "250px" }, "& .MuiInput-underline:before": {
-      borderBottomColor: "#d9d8d4", // default color before focus
+      borderBottomColor: "#d9d8d4", 
     },}}
                 placeholder="Search..."
                 variant="standard"
@@ -185,7 +177,6 @@ export default function CheckboxList({ onSelect }) {
     </Box>
 
     {/* Questions List - Fixed Height to Keep Button at Bottom */}
-
     {(loadingQuestions) ?  (
         <Box sx={{ width: '100%', mt: 2 }}>
           {[...Array(20)].map((_, index) => (
@@ -222,43 +213,29 @@ export default function CheckboxList({ onSelect }) {
                                         const q = questions.find(q => q.question_id === id);
                                         return q && (type === "" || q.question_type === type);
                                     }))) {
-                                    // Restoration logic - restore ALL previously checked items
-                                    console.log("Restoring ALL selections:", previousChecked);
                                     
-                                    // Create a new checked array with all previousChecked items
                                     const newChecked = [...checked, ...previousChecked];
-                                    
-                                    // Update state
                                     setChecked(newChecked);
                                     setPreviousChecked([]);
                                     
-                                    // Ensure we're passing ALL selected questions to the parent
                                     if (onSelect) {
                                         const allSelectedQuestions = questions.filter(q => 
                                             newChecked.includes(q.question_id)
                                         );
-                                        console.log("Passing all restored questions to parent:", allSelectedQuestions);
                                         onSelect(allSelectedQuestions);
                                     }
                                 } else if (previousChecked.length > 0) {
-                                    // Type-specific restoration
-                                    // Get previously checked questions of current type
                                     const typeSpecificPreviousIds = previousChecked.filter(id => {
                                         const q = questions.find(q => q.question_id === id);
                                         return q && (type === "" || q.question_type === type);
                                     });
                                     
-                                    console.log("Restoring type-specific selections:", typeSpecificPreviousIds);
-                                    
-                                    // Create a new checked array adding back type-specific items
                                     const newChecked = [...checked, ...typeSpecificPreviousIds];
                                     
-                                    // Remove restored IDs from previousChecked
                                     const newPreviousChecked = previousChecked.filter(
                                         id => !typeSpecificPreviousIds.includes(id)
                                     );
                                     
-                                    // Update state
                                     setChecked(newChecked);
                                     setPreviousChecked(newPreviousChecked);
                                     
@@ -266,20 +243,14 @@ export default function CheckboxList({ onSelect }) {
                                         const allSelectedQuestions = questions.filter(q => 
                                             newChecked.includes(q.question_id)
                                         );
-                                        console.log("Passing type-specific restored questions:", allSelectedQuestions);
                                         onSelect(allSelectedQuestions);
                                     }
                                 } else {
-                                    // Deselection logic
                                     const visibleIds = visibleQuestions.map(q => q.question_id);
                                     const visibleCheckedIds = visibleIds.filter(id => checked.includes(id));
                                     
-                                    console.log("Deselecting visible questions:", visibleCheckedIds);
-                                    
-                                    // Store deselected items for later restoration
                                     setPreviousChecked(prev => [...prev, ...visibleCheckedIds]);
-                                    
-                                    // Remove deselected items from checked
+                            
                                     const newChecked = checked.filter(id => !visibleCheckedIds.includes(id));
                                     setChecked(newChecked);
                                     
@@ -287,7 +258,6 @@ export default function CheckboxList({ onSelect }) {
                                         const remainingSelectedQuestions = questions.filter(q => 
                                             newChecked.includes(q.question_id)
                                         );
-                                        console.log("Passing remaining selected questions to parent:", remainingSelectedQuestions);
                                         onSelect(remainingSelectedQuestions);
                                     }
                                 }
@@ -322,11 +292,9 @@ export default function CheckboxList({ onSelect }) {
                                 !filteredQuestions.every(q => checked.includes(q.question_id))
                             }
                             onChange={() => {
-                                // Get current filtered question IDs
                                 const filteredIds = filteredQuestions.map(q => q.question_id);
                                 
                                 if (filteredQuestions.every(q => checked.includes(q.question_id))) {
-                                    // If all filtered questions are checked, uncheck only those filtered questions
                                     const newChecked = checked.filter(id => !filteredIds.includes(id));
                                     setChecked(newChecked);
                                     
@@ -335,13 +303,8 @@ export default function CheckboxList({ onSelect }) {
                                         onSelect(selectedQuestions);
                                     }
                                 } else {
-                                    // If not all filtered questions are checked, check all filtered questions
-                                    // while maintaining other checked items
-                                    
-                                    // First, remove any existing filtered questions to avoid duplicates
                                     const nonFilteredChecked = checked.filter(id => !filteredIds.includes(id));
-                                    
-                                    // Then add all the current filtered questions
+                                  
                                     const newChecked = [...nonFilteredChecked, ...filteredIds];
                                     setChecked(newChecked);
                                     

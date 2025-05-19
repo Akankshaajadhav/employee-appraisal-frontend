@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   MenuItem,
   Select,
@@ -46,15 +46,11 @@ const DropdownPage = () => {
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success"); 
   const [loadingCycles, setLoadingCycles] = useState(true);
-
   const [isReadOnly, setReadOnly] = useState(true);
-  const [isLeadAssessmentDisabled, setIsLeadAssessmentDisabled] = useState(true); // Start with disabled by default
-
+  const [isLeadAssessmentDisabled, setIsLeadAssessmentDisabled] = useState(true); // Starting with disabled by default
   const [saving, setSaving] = useState(false); 
-
   const [leadAssessmentActive, setLeadAssessmentActive] = useState(false);
   const [leadAssessmentCompleted, setLeadAssessmentCompleted] = useState(false);
-
   const [modalSelectedEmployee, setModalSelectedEmployee] = useState("");  
   const [initialLoadCompleted, setInitialLoadCompleted] = useState(false);
 
@@ -121,7 +117,7 @@ const DropdownPage = () => {
         
             setSelectedEmployee(employeeId);
         
-            //  Add this line to make sure the dropdown gets the employee list
+            // For dropdown to get the employee list
             const employeesResponse = await axios.get(`${API_URL}/employees/${activeCycle.cycle_id}/${employeeId}`);
             setEmployees(employeesResponse.data);
 
@@ -148,11 +144,11 @@ const DropdownPage = () => {
     if (!cycleId) return;
     
     try {
-      // First check self-assessment stage
+      // check self-assessment stage
       const selfAssessmentRes = await axios.get(`${API_URL}/stages/self-assessment/${cycleId}`);
       const { is_active: selfAssessmentActive, is_completed: selfAssessmentCompleted } = selfAssessmentRes.data;
       
-      // Then check lead-assessment stage
+      // check lead-assessment stage
       const leadAssessmentRes = await axios.get(`${API_URL}/stages/lead-assessment/${cycleId}`);
       const { is_active, is_completed } = leadAssessmentRes.data;
       
@@ -165,12 +161,6 @@ const DropdownPage = () => {
       // 3. Otherwise, enable it
       
       if ((selfAssessmentActive && !selfAssessmentCompleted) || (!is_active && !is_completed)) {
-        console.log("Lead Assessment should be disabled", { 
-          selfAssessmentActive, 
-          selfAssessmentCompleted, 
-          leadActive: is_active, 
-          leadCompleted: is_completed 
-        });
         setIsLeadAssessmentDisabled(true);
       } else {
         setIsLeadAssessmentDisabled(false);
@@ -185,27 +175,24 @@ const DropdownPage = () => {
     const fetchAssessmentDataAndResponses = async () => {
       if (!selectedCycle || !selectedEmployee) return;
       
-      // Who owns the questions - always the selected employee now
       const questionOwnerId = selectedEmployee; 
       const responseOwnerId = selectedEmployee;
       
-      // Check if viewing another employee's assessment
+      // viewing another employee's assessment
       const isViewingOtherEmployee = userRole === "team lead" && selectedEmployee !== employeeId;
       
       try {
         let readOnly = false;
-        // STEP 1:check if selected cycle is active, Check if Self Assessment stage is active
+        // STEP 1: If selected cycle is active, If Self Assessment stage is active
         if(isCycleActive ){
           const stageRes = await axios.get(`${API_URL}/stages/self-assessment/${selectedCycle}`);
           const { is_active } = stageRes.data;
           const {is_completed} = stageRes.data;
           if (!is_active && !is_completed) {
-            // console.log("Self Assessment stage is not active.");
             setAssessmentData([]);
             setResponses({});
             return;
           }
-          // If stage is completed, show as read-only
           if (is_completed) {
             readOnly = true;
             setReadOnly(true);
@@ -215,7 +202,7 @@ const DropdownPage = () => {
           }
         }
         
-        // STEP 2: Fetch assessment questions
+        // STEP 2: Fetching assessment questions
         const [questionsRes, responseRes] = await Promise.all([
           axios.get(`${API_URL}/assessment/questions/${questionOwnerId}/${selectedCycle}`),
           axios.get(`${API_URL}/assessment/responses/${responseOwnerId}/${selectedCycle}`).catch(err => {
@@ -257,7 +244,7 @@ const DropdownPage = () => {
     fetchAssessmentDataAndResponses();
   }, [selectedCycle, selectedEmployee, userRole, employeeId]);
 
-  // This effect checks Lead Assessment stage when cycle changes
+  // Checking Lead Assessment stage when cycle changes
   useEffect(() => {
     if (!selectedCycle || !initialLoadCompleted) return;
     
@@ -267,7 +254,7 @@ const DropdownPage = () => {
   }, [selectedCycle, initialLoadCompleted, userRole, isCycleActive]);
   
   const openModal = () => {
-    setModalSelectedEmployee(selectedEmployee); // Initialize modal with current selection
+    setModalSelectedEmployee(selectedEmployee);
     setModalOpen(true);
   };
 
@@ -280,9 +267,6 @@ const DropdownPage = () => {
       const empId = e.target.value;
       setSelectedEmployee(empId);
       setTeamLeadName("");
-      // setModalOpen(true); // Open modal when employee changes
-    
-      // Always clear existing data when changing employee
       setAssessmentData([]);
       setResponses({});
     
@@ -301,10 +285,9 @@ const DropdownPage = () => {
     setSelectedCycle(cycleId);
   
     try {
-      // First, find the selected cycle in the already loaded cycles
+      // Finding selected cycle in the already loaded cycles
       const selectedCycleObj = appraisalCycles.find(cycle => cycle.cycle_id === cycleId);
-      
-      // Immediately update the isCycleActive state based on the local data
+
       if (selectedCycleObj) {
         setIsCycleActive(selectedCycleObj.status === "active");
       }
@@ -315,10 +298,8 @@ const DropdownPage = () => {
         axios.get(`${API_URL}/reporting_manager/${employeeId}`),
       ]);
 
-      // Then also verify with the API (as a backup)
       setIsCycleActive(cycleResponse.data.status === "active");
   
-      // For team leads and admins, check the Lead Assessment stage
       if (userRole === "team lead" || userRole === "admin") {
         await checkLeadAssessmentStage(cycleId);
       }
@@ -326,12 +307,12 @@ const DropdownPage = () => {
       setEmployees(employeesResponse.data);
   
       if (userRole === "team lead" || userRole === "admin") {
-        // For Team Leads, always default to themselves
+        // For Team Leads, always defaulting to themselves
         setSelectedEmployee(employeeId);
         const { reporting_manager_id, reporting_manager_name } = managerRes.data;
         setTeamLeadName(`${reporting_manager_id} - ${reporting_manager_name}`);
       } else {
-        // HR or employee flow
+        //  For HR or employee 
         const userExists = employeesResponse.data.some((emp) => emp.employee_id === employeeId);
         const defaultEmpId = userExists
           ? employeeId
@@ -351,7 +332,6 @@ const DropdownPage = () => {
       }
     } catch (error) {
       console.error("Error handling cycle change:", error);
-      // In case of error, ensure we check the local data
       const selectedCycleObj = appraisalCycles.find(cycle => cycle.cycle_id === cycleId);
       if (selectedCycleObj) {
         setIsCycleActive(selectedCycleObj.status === "active");
@@ -360,26 +340,17 @@ const DropdownPage = () => {
   };
   
   const canUserSubmit = () => {
-    // For debugging - log the key values affecting the decision
-    console.log({
-      userRole,
-      selectedEmployee,
-      employeeId,
-      isCycleActive,
-      isEqual: String(selectedEmployee) === String(employeeId)
-    });
-    
-    // Regular employee viewing their own assessment
+    // For regular employee - view their own assessment
     if (userRole !== "team lead" && userRole !== "admin" && String(selectedEmployee) === String(employeeId)) {
       return isCycleActive;
     }
     
-    // Team lead submitting their own assessment
+    // For team lead - submit their own assessment
     if ((userRole === "team lead" || userRole === "admin") && String(selectedEmployee) === String(employeeId)) {
       return isCycleActive;
     }
 
-    //if Team lead is selecting the active cycle and and self assessment stage is completed 
+    // Team lead is selecting the active cycle and and self assessment stage is completed 
     if(isReadOnly === "true"){
       return true;
     }
@@ -397,7 +368,6 @@ const DropdownPage = () => {
   const renderInputField = (question) => {
     const { question_id, question_type, options = [] } = question;
     
-    // Determine if fields should be read-only
     const isViewingOtherEmployee = (userRole === "team lead" || userRole === "admin")&& String(selectedEmployee) !== String(employeeId);
 
     const isDisabled = !isCycleActive || isViewingOtherEmployee || isReadOnly;
@@ -474,7 +444,7 @@ const DropdownPage = () => {
 
   const handleSubmit = async () => {
     try {
-      setSaving(true); // Show loading backdrop
+      setSaving(true); 
       const payload = assessmentData.map((question) => {
         const response = responses[question.question_id];
         const question_type = question.question_type.toLowerCase();
@@ -522,14 +492,14 @@ const DropdownPage = () => {
       setSnackbarOpen(true);
     }
     finally {
-      setSaving(false); // Hide loading backdrop           
+      setSaving(false);          
     }
   };
 
   const refreshAssessmentData = async () => {
     if (!selectedCycle || !selectedEmployee) return;
   
-    // Always use the selected employee's data
+    // selected employee's data
     const questionOwnerId = selectedEmployee;
     const responseOwnerId = selectedEmployee;
   
@@ -650,15 +620,10 @@ const DropdownPage = () => {
                     }}
                   >
                     Lead Assessment
-                    {/* {isLeadAssessmentDisabled && <span> (Not Available)</span>} */}
                   </a>
                 )}
               </Box>
-            )}
-
-
-            
-              
+            )}      
           </Box> 
         </CardContent>
 
@@ -669,7 +634,7 @@ const DropdownPage = () => {
             <Box mt={0}>
               {assessmentData.map((question, index) => (
                 <Box key={question.question_id} mb={3}>
-                  {/* For the first question, show question + refresh button in same line */}
+                  {/* For the first question, showing question and  refresh button in same line */}
                   {index === 0 ? (
                     <Box display="flex" alignItems="center" justifyContent="space-between">
                       <Typography variant="subtitle1" fontWeight={"bold"}>
@@ -683,7 +648,7 @@ const DropdownPage = () => {
                     </Box>
                     ) : (
 
-                    // For other questions, just show question text normally
+                    // For remaining questions,showing question only
                     <Typography variant="subtitle1" fontWeight={"bold"}>
                       {index + 1}. {question.question_text}
                     </Typography>
@@ -692,7 +657,7 @@ const DropdownPage = () => {
                 </Box>
               ))}
       
-              {/* FIXED SUBMIT BUTTON LOGIC - Now using the canUserSubmit helper function */}
+              {/* Submit button */}
               {canUserSubmit() && (
                 <Box mt={3} display="flex" justifyContent="flex-end">
                   <Button variant="contained" color="primary" onClick={handleSubmit}  disabled={isReadOnly}>
@@ -719,15 +684,14 @@ const DropdownPage = () => {
             onClose={closeModal}
             selectedCycle={selectedCycle}
             employees={employees}
-            selectedEmployee={modalSelectedEmployee}  // Use modal-specific state
-            setSelectedEmployee={setModalSelectedEmployee}  // Use modal-specific setter
+            selectedEmployee={modalSelectedEmployee} 
+            setSelectedEmployee={setModalSelectedEmployee}
             employeeId={employeeId}
             isCycleActive={isCycleActive}
             leadAssessmentActive={leadAssessmentActive}       
             leadAssessmentCompleted={leadAssessmentCompleted} 
             prefilledData={null}
           />
-
         </CardContent>
       </Card>
 
