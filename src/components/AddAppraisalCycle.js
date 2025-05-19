@@ -61,7 +61,7 @@ const AddAppraisalCycle = ({ onClose }) => {
     { name: "Closure", startDate: "", endDate: "" },
   ]);
 
-  //new
+
   const [parameterErrors, setParameterErrors] = useState({});
 
   const [saving, setSaving] = useState(false); //3
@@ -161,7 +161,6 @@ const AddAppraisalCycle = ({ onClose }) => {
     stages.forEach((stage, index) => {
       let error = {};
       if (!stage.startDate || !stage.endDate) {
-        // error.start = "Start date and is required";
         valid = false;
       }
       if (
@@ -217,8 +216,8 @@ const AddAppraisalCycle = ({ onClose }) => {
   const handleSave = async () => {
     try {
       console.log("Saving Appraisal Cycle...");
-      setSaving(true); // Show loading backdrop       //3
-      // Step 1: Save Appraisal Cycle
+      setSaving(true);        
+      // Step 1: Save Appraisal Cycle details
       const cycleData = await createAppraisalCycle({
         cycle_name: cycleName,
         description,
@@ -268,7 +267,7 @@ const AddAppraisalCycle = ({ onClose }) => {
         severity: "error",
       });
     }finally {
-      setSaving(false); // Hide loading backdrop             //4
+      setSaving(false); // Hide loading backdrop             
     }
   };
 
@@ -300,7 +299,7 @@ const AddAppraisalCycle = ({ onClose }) => {
     // Always update the state to show what the user is typing
     setStartDate(selectedDate);
     
-    // Validate: check if the date is earlier than today
+    //if the date is earlier than today (while typing)
     if (selectedDate && selectedDate < today) {
       setError(true);
       setErrorMessage('Please select today or a future date');
