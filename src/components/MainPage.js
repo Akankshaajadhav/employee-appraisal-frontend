@@ -5,7 +5,6 @@ import HRLandingPage from './HRLandingPage';
 
 const MainPage = () => {
   const [activePage, setActivePage] = useState('hr-dashboard');  // if wanted deafult to be hr-dashboard
- // const [activePage, setActivePage] = useState('assessment'); // Default to 'assessment'
   const handleNavigate = (pageId) => {
     setActivePage(pageId);
   };
